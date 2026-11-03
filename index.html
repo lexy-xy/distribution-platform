@@ -1,0 +1,1515 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distribution Center · TikTok Business Center (Prototype)</title>
+<style>
+:root{
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --text:#161823;--text2:#5C6068;--text3:#8A8F99;
+  --border:#E3E5E8;--border2:#D0D3D8;--row:#EEF0F2;
+  --bg:#F5F6F7;--hover:#F2F3F5;--th:#F7F8FA;
+  --primary:#009995;--primary-h:#00857F;--primary-t:#007A76;--primary-bg:#E6F6F5;--nav-on:#DFF3F2;
+  --ok:#0E9F6E;--ok-bg:#E8F7F0;--warn:#B76E00;--warn-bg:#FFF6E5;--warn-b:#F5D9A6;
+  --err:#D83A3A;--err-bg:#FDEDED;--err-b:#F5C2C2;--info:#2463D1;--info-bg:#EDF3FE;--info-b:#C9DAF8;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font:13px/1.5 var(--font);color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.ic{flex:none;display:inline-block;vertical-align:middle}
+.mono{font-family:var(--mono);font-size:12px}
+.muted{color:var(--text2)}.faint{color:var(--text3)}
+.nowrap{white-space:nowrap}.ell{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* Top bar */
+.topbar{position:fixed;top:0;left:0;right:0;height:64px;background:#121415;display:flex;align-items:center;padding:0 16px 0 14px;z-index:50;color:#fff}
+.app-pill{width:68px;height:36px;border-radius:18px;background:#2A2D2F;border:0;display:flex;align-items:center;justify-content:space-between;padding:0 4px 0 10px;cursor:pointer;color:#fff}
+.app-pill:hover{background:#35393B}
+.avatar{width:28px;height:28px;border-radius:50%;background:#25C2B8;color:#04302D;font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.brand{display:flex;align-items:center;gap:8px;margin-left:16px;font-size:17px;letter-spacing:-.1px;white-space:nowrap}
+.brand b{font-weight:700}.brand span{font-weight:500}
+.top-right{margin-left:auto;display:flex;align-items:center;gap:4px}
+.tb-btn{width:36px;height:36px;border:0;border-radius:4px;background:transparent;color:#E8EAEB;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.tb-btn:hover{background:#2A2D2F}
+.portfolio{height:36px;margin-left:8px;border:1px solid #3A3E41;border-radius:18px;background:transparent;color:#fff;display:flex;align-items:center;gap:8px;padding:0 10px 0 4px;cursor:pointer;white-space:nowrap}
+.portfolio:hover{background:#1F2224}
+.portfolio .pf-av{width:28px;height:28px;border-radius:50%;background:#3A3E41;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600}
+
+/* Sidebar */
+.sidebar{position:fixed;top:64px;left:0;bottom:0;width:240px;background:#fff;border-right:1px solid var(--border);overflow-y:auto;padding:8px 0 72px;z-index:40}
+.nav-label{font-size:12px;color:var(--text3);padding:14px 20px 4px;line-height:18px}
+.nav-row{height:40px;margin:0 8px;padding:0 12px;border-radius:4px;display:flex;align-items:center;gap:12px;color:var(--text);text-decoration:none;cursor:pointer;border:0;background:transparent;width:calc(100% - 16px);text-align:left;font-size:14px}
+.nav-row:hover{background:var(--hover)}
+.nav-row .ic{color:#3B3F46}
+.nav-row .chev{margin-left:auto;transition:transform .15s;color:var(--text2)}
+.nav-row.open .chev{transform:rotate(180deg)}
+.nav-row.parent-on{font-weight:600}
+.nav-sub{height:40px;margin:0 8px;padding:0 6px 0 44px;white-space:nowrap;letter-spacing:-.1px;border-radius:4px;display:flex;align-items:center;color:var(--text);text-decoration:none;font-size:14px}
+.nav-sub:hover{background:var(--hover)}
+.nav-sub.on{background:var(--nav-on);font-weight:600}
+.nav-sep{height:1px;background:var(--border);margin:8px 16px}
+
+/* Main */
+.main{margin-left:240px;padding-top:64px;min-width:0}
+.page{padding:20px 24px 96px;min-width:0}
+.ph{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:0 0 12px}
+.ph h1{font-size:20px;line-height:28px;margin:0;font-weight:600}
+.ph p{margin:2px 0 0;color:var(--text2)}
+.tabs{display:flex;gap:24px;border-bottom:1px solid var(--border);margin-bottom:16px}
+.tab{height:40px;display:flex;align-items:center;border:0;background:none;padding:0;color:var(--text2);font-size:14px;font-weight:500;border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;text-decoration:none}
+.tab:hover{color:var(--text)}
+.tab.on{color:var(--text);border-bottom-color:var(--primary);font-weight:600}
+.stack>*+*{margin-top:12px}
+
+/* Controls */
+.btn{height:32px;padding:0 12px;border:1px solid var(--border2);border-radius:4px;background:#fff;font-weight:500;display:inline-flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;white-space:nowrap;color:var(--text);text-decoration:none;font-size:13px}
+.btn:hover{background:var(--hover)}
+.btn-primary{background:var(--primary);border-color:var(--primary);color:#fff}
+.btn-primary:hover{background:var(--primary-h);border-color:var(--primary-h)}
+.btn-danger{background:var(--err);border-color:var(--err);color:#fff}
+.btn-sm{height:28px;padding:0 10px;font-size:12px}
+.btn-xs{height:24px;padding:0 8px;font-size:12px}
+.btn-icon{width:28px;height:28px;padding:0;border-color:transparent;background:transparent;color:var(--text2)}
+.btn-icon:hover{background:var(--hover);color:var(--text)}
+.btn-link{border:0;background:none;padding:0;height:auto;color:var(--primary-t);font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:inherit}
+.btn-link:hover{text-decoration:underline}
+.btn[disabled]{opacity:.5;cursor:not-allowed}
+.btn.loading{pointer-events:none;opacity:.8}
+.input,.select{height:32px;border:1px solid var(--border2);border-radius:4px;background:#fff;padding:0 10px;outline:none;min-width:0}
+.select{padding-right:28px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6068' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;cursor:pointer}
+.input:focus,.select:focus{border-color:var(--primary)}
+.search{position:relative;display:inline-flex;align-items:center}
+.search .ic{position:absolute;left:9px;color:var(--text3);pointer-events:none}
+.search .input{padding-left:30px;width:240px}
+.cb{width:16px;height:16px;accent-color:var(--primary);cursor:pointer;margin:0;vertical-align:middle}
+.cb[disabled]{cursor:not-allowed}
+.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.toolbar .left,.toolbar .right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--border2);border-radius:4px;overflow:hidden}
+.seg button{border:0;background:#fff;height:26px;padding:0 9px;font-size:12px;font-weight:500;cursor:pointer;border-right:1px solid var(--border2)}
+.seg button:last-child{border-right:0}
+.seg button.on{background:var(--primary-bg);color:var(--primary-t)}
+
+/* Panels, tables */
+.panel{background:#fff;border:1px solid var(--border);border-radius:4px}
+.panel-h{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--border)}
+.panel-h h3{margin:0;font-size:14px;font-weight:600}
+.panel-f{padding:8px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;color:var(--text2);font-size:12px;gap:12px}
+.tbl-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.tbl th{height:36px;background:var(--th);font-weight:500;color:var(--text2);font-size:12px;text-align:left;padding:0 12px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbl td{padding:8px 12px;border-bottom:1px solid var(--row);vertical-align:middle;overflow:hidden}
+.tbl tbody tr:hover td{background:#FAFBFC}
+.tbl tr:last-child td{border-bottom:0}
+.tbl .num{text-align:right;font-variant-numeric:tabular-nums}
+.tbl tr.sel td{background:#F2FAF9}
+.tbl tr.flash td{animation:flash 1.6s ease-out}
+@keyframes flash{0%{background:#CDEDEA}100%{background:transparent}}
+.tbl tr.sub td{background:#FBFBFC}
+.tbl tr.clickable{cursor:pointer}
+.cell-title{font-weight:500;color:var(--text)}
+.cell-sub{font-size:12px;color:var(--text2)}
+.copyable{display:inline-flex;align-items:center;gap:2px;max-width:100%}
+.copyable .btn-icon{width:22px;height:22px}
+.linkbox{display:flex;align-items:center;gap:6px;min-width:0}
+.linkbox .mono{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.linkbox .mono.start{direction:rtl;text-align:left}
+
+/* Status */
+.st{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;white-space:nowrap;line-height:20px}
+.st::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.st.ok{color:var(--ok)}.st.warn{color:var(--warn)}.st.err{color:var(--err)}.st.info{color:var(--info)}.st.muted{color:var(--text2)}
+.st.spin::before{width:8px;height:8px;background:none;border:1.5px solid currentColor;border-right-color:transparent;animation:rot .8s linear infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+.st-reason{font-size:12px;color:var(--text2);line-height:16px;margin-top:2px;white-space:normal}
+.tag{display:inline-flex;align-items:center;gap:4px;height:20px;padding:0 6px;border-radius:2px;font-size:12px;background:#F1F2F4;color:#4A4F57;white-space:nowrap;font-weight:500}
+.tag.teal{background:var(--primary-bg);color:var(--primary-t)}
+.tag.warn{background:var(--warn-bg);color:var(--warn)}
+.tag.err{background:var(--err-bg);color:var(--err)}
+.tag.info{background:var(--info-bg);color:var(--info)}
+.tag.dark{background:rgba(0,0,0,.6);color:#fff}
+.tags{display:flex;flex-wrap:wrap;gap:4px}
+
+/* Banner */
+.banner{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--info-b);background:var(--info-bg);border-radius:4px;font-size:13px}
+.banner .ic{margin-top:1px;color:var(--info)}
+.banner .bn-body{flex:1;min-width:0}
+.banner .bn-act{display:flex;gap:8px;align-items:center;flex:none}
+.banner.warn{border-color:var(--warn-b);background:var(--warn-bg)}.banner.warn>.ic{color:var(--warn)}
+.banner.err{border-color:var(--err-b);background:var(--err-bg)}.banner.err>.ic{color:var(--err)}
+.banner.ok{border-color:#BFE6D4;background:var(--ok-bg)}.banner.ok>.ic{color:var(--ok)}
+.banner.plain{border-color:var(--border);background:#FAFBFC}.banner.plain>.ic{color:var(--text2)}
+
+/* KPI strip */
+.kpis{display:grid;grid-template-columns:repeat(var(--n,5),minmax(0,1fr));background:#fff;border:1px solid var(--border);border-radius:4px}
+.kpi{padding:10px 16px;border-right:1px solid var(--border);min-width:0;text-align:left;background:none;border-top:0;border-bottom:0;border-left:0}
+.kpi:last-child{border-right:0}
+button.kpi{cursor:pointer}button.kpi:hover{background:#FAFBFC}
+button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
+.kpi-l{font-size:12px;color:var(--text2);display:flex;align-items:center;gap:4px;white-space:nowrap}
+.kpi-v{font-size:20px;font-weight:600;line-height:28px;margin-top:2px;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-s{font-size:12px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi-v.err{color:var(--err)}.kpi-v.warn{color:var(--warn)}
+
+/* Marketplace */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.card{background:#fff;border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
+.card:hover{border-color:#B9C0C7}
+.card:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+.poster-box{position:relative;aspect-ratio:3/4;background:#1d2329;overflow:hidden}
+.poster-box svg.poster{position:absolute;inset:0;width:100%;height:100%;display:block}
+.poster-box .ov-tl{position:absolute;top:8px;left:8px;display:flex;gap:4px}
+.poster-box .ov-tr{position:absolute;top:8px;right:8px}
+.poster-box .ov-b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:12px;display:flex;justify-content:space-between}
+.card-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.card-t{font-size:14px;font-weight:600;line-height:20px}
+.card-m{font-size:12px;color:var(--text2);line-height:18px}
+.card-f{margin-top:auto;padding-top:8px;border-top:1px solid var(--row);display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.mk-count{font-size:12px;color:var(--text2)}
+
+/* Drawer & modal */
+.mask{position:fixed;inset:0;background:rgba(22,24,35,.45);z-index:100;opacity:0;transition:opacity .15s}
+.mask.show{opacity:1}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(var(--w,760px),calc(100vw - 80px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
+.drawer.show{transform:none}
+.dr-h{min-height:56px;padding:12px 20px 12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
+.dr-h .t{flex:1;min-width:0}
+.dr-h h2{margin:0;font-size:16px;line-height:24px;font-weight:600}
+.dr-h .s{font-size:12px;color:var(--text2);margin-top:2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.dr-b{flex:1;overflow-y:auto;padding:16px 24px 24px}
+.dr-f{min-height:60px;padding:12px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px}
+.dr-f .grow{margin-right:auto;color:var(--text2);font-size:12px}
+.modal-mask{z-index:200}
+.modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-48%);opacity:0;width:min(var(--w,560px),calc(100vw - 48px));max-height:calc(100vh - 80px);background:#fff;border-radius:4px;z-index:201;display:flex;flex-direction:column;transition:all .15s}
+.modal.show{opacity:1;transform:translate(-50%,-50%)}
+.modal .dr-h{padding:16px 16px 12px 24px;border-bottom:0}
+.modal .dr-b{padding:4px 24px 16px}
+.modal .dr-f{border-top:1px solid var(--border)}
+.sec{margin-top:20px}
+.sec:first-child{margin-top:0}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
+.sec-h h4{margin:0;font-size:14px;font-weight:600}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px}
+.kv.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kv .k{font-size:12px;color:var(--text2)}
+.kv .v{font-size:13px;word-break:break-word}
+.box{border:1px solid var(--border);border-radius:4px;padding:12px 14px}
+.boxes{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.box-l{font-size:12px;color:var(--text2);margin-bottom:4px;display:flex;align-items:center;gap:6px}
+.timeline{list-style:none;margin:0;padding:0}
+.timeline li{position:relative;padding:0 0 14px 20px}
+.timeline li::before{content:"";position:absolute;left:4px;top:6px;width:7px;height:7px;border-radius:50%;background:var(--border2)}
+.timeline li::after{content:"";position:absolute;left:7px;top:16px;bottom:0;width:1px;background:var(--border)}
+.timeline li:last-child::after{display:none}
+.timeline li.ok::before{background:var(--ok)}.timeline li.err::before{background:var(--err)}.timeline li.warn::before{background:#E09B2D}.timeline li.info::before{background:var(--info)}
+.timeline .tl-t{font-size:12px;color:var(--text3)}
+.timeline .tl-e{font-weight:500}
+.timeline .tl-d{font-size:12px;color:var(--text2)}
+.res-sum{display:flex;gap:16px;flex-wrap:wrap;padding:10px 12px;background:#FAFBFC;border:1px solid var(--border);border-radius:4px;margin-bottom:12px}
+.res-sum div{font-size:12px;color:var(--text2)}
+.res-sum b{display:block;font-size:18px;color:var(--text);font-weight:600}
+.check-row{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border:1px solid var(--border);border-radius:4px;cursor:pointer;margin-top:12px}
+.check-row .cb{margin-top:2px}
+.amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
+
+/* Player */
+.det-top{display:grid;grid-template-columns:232px minmax(0,1fr);gap:20px}
+.player{position:relative;width:232px;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
+.player svg.poster{position:absolute;inset:0;width:100%;height:100%}
+.player .pl-dim{position:absolute;inset:0;background:rgba(0,0,0,.18)}
+.player .pl-top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.player .pl-center{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.5);border:0;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
+.player.playing .pl-center{opacity:0}
+.player:hover .pl-center{opacity:1}
+.player .pl-ctrl{position:absolute;left:0;right:0;bottom:0;padding:22px 8px 8px;background:linear-gradient(transparent,rgba(0,0,0,.75))}
+.pl-bar{height:14px;display:flex;align-items:center;cursor:pointer}
+.pl-bar .trk{position:relative;height:3px;width:100%;background:rgba(255,255,255,.3);border-radius:2px}
+.pl-bar .fill{position:absolute;left:0;top:0;bottom:0;background:#25C2B8;border-radius:2px}
+.pl-row{display:flex;align-items:center;gap:4px;margin-top:2px}
+.pl-btn{width:26px;height:26px;border:0;background:transparent;color:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.pl-btn:hover{background:rgba(255,255,255,.15)}
+.pl-time{font-size:11px;font-variant-numeric:tabular-nums;margin-left:2px;flex:1}
+.pl-speed{display:flex;border:1px solid rgba(255,255,255,.35);border-radius:3px;overflow:hidden}
+.pl-speed button{border:0;background:transparent;color:#fff;font-size:11px;height:20px;padding:0 5px;cursor:pointer;font-weight:600}
+.pl-speed button.on{background:#fff;color:#111}
+.series{margin-top:10px;width:232px}
+.series .trk{position:relative;height:6px;background:#E9EBEE;border-radius:3px}
+.series .free{position:absolute;left:0;top:0;bottom:0;background:#C7E9E6;border-radius:3px 0 0 3px}
+.series .mark{position:absolute;top:-4px;width:2px;height:14px;background:var(--warn)}
+.series .cur{position:absolute;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid #fff;box-shadow:0 0 0 1px var(--primary);transform:translateX(-6px)}
+.series .lbls{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:6px}
+.ep-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px}
+.ep{height:26px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;padding:0;font-variant-numeric:tabular-nums}
+.ep:hover{border-color:var(--primary)}
+.ep.hook{background:#F0FAF9}
+.ep.paid{color:var(--text2)}
+.ep.mid{background:#F4F5FB}
+.ep.pw{border-color:#E7B567;background:var(--warn-bg);color:var(--warn);font-weight:600}
+.ep.cur{background:var(--primary);border-color:var(--primary);color:#fff}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin-top:8px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border:1px solid var(--border);border-radius:2px;display:inline-block}
+
+/* Empty / skeleton */
+.empty{padding:48px 24px;text-align:center;color:var(--text2)}
+.empty .em-ic{width:48px;height:48px;border-radius:50%;background:#F1F2F4;color:var(--text3);display:inline-flex;align-items:center;justify-content:center;margin-bottom:12px}
+.empty h3{margin:0 0 4px;font-size:15px;color:var(--text);font-weight:600}
+.empty p{margin:0 auto 16px;max-width:460px}
+.empty .acts{display:flex;justify-content:center;gap:8px}
+.sk{background:linear-gradient(90deg,#EEF0F2 25%,#F6F7F8 50%,#EEF0F2 75%);background-size:200% 100%;animation:sk 1.2s infinite linear;border-radius:3px}
+@keyframes sk{from{background-position:200% 0}to{background-position:-200% 0}}
+
+/* Toast */
+.toasts{position:fixed;top:76px;left:50%;transform:translateX(-50%);z-index:500;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{background:#22262A;color:#fff;padding:9px 14px;border-radius:4px;font-size:13px;display:flex;align-items:center;gap:8px;max-width:560px;box-shadow:0 4px 12px rgba(0,0,0,.18);animation:tin .18s ease-out}
+.toast .ic{color:#8FE3DC}.toast.err .ic{color:#FF9C9C}.toast.warn .ic{color:#FFD27A}
+@keyframes tin{from{opacity:0;transform:translateY(-6px)}}
+
+/* Simulated TTAM */
+.ttam{position:fixed;inset:0;z-index:300;background:#F5F6F7;display:none;flex-direction:column}
+.ttam.show{display:flex}
+.ttam-h{height:56px;background:#fff;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:12px;padding:0 20px}
+.ttam-b{padding:24px;max-width:880px;margin:0 auto;width:100%}
+
+/* Demo controller (not product UI) */
+.demo{position:fixed;left:16px;bottom:16px;z-index:400;font-family:var(--font);color:#E6E8EB}
+.demo-pill{height:36px;border-radius:18px;background:#15171A;border:1px dashed #F5B83D;color:#F5F6F7;display:flex;align-items:center;gap:8px;padding:0 14px 0 12px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+.demo-pill .ic{color:#F5B83D}
+.demo-pill em{font-style:normal;color:#A9AFB8;font-weight:500}
+.demo-panel{width:300px;background:#15171A;border:1px dashed #F5B83D;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:hidden}
+.demo-h{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 14px;border-bottom:1px solid #2C3036}
+.demo-h b{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#F5B83D}
+.demo-h small{display:block;font-size:11px;color:#8C929B;margin-top:1px}
+.demo-h .x{margin-left:auto;width:26px;height:26px;border:0;border-radius:4px;background:transparent;color:#C9CDD3;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.demo-h .x:hover{background:#262A30}
+.demo-s{padding:10px 14px 4px}
+.demo-s .lbl{font-size:11px;color:#8C929B;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.demo-opt{display:flex;width:100%;align-items:center;gap:8px;border:0;background:transparent;color:#D9DCE0;padding:5px 8px;border-radius:4px;font-size:12px;text-align:left;cursor:pointer}
+.demo-opt:hover{background:#22262C}
+.demo-opt i{width:12px;height:12px;border-radius:50%;border:1.5px solid #5B616B;flex:none}
+.demo-opt.on{background:#2A2418;color:#fff}
+.demo-opt.on i{border-color:#F5B83D;background:radial-gradient(#F5B83D 40%,transparent 45%)}
+.demo-f{display:flex;gap:8px;padding:10px 14px 12px;border-top:1px solid #2C3036;margin-top:6px}
+.demo-f button{flex:1;height:30px;border-radius:4px;border:1px solid #3A3F47;background:#1E2126;color:#E6E8EB;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
+.demo-f button:hover{background:#272B31}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-grid" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="4.5" height="4.5" rx="1.2"/><rect x="9.75" y="3" width="4.5" height="4.5" rx="1.2"/><rect x="16.5" y="3" width="4.5" height="4.5" rx="1.2"/><rect x="3" y="9.75" width="4.5" height="4.5" rx="1.2"/><rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1.2"/><rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1.2"/><rect x="3" y="16.5" width="4.5" height="4.5" rx="1.2"/><rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1.2"/><rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1.2"/></symbol>
+    <symbol id="i-tiktok" viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.8A4.3 4.3 0 0 1 15.5 3h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.2-1.6z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.6-2.8 2.6"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-bell" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></symbol>
+    <symbol id="i-chev-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></symbol>
+    <symbol id="i-chev-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></symbol>
+    <symbol id="i-chev-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></symbol>
+    <symbol id="i-agent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l1.9 5.1L19 10l-5.1 1.9L12 17l-1.9-5.1L5 10l5.1-1.9z"/><path d="M19 16v4M17 18h4"/></symbol>
+    <symbol id="i-ads" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10v4a1 1 0 0 0 1 1h3l6 4V5L7 9H4a1 1 0 0 0-1 1z"/><path d="M17 9a3.5 3.5 0 0 1 0 6"/><path d="M19.5 6.5a7 7 0 0 1 0 11"/></symbol>
+    <symbol id="i-suite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></symbol>
+    <symbol id="i-one" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/></symbol>
+    <symbol id="i-library" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></symbol>
+    <symbol id="i-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4"/><path d="m15.4 6.5-6.8 4"/></symbol>
+    <symbol id="i-leads" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M19 8v6M22 11h-6"/></symbol>
+    <symbol id="i-events" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></symbol>
+    <symbol id="i-apps" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></symbol>
+    <symbol id="i-billing" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/><path d="M6 15h4"/></symbol>
+    <symbol id="i-building" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><path d="M5 21V7l7-4 7 4v14"/><path d="M9 10h1M14 10h1M9 14h1M14 14h1M10 21v-3h4v3"/></symbol>
+    <symbol id="i-tools" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="i-external" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24" fill="currentColor"><path d="M7 4.5v15a1 1 0 0 0 1.5.86l12.5-7.5a1 1 0 0 0 0-1.72L8.5 3.64A1 1 0 0 0 7 4.5z"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24" fill="currentColor"><path d="M18 5.5v13a1 1 0 0 1-1.6.8L8 13v6H6V5h2v6l8.4-6.3a1 1 0 0 1 1.6.8z"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5.5v13a1 1 0 0 0 1.6.8L16 13v6h2V5h-2v6L7.6 4.7A1 1 0 0 0 6 5.5z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 16v-5"/><path d="M12 8h.01"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
+    <symbol id="i-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="m8.5 12 2.5 2.5 4.5-5"/></symbol>
+    <symbol id="i-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="m15 9-6 6"/><path d="m9 9 6 6"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 7v5l3 2"/></symbol>
+    <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 3v5h-5"/></symbol>
+    <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
+    <symbol id="i-minimize" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+    <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4"/></symbol>
+  </defs>
+</svg>
+
+<header class="topbar">
+  <button class="app-pill" data-act="toast" data-msg="App switcher and account menu are outside this prototype." aria-label="Apps and account">
+    <svg class="ic" width="18" height="18" aria-hidden="true"><use href="#i-grid"/></svg>
+    <span class="avatar">S</span>
+  </button>
+  <div class="brand"><svg class="ic" width="22" height="22" aria-hidden="true"><use href="#i-tiktok"/></svg><b>TikTok:</b><span>Business Center</span></div>
+  <div class="top-right">
+    <button class="tb-btn" data-act="toast" data-msg="Global search is outside this prototype." aria-label="Search"><svg class="ic" width="20" height="20"><use href="#i-search"/></svg></button>
+    <button class="tb-btn" data-act="toast" data-msg="Help center is outside this prototype." aria-label="Help"><svg class="ic" width="20" height="20"><use href="#i-help"/></svg></button>
+    <button class="tb-btn" data-act="toast" data-msg="Notifications are outside this prototype." aria-label="Notifications"><svg class="ic" width="20" height="20"><use href="#i-bell"/></svg></button>
+    <button class="portfolio" data-act="toast" data-msg="Switching business portfolios is outside this prototype." aria-label="Business portfolio"><span class="pf-av">SI</span>Shike Interactive (Admin)<svg class="ic" width="14" height="14"><use href="#i-chev-down"/></svg></button>
+  </div>
+</header>
+
+<nav class="sidebar" id="sidebar" aria-label="Global navigation"></nav>
+<main class="main"><div class="page" id="page"></div></main>
+
+<div id="drawer-root"></div>
+<div id="modal-root"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+<div class="ttam" id="ttam"></div>
+<div class="demo" id="demo"></div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- Helpers ---------- */
+const $ = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ic = (n, s, cls) => `<svg class="ic ${cls || ''}" width="${s || 16}" height="${s || 16}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const money = n => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const money0 = n => '$' + Math.round(n).toLocaleString('en-US');
+const plural = (n, w, p) => n + ' ' + (n === 1 ? w : (p || w + 's'));
+let uid = 0;
+const hashStr = s => { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100003; return h; };
+const sr = n => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+/* ---------- Static mock data ---------- */
+const BCS = {
+  main: {id: '7319004211850', name: 'Shike Interactive', role: 'Main BC'},
+  sub:  {id: '7319004211861', name: 'Shike Interactive · Studio B', role: 'Sub BC'}
+};
+const CONTRACTS = [
+  {id:'CTR-902184', title:'The Last Clause', holder:'Northline Pictures', genres:['Legal','Revenge','Romance'], episodes:72, paywall:12, format:'Live action', source:'Local original', launch:'2026-09-18', launchL:'Sep 18, 2026', rank:2, rankL:'#2 Trending · Legal', plays:'18.4M',
+   synopsis:'A junior contract lawyer discovers her late mentor buried a clause that could topple the firm that betrayed him, and she has 30 days to enforce it.'},
+  {id:'CTR-781230', title:'A House by the Tide', holder:'Bluefin Studio', genres:['Family','Mystery'], episodes:60, paywall:10, format:'Live action', source:'Localized', launch:'2026-08-02', launchL:'Aug 2, 2026', rank:7, rankL:'#7 Trending · Family', plays:'9.1M',
+   synopsis:'Three estranged siblings return to their mother\u2019s seaside house and uncover the debt she hid from them for twenty years.'},
+  {id:'CTR-550361', title:'Moonblade Oath', holder:'Lumen Animation Works', genres:['Fantasy','Action'], episodes:80, paywall:15, format:'AI animation', source:'Local original', launch:'2026-10-05', launchL:'Oct 5, 2026', rank:1, rankL:'#1 Trending · Fantasy', plays:'24.7M',
+   synopsis:'A disgraced blade-bearer swears to protect the heir of a fallen moon clan, only to learn she is the one being hunted.'},
+  {id:'CTR-340918', title:'The Physician at Midnight', holder:'Harbor Lane Media', genres:['Medical','Romance','Suspense'], episodes:66, paywall:11, format:'Live action', source:'Localized', launch:'2026-07-21', launchL:'Jul 21, 2026', rank:12, rankL:'#12 Trending · Suspense', plays:'6.3M',
+   synopsis:'A night-shift doctor treats a mysterious patient whose injuries seem to predict crimes that haven\u2019t happened yet.'}
+];
+const COLLECTIONS = [
+  {id:'COL-US-18421', ctr:'CTR-902184', market:'United States', code:'US', lang:'English', share:45, base:820},
+  {id:'COL-GB-18422', ctr:'CTR-902184', market:'United Kingdom', code:'GB', lang:'English', share:40, base:310},
+  {id:'COL-BR-77310', ctr:'CTR-781230', market:'Brazil', code:'BR', lang:'Portuguese', share:42, base:0},
+  {id:'COL-MX-77311', ctr:'CTR-781230', market:'Mexico', code:'MX', lang:'Spanish', share:42, base:0},
+  {id:'COL-US-55001', ctr:'CTR-550361', market:'United States', code:'US', lang:'English', share:50, base:640},
+  {id:'COL-JP-55002', ctr:'CTR-550361', market:'Japan', code:'JP', lang:'Japanese', share:45, base:0},
+  {id:'COL-TH-34001', ctr:'CTR-340918', market:'Thailand', code:'TH', lang:'Thai', share:38, base:180},
+  {id:'COL-ID-34002', ctr:'CTR-340918', market:'Indonesia', code:'ID', lang:'Indonesian', share:38, base:0}
+];
+const ADS = {
+  'COL-US-18421': [['1812004417','LC_US_hook_courtroom_v3','LC US · Broad · Oct'],['1812004418','LC_US_reveal_clause_v1','LC US · Broad · Oct'],['1812004431','LC_US_romance_cut_v2','LC US · Lookalike'],['1812004432','LC_US_ep12_tease','LC US · Lookalike'],['1812004450','LC_US_trailer_15s','LC US · Retarget']],
+  'COL-GB-18422': [['1812007702','LC_UK_hook_v1','LC UK · Broad'],['1812007703','LC_UK_betrayal_v2','LC UK · Broad'],['1812007719','LC_UK_trailer_30s','LC UK · Retarget']],
+  'COL-US-55001': [['1813300120','MO_US_duel_open_v4','MO US · Anime fans'],['1813300121','MO_US_moon_clan_v2','MO US · Anime fans'],['1813300138','MO_US_heir_twist','MO US · Broad'],['1813300139','MO_US_trailer_20s','MO US · Broad']],
+  'COL-TH-34001': [['1814100051','PM_TH_er_hook_v2','PM TH · Broad'],['1814100052','PM_TH_patient_v1','PM TH · Broad']],
+  'COL-JP-55002': [], 'COL-ID-34002': [], 'COL-BR-77310': [], 'COL-MX-77311': []
+};
+const ART = {
+  'CTR-902184': {c1:'#22324F', c2:'#0B111E', s:'<rect x="40" y="46" width="220" height="236" fill="#2E4266" opacity=".55"/><path d="M150 46v236M40 164h220" stroke="#0B111E" stroke-width="6"/><circle cx="222" cy="300" r="78" fill="#E0A458" opacity=".16"/><circle cx="222" cy="300" r="26" fill="#F2C07D" opacity=".6"/><path d="M90 400c0-72 26-112 60-112s60 40 60 112z" fill="#060A13"/><circle cx="150" cy="252" r="30" fill="#060A13"/>'},
+  'CTR-781230': {c1:'#A9CFCF', c2:'#1E5A66', s:'<circle cx="212" cy="104" r="40" fill="#F7E6C6" opacity=".9"/><path d="M66 258l52-46 52 46v58H66z" fill="#2B383E"/><rect x="104" y="274" width="22" height="42" fill="#F2C27B" opacity=".85"/><path d="M0 302c40-15 80 15 120 0s80-15 120 0 60 10 60 10v88H0z" fill="#17505A"/><path d="M0 332c40-15 80 15 120 0s80-15 120 0 60 10 60 10v58H0z" fill="#103B43"/><path d="M0 362c50-12 100 12 150 0s100-12 150 0v38H0z" fill="#0A272D"/>'},
+  'CTR-550361': {c1:'#2D1C50', c2:'#0C0A1B', s:'<circle cx="192" cy="118" r="70" fill="#E9E3FF" opacity=".92"/><circle cx="218" cy="102" r="62" fill="#2D1C50" opacity=".6"/><path d="M58 344 252 58" stroke="#CAD8FF" stroke-width="5" stroke-linecap="round"/><path d="M44 356l22-22" stroke="#8A6CFF" stroke-width="10" stroke-linecap="round"/><path d="M0 330l70-80 50 50 60-90 120 120v70H0z" fill="#120C27"/>'},
+  'CTR-340918': {c1:'#15393F', c2:'#051214', s:'<path d="M0 400 110 172h80l110 228z" fill="#0D2B30"/><rect x="110" y="110" width="80" height="62" fill="#BFE6E0" opacity=".78"/><path d="M150 110v62M110 141h80" stroke="#15393F" stroke-width="4"/><circle cx="62" cy="70" r="26" fill="#E9F2EF" opacity=".82"/><path d="M134 400c0-52 7-82 16-82s16 30 16 82z" fill="#030A0B"/><circle cx="150" cy="304" r="11" fill="#030A0B"/>'}
+};
+function poster(ctrId){
+  const a = ART[ctrId]; const g = 'pg' + (++uid);
+  return `<svg class="poster" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a.c1}"/><stop offset="1" stop-color="${a.c2}"/></linearGradient></defs><rect width="300" height="400" fill="url(#${g})"/>${a.s}</svg>`;
+}
+
+const STATES = [['normal','Normal'],['empty','Empty'],['loading','Loading'],['error','Error'],['partial','Partial success'],['unknown','Result unknown'],['invalid','Link invalid & auto-pausing'],['pending','Settlement pending confirmation'],['payout','Payout exception']];
+const PAGES = [['marketplace','Drama Marketplace','/marketplace'],['links','Distribution Management · Link view','/distribution/links'],['dramas','Distribution Management · By drama','/distribution/dramas'],['data','Revenue & Settlement · Distribution data','/revenue/data'],['settlement','Revenue & Settlement · Settlement management','/revenue/settlement']];
+const PATH = Object.fromEntries(PAGES.map(p => [p[0], p[2]]));
+const ROUTE = Object.fromEntries(PAGES.map(p => [p[2], p[0]]));
+
+const LINK_ST = {active:['ok','Active'], invalid:['err','Invalid'], unknown:['warn','Status unknown']};
+const AP_ST = {none:['muted','No action needed'], pausing:['info spin','Auto-pausing'], complete:['ok','Auto-pause complete'], partial:['warn','Partially paused'], failed:['err','Auto-pause failed'], unknown:['warn','Result unknown']};
+const STM_ST = {pending:['warn','Pending confirmation'], confirming:['warn spin','Confirming · result unknown'], processing:['info','Processing'], paid:['ok','Paid'], failed:['err','Payout failed']};
+const SYNC = 'Nov 3, 2026 02:00 UTC';
+
+/* ---------- Dynamic data per demo state ---------- */
+const S = {state:'normal', page:null, data:null, after:null};
+const UI = freshUI();
+function freshUI(){
+  return {
+    mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop'},
+    lv:{q:'', status:'all', ap:'all', market:'all', sel:new Set()},
+    bd:{q:'', open:new Set(['CTR-902184'])},
+    dd:{range:30, ctr:'all'},
+    st:{period:'all', bc:'all', status:'all'},
+    dismissed:new Set()
+  };
+}
+
+function mkLink(col, code, created){
+  return {col, code, url:'https://dist.ttbc.example/l/' + code, status:'active', reason:'', ap:'none', apNote:'', created, updated:SYNC, isNew:false,
+    ads:(ADS[col] || []).map(a => ({id:a[0], name:a[1], campaign:a[2], st:'Delivering'})),
+    history:[{t:created, e:'Link generated', d:'Key ' + col + ' × BC ' + BCS.main.id, k:'ok'}, {t:created, e:'Link active', d:'Distribution enabled by the rights holder in TTDC', k:'ok'}]};
+}
+function buildData(st){
+  const claim = {'COL-US-18421':'claimed','COL-GB-18422':'claimed','COL-BR-77310':'available','COL-MX-77311':'available','COL-US-55001':'claimed','COL-JP-55002':'claimed','COL-TH-34001':'claimed','COL-ID-34002':'claimed'};
+  const d = {
+    cols: COLLECTIONS.map(c => Object.assign({}, c, {claim:claim[c.id], dist:'open'})),
+    links: [mkLink('COL-US-18421','k7Qm2x','Sep 20, 2026 10:14 UTC'), mkLink('COL-GB-18422','p3Lw9a','Sep 21, 2026 08:02 UTC'), mkLink('COL-US-55001','v8Rt4c','Oct 7, 2026 15:40 UTC'), mkLink('COL-TH-34001','d2Hn6s','Aug 2, 2026 11:25 UTC')],
+    statements: [
+      {id:'STM-202610-M', period:'Oct 2026', bc:'main', gross:48210.40, adj:-1180.00, version:1, status:'pending', generated:'Nov 2, 2026', updated:'Nov 2, 2026 09:00 UTC', due:'Nov 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',19880.40],['COL-GB-18422',6529.80]]],['CTR-550361',[['COL-US-55001',15320.60]]],['CTR-340918',[['COL-TH-34001',6479.60]]]], adjNote:'Refunded orders on COL-US-18421 (Oct 12–18)'},
+      {id:'STM-202610-S', period:'Oct 2026', bc:'sub', gross:12480.75, adj:0, version:1, status:'processing', generated:'Nov 2, 2026', updated:'Nov 2, 2026 14:22 UTC', due:'Nov 10, 2026', revised:false,
+        split:[['CTR-550361',[['COL-JP-55002',8210.35]]],['CTR-781230',[['COL-BR-77310',4270.40]]]], adjNote:''},
+      {id:'STM-202609-M', period:'Sep 2026', bc:'main', gross:42305.10, adj:-420.00, version:1, status:'paid', generated:'Oct 2, 2026', updated:'Oct 15, 2026 09:12 UTC', due:'Oct 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',17240.10],['COL-GB-18422',5910.00]]],['CTR-550361',[['COL-US-55001',12890.00]]],['CTR-340918',[['COL-TH-34001',6265.00]]]], adjNote:'Chargebacks on COL-GB-18422'},
+      {id:'STM-202609-S', period:'Sep 2026', bc:'sub', gross:9904.20, adj:0, version:1, status:'paid', generated:'Oct 2, 2026', updated:'Oct 15, 2026 09:12 UTC', due:'Oct 10, 2026', revised:false,
+        split:[['CTR-550361',[['COL-JP-55002',6120.20]]],['CTR-781230',[['COL-BR-77310',3784.00]]]], adjNote:''},
+      {id:'STM-202608-M', period:'Aug 2026', bc:'main', gross:36402.75, adj:0, version:1, status:'paid', generated:'Sep 2, 2026', updated:'Sep 15, 2026 09:05 UTC', due:'Sep 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',21002.75]]],['CTR-340918',[['COL-TH-34001',15400.00]]]], adjNote:''}
+    ],
+    logs: [
+      {t:'Nov 2, 2026 14:22 UTC', stm:'STM-202610-S', e:'Confirmed by you · queued for payout', k:'info', d:'Payout batch PB-1102-07 · expected by Nov 15, 2026'},
+      {t:'Nov 2, 2026 09:00 UTC', stm:'STM-202610-M', e:'Statement generated · awaiting your confirmation', k:'warn', d:'Version 1 · confirm by Nov 10, 2026'},
+      {t:'Nov 2, 2026 09:00 UTC', stm:'STM-202610-S', e:'Statement generated', k:'', d:'Version 1'},
+      {t:'Oct 15, 2026 09:12 UTC', stm:'STM-202609-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-88124 · bank account ending 4471'},
+      {t:'Oct 15, 2026 09:12 UTC', stm:'STM-202609-S', e:'Payout sent · paid', k:'ok', d:'Reference PAY-88125 · bank account ending 0938'},
+      {t:'Sep 15, 2026 09:05 UTC', stm:'STM-202608-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-80410 · bank account ending 4471'}
+    ],
+    lastClaim:null, lastGen:null, stmPartial:false, dataNote:null
+  };
+  const L = id => d.links.find(l => l.col === id);
+  const C = id => d.cols.find(c => c.id === id);
+  if (st === 'invalid'){
+    const a = L('COL-US-18421'); a.status = 'invalid'; a.reason = 'Distribution disabled by the rights holder'; a.updated = 'Nov 3, 2026 02:41 UTC'; a.ap = 'pausing'; a.apNote = '3 of 5 ads paused · 2 pausing';
+    a.ads.forEach((x, i) => x.st = i < 3 ? 'Paused' : 'Pausing');
+    a.history.push({t:'Nov 3, 2026 02:41 UTC', e:'Link invalid', d:'Distribution disabled by the rights holder in TTDC', k:'err'}, {t:'Nov 3, 2026 02:42 UTC', e:'Auto-pause requested in TTAM', d:'5 affected ads', k:'info'}, {t:'Nov 3, 2026 02:50 UTC', e:'TTAM: 3 of 5 ads paused', d:'2 ads still pausing', k:'info'});
+    const b = L('COL-GB-18422'); b.status = 'invalid'; b.reason = 'Distribution authorization expired'; b.updated = 'Nov 3, 2026 01:15 UTC'; b.ap = 'partial'; b.apNote = '2 of 3 ads paused · 1 failed';
+    b.ads[0].st = 'Paused'; b.ads[1].st = 'Paused'; b.ads[2].st = 'Pause failed · ad under review';
+    b.history.push({t:'Nov 3, 2026 01:15 UTC', e:'Link invalid', d:'Distribution authorization expired (Nov 2, 2026)', k:'err'}, {t:'Nov 3, 2026 01:16 UTC', e:'Auto-pause requested in TTAM', d:'3 affected ads', k:'info'}, {t:'Nov 3, 2026 01:31 UTC', e:'TTAM: partially paused', d:'2 paused · 1 failed (ad under review)', k:'warn'});
+    const c = L('COL-US-55001'); c.status = 'invalid'; c.reason = 'Drama removed by the rights holder'; c.updated = 'Nov 2, 2026 22:08 UTC'; c.ap = 'failed'; c.apNote = '0 of 4 ads paused';
+    c.ads.forEach(x => x.st = 'Pause failed · campaign locked');
+    c.history.push({t:'Nov 2, 2026 22:08 UTC', e:'Link invalid', d:'Drama removed by the rights holder in TTDC', k:'err'}, {t:'Nov 2, 2026 22:09 UTC', e:'Auto-pause requested in TTAM', d:'4 affected ads', k:'info'}, {t:'Nov 2, 2026 22:40 UTC', e:'TTAM: auto-pause failed', d:'Campaign locked by an active budget schedule. Pause these ads in TTAM.', k:'err'});
+    C('COL-US-18421').dist = 'disabled'; C('COL-GB-18422').dist = 'expired'; C('COL-US-55001').dist = 'removed';
+  }
+  if (st === 'unknown'){
+    const c = L('COL-US-55001'); c.status = 'unknown'; c.reason = 'Waiting for TTAM status confirmation'; c.updated = 'Nov 3, 2026 02:58 UTC'; c.ap = 'unknown'; c.apNote = 'TTAM hasn\u2019t returned a result yet';
+    c.ads.forEach(x => x.st = 'Unknown');
+    c.history.push({t:'Nov 3, 2026 02:58 UTC', e:'Status check pending', d:'Waiting for TTAM status confirmation', k:'warn'});
+    C('COL-MX-77311').claim = 'confirming';
+    d.statements[0].status = 'confirming'; d.statements[0].updated = 'Nov 3, 2026 02:50 UTC';
+    d.logs.unshift({t:'Nov 3, 2026 02:50 UTC', stm:'STM-202610-M', e:'Confirmation submitted · result unknown', k:'warn', d:'The settlement system hasn\u2019t acknowledged yet. Don\u2019t confirm again; use Check status.'});
+  }
+  if (st === 'partial'){
+    const j = mkLink('COL-JP-55002','m5Yz8e','Nov 3, 2026 02:55 UTC'); j.isNew = true; d.links.push(j);
+    C('COL-BR-77310').claim = 'claimed';
+    d.lastClaim = {ctr:'CTR-781230', items:[{col:'COL-BR-77310', r:'claimed'}, {col:'COL-MX-77311', r:'failed', why:'Terms changed while you were confirming (revenue share 42% to 40%, version 3 to 4). Review the new terms and claim again.'}]};
+    d.lastGen = [{col:'COL-JP-55002', r:'generated'}, {col:'COL-ID-34002', r:'failed', why:'Collection version is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.'}, {col:'COL-US-55001', r:'existed'}];
+    d.stmPartial = true;
+    d.dataNote = 'partial';
+  }
+  if (st === 'pending'){
+    const m = d.statements[0]; m.version = 2; m.revised = true; m.adj = -1180.00; m.updated = 'Nov 2, 2026 18:30 UTC';
+    const s2 = d.statements[1]; s2.status = 'pending'; s2.updated = 'Nov 2, 2026 09:00 UTC';
+    d.logs = d.logs.filter(l => !(l.stm === 'STM-202610-S' && l.e.startsWith('Confirmed')));
+    d.logs.unshift({t:'Nov 2, 2026 18:30 UTC', stm:'STM-202610-M', e:'Statement revised · v1 to v2 · re-confirmation required', k:'warn', d:'Adjustment of -$1,180.00 added for refunded orders. Your earlier review no longer applies.'});
+  }
+  if (st === 'payout'){
+    const f = d.statements[3]; f.status = 'failed'; f.updated = 'Oct 15, 2026 09:14 UTC'; f.failReason = 'Beneficiary name mismatch';
+    d.logs = d.logs.filter(l => l.stm !== 'STM-202609-S');
+    d.logs.splice(3, 0,
+      {t:'Oct 15, 2026 09:14 UTC', stm:'STM-202609-S', e:'Payout failed · beneficiary name mismatch', k:'err', d:'Bank returned R03: account holder \u201cSHIKE INTERACTIVE TECH LTD\u201d doesn\u2019t match beneficiary \u201cShike Interactive Ltd\u201d. Update the beneficiary name in Billing to match the bank account, then request a payout retry.'},
+      {t:'Oct 15, 2026 09:12 UTC', stm:'STM-202609-S', e:'Payout sent to bank', k:'info', d:'Reference PAY-88125 · bank account ending 0938'},
+      {t:'Oct 3, 2026 10:41 UTC', stm:'STM-202609-S', e:'Confirmed by you · queued for payout', k:'info', d:'Payout batch PB-1003-02'});
+  }
+  return d;
+}
+const D = () => S.data;
+const ctrOf = id => CONTRACTS.find(c => c.id === id);
+const colOf = id => D().cols.find(c => c.id === id);
+const colsOf = ctrId => D().cols.filter(c => c.ctr === ctrId);
+const linkOf = colId => D().links.find(l => l.col === colId);
+const stmOf = id => D().statements.find(s => s.id === id);
+const stmFinal = s => s.gross + s.adj;
+const colLabel = c => c.market + ' · ' + c.lang;
+
+/* ---------- Generic UI ---------- */
+function toast(msg, type){
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type || '');
+  t.innerHTML = ic(type === 'err' ? 'x-circle' : type === 'warn' ? 'alert' : type === 'info' ? 'info' : 'check-circle', 16) + '<span>' + msg + '</span>';
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.remove(), 3400);
+}
+function copyText(text, msg){
+  const done = () => toast(msg || 'Copied to clipboard');
+  const fallback = () => {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+    ta.remove(); done();
+  };
+  if (navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(done, fallback); } else fallback();
+}
+function download(name, text){
+  const blob = new Blob([text], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+const csv = rows => rows.map(r => r.map(v => { const s = String(v == null ? '' : v); return /[",\n\t]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\n');
+const stChip = (map, k) => `<span class="st ${map[k][0]}">${map[k][1]}</span>`;
+function banner(kind, body, acts, iconName){
+  const icn = iconName || (kind === 'err' ? 'x-circle' : kind === 'warn' ? 'alert' : kind === 'ok' ? 'check-circle' : 'info');
+  return `<div class="banner ${kind}">${ic(icn, 16)}<div class="bn-body">${body}</div>${acts ? '<div class="bn-act">' + acts + '</div>' : ''}</div>`;
+}
+function copyBtn(text, label){ return `<button class="btn btn-icon" data-act="copy" data-text="${esc(text)}" data-msg="${esc(label || 'Copied')}" aria-label="Copy">${ic('copy', 14)}</button>`; }
+function emptyBlock(icon, title, text, acts){ return `<div class="empty"><div class="em-ic">${ic(icon, 22)}</div><h3>${title}</h3><p>${text}</p>${acts ? '<div class="acts">' + acts + '</div>' : ''}</div>`; }
+function errorBlock(what){
+  return `<div class="panel">${emptyBlock('alert', 'We couldn\u2019t load ' + what, 'The service didn\u2019t respond in time. Your data is safe; nothing was changed. Request ID 7f3a-91c2-0b44.', '<button class="btn btn-primary" data-act="retry">' + ic('refresh', 14) + 'Retry</button><button class="btn" data-act="toast" data-msg="Status page is outside this prototype.">View service status</button>')}</div>`;
+}
+function skelRows(n, cols){
+  let r = '';
+  for (let i = 0; i < n; i++){ r += '<tr>' + Array.from({length:cols}, (_, j) => `<td><div class="sk" style="height:12px;width:${50 + ((i * 7 + j * 13) % 45)}%"></div>${j === 1 ? '<div class="sk" style="height:10px;width:40%;margin-top:6px"></div>' : ''}</td>`).join('') + '</tr>'; }
+  return r;
+}
+function skelKpis(n){ return `<div class="kpis" style="--n:${n}">` + Array.from({length:n}, () => '<div class="kpi"><div class="sk" style="height:10px;width:50%"></div><div class="sk" style="height:18px;width:70%;margin-top:10px"></div></div>').join('') + '</div>'; }
+
+/* Drawer / modal */
+let drawerFn = null, modalFn = null, drawerClose = null;
+function openDrawer(fn, onClose){
+  drawerFn = fn; drawerClose = onClose || null;
+  const r = fn();
+  $('#drawer-root').innerHTML = `<div class="mask" data-act="close-drawer"></div><aside class="drawer" role="dialog" aria-modal="true" style="--w:${r.width || 760}px">${drawerInner(r)}</aside>`;
+  requestAnimationFrame(() => { $$('#drawer-root .mask, #drawer-root .drawer').forEach(e => e.classList.add('show')); });
+}
+function drawerInner(r){
+  return `<div class="dr-h"><div class="t"><h2>${r.title}</h2>${r.sub ? '<div class="s">' + r.sub + '</div>' : ''}</div><button class="btn btn-icon" data-act="close-drawer" aria-label="Close">${ic('close', 18)}</button></div><div class="dr-b">${r.body}</div>${r.footer ? '<div class="dr-f">' + r.footer + '</div>' : ''}`;
+}
+function refreshDrawer(){
+  if (!drawerFn) return;
+  const dr = $('#drawer-root .drawer'); if (!dr) return;
+  const b = $('.dr-b', dr); const top = b ? b.scrollTop : 0;
+  const r = drawerFn(); dr.style.setProperty('--w', (r.width || 760) + 'px'); dr.innerHTML = drawerInner(r);
+  const nb = $('.dr-b', dr); if (nb) nb.scrollTop = top;
+  if (r.after) r.after();
+}
+function closeDrawer(){
+  if (drawerClose) { try { drawerClose(); } catch (e) { /* ignore */ } }
+  drawerFn = null; drawerClose = null; $('#drawer-root').innerHTML = '';
+}
+function openModal(fn){
+  modalFn = fn;
+  const r = fn();
+  $('#modal-root').innerHTML = `<div class="mask modal-mask show" data-act="close-modal"></div><div class="modal" role="dialog" aria-modal="true" style="--w:${r.width || 560}px">${drawerInner(r).replace('data-act="close-drawer"', 'data-act="close-modal"')}</div>`;
+  requestAnimationFrame(() => { const m = $('#modal-root .modal'); if (m) m.classList.add('show'); });
+}
+function refreshModal(){
+  if (!modalFn) return; const m = $('#modal-root .modal'); if (!m) return;
+  const r = modalFn(); m.style.setProperty('--w', (r.width || 560) + 'px');
+  m.innerHTML = drawerInner(r).replace('data-act="close-drawer"', 'data-act="close-modal"');
+}
+function closeModal(){ modalFn = null; $('#modal-root').innerHTML = ''; }
+function closeAll(){ closeModal(); closeDrawer(); }
+function busy(btn, ms, fn){
+  if (!btn) { fn(); return; }
+  btn.classList.add('loading'); const html = btn.innerHTML; btn.innerHTML = '<span class="st info spin" style="color:inherit"></span>' + btn.textContent.trim();
+  setTimeout(() => { if (btn.isConnected) { btn.classList.remove('loading'); btn.innerHTML = html; } fn(); }, ms);
+}
+
+/* ---------- Navigation ---------- */
+const NAV_OPEN = {dc:true};
+function renderSidebar(){
+  const p = S.page, s = S.state;
+  const row = (icon, name) => `<button class="nav-row" data-act="outside" data-name="${name}">${ic(icon, 20)}<span>${name}</span></button>`;
+  const sub = (page, label, on) => `<a class="nav-sub ${on ? 'on' : ''}" href="#${PATH[page]}?state=${s}" ${on ? 'aria-current="page"' : ''}>${label}</a>`;
+  const inDc = ['marketplace','links','dramas','data','settlement'].includes(p);
+  $('#sidebar').innerHTML =
+    row('agent', 'Business agent') +
+    '<div class="nav-label">Platforms</div>' + row('ads', 'Ads Manager') + row('suite', 'Business Suite') +
+    '<div class="nav-label">Creatives</div>' + row('one', 'TikTok One') + row('library', 'Creative Library') +
+    `<button class="nav-row ${NAV_OPEN.dc ? 'open' : ''} ${inDc ? 'parent-on' : ''}" data-act="nav-toggle" aria-expanded="${NAV_OPEN.dc}">${ic('share', 20)}<span>Distribution Center</span>${ic('chev-down', 16, 'chev')}</button>` +
+    (NAV_OPEN.dc ? sub('marketplace', 'Drama Marketplace', p === 'marketplace') + sub('links', 'Distribution Management', p === 'links' || p === 'dramas') + sub('data', 'Revenue & Settlement', p === 'data' || p === 'settlement') : '') +
+    '<div class="nav-label">Connection</div>' + row('leads', 'Leads Center') + row('events', 'Events Manager') +
+    '<div class="nav-label">Planning</div>' + row('apps', 'Apps & Agents') +
+    '<div class="nav-label">Settings</div>' + row('billing', 'Billing') + row('building', 'Business Settings') +
+    '<div class="nav-sep"></div>' + row('tools', 'All tools');
+}
+function go(page, after){
+  const target = '#' + PATH[page] + '?state=' + S.state;
+  if (location.hash === target){ closeAll(); render(); if (after) after(); return; }
+  S.after = after || null; location.hash = target;
+}
+function parseHash(){
+  const h = location.hash.replace(/^#/, '') || '/marketplace';
+  const [path, qs] = h.split('?');
+  return {path, state:new URLSearchParams(qs || '').get('state')};
+}
+function onRoute(){
+  const {path, state} = parseHash();
+  const page = ROUTE[path];
+  const st = STATES.some(x => x[0] === state) ? state : 'normal';
+  if (!page || state !== st){ location.replace('#' + PATH[page || 'marketplace'] + '?state=' + st); return; }
+  if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv.sel.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); }
+  if (page !== S.page){ const first = S.page === null; S.page = page; closeAll(); stopPlayer(); if (!first) window.scrollTo(0, 0); }
+  render();
+  if (S.after){ const f = S.after; S.after = null; f(); }
+}
+
+function render(){
+  const a = document.activeElement; const fName = a && a.name && $('#page').contains(a) ? a.name : null; const caret = fName && a.selectionStart != null ? a.selectionStart : null;
+  renderSidebar();
+  const fn = {marketplace:pageMarketplace, links:pageLinks, dramas:pageDramas, data:pageData, settlement:pageSettlement}[S.page];
+  $('#page').innerHTML = fn();
+  renderDemo();
+  if (fName){ const el = $('#page [name="' + fName + '"]'); if (el){ el.focus(); if (caret != null && el.setSelectionRange) el.setSelectionRange(caret, caret); } }
+}
+function globalNotice(){
+  if (S.page === 'settlement') return '';
+  if (S.state === 'pending' && D().statements.some(s => s.status === 'pending')) return banner('warn', '<b>2 settlement statements need your confirmation.</b> STM-202610-M was revised (v1 to v2). Payout starts only after you confirm each statement.', '<button class="btn btn-sm" data-act="go" data-to="settlement">Review statements</button>');
+  if (S.state === 'payout' && stmOf('STM-202609-S').status === 'failed') return banner('err', '<b>Payout failed for STM-202609-S (Sep 2026 · Studio B).</b> Beneficiary name mismatch. Update beneficiary details, then request a payout retry.', '<button class="btn btn-sm" data-act="open-stm" data-id="STM-202609-S" data-from="1">View payout log</button>');
+  return '';
+}
+
+/* ---------- Drama Marketplace ---------- */
+function claimSummary(ctrId){
+  const cs = colsOf(ctrId);
+  const n = k => cs.filter(c => c.claim === k).length;
+  const dis = cs.filter(c => c.dist !== 'open').length;
+  if (dis) return `<span class="st err">${dis} of ${cs.length} no longer open</span>`;
+  if (n('confirming')) return `<span class="st warn spin">${n('confirming')} claim confirming</span>`;
+  if (n('available')) return `<span class="st ok">${n('available')} of ${cs.length} available</span>`;
+  return `<span class="st muted">All ${cs.length} claimed by you</span>`;
+}
+function mkFiltered(){
+  const f = UI.mk; const q = f.q.trim().toLowerCase();
+  let list = CONTRACTS.filter(c => {
+    const cs = colsOf(c.id);
+    if (q && ![c.title, c.id, c.holder].concat(cs.map(x => x.id)).join(' ').toLowerCase().includes(q)) return false;
+    if (f.lang !== 'all' && !cs.some(x => x.lang === f.lang)) return false;
+    if (f.format !== 'all' && c.format !== f.format) return false;
+    if (f.source !== 'all' && c.source !== f.source) return false;
+    if (f.genre !== 'all' && !c.genres.includes(f.genre)) return false;
+    if (f.avail === 'available' && !cs.some(x => x.claim === 'available' && x.dist === 'open')) return false;
+    if (f.avail === 'claimed' && !cs.some(x => x.claim === 'claimed')) return false;
+    return true;
+  });
+  list.sort((a, b) => f.sort === 'new' ? b.launch.localeCompare(a.launch) : f.sort === 'eps' ? a.episodes - b.episodes : a.rank - b.rank);
+  return list;
+}
+function sel(name, val, opts, label){
+  return `<select class="select" name="${name}" data-chg="filter" aria-label="${label}">` + opts.map(o => `<option value="${esc(o[0])}" ${o[0] === val ? 'selected' : ''}>${esc(o[1])}</option>`).join('') + '</select>';
+}
+function pageMarketplace(){
+  const f = UI.mk; const st = S.state;
+  const langs = Array.from(new Set(COLLECTIONS.map(c => c.lang)));
+  const genres = Array.from(new Set([].concat(...CONTRACTS.map(c => c.genres)))).sort();
+  let out = `<div class="ph"><div><h1>Drama Marketplace</h1><p>Browse dramas rights holders have opened for distribution, preview episodes, and claim the collections you want to test.</p></div><div><button class="btn" data-act="go" data-to="links">${ic('link', 14)}My distribution links</button></div></div>`;
+  out += '<div class="stack">';
+  const gn = globalNotice(); if (gn) out += gn;
+  if (st === 'partial' && D().lastClaim && !UI.dismissed.has('mk-partial')) out += banner('warn', '<b>Your last claim partially succeeded.</b> A House by the Tide: 1 collection claimed, 1 failed because the terms changed during confirmation.', '<button class="btn btn-sm" data-act="last-claim">View results</button><button class="btn btn-icon" data-act="dismiss" data-k="mk-partial" aria-label="Dismiss">' + ic('close', 14) + '</button>');
+  if (st === 'unknown' && colOf('COL-MX-77311').claim === 'confirming') out += banner('warn', '<b>A claim is still being confirmed.</b> A House by the Tide · Mexico · Spanish (COL-MX-77311). Don\u2019t submit it again; the result updates automatically.', '<button class="btn btn-sm" data-act="recheck-claim" data-col="COL-MX-77311">Check again</button>', 'clock');
+  if (st === 'invalid') out += banner('err', '<b>3 collections you claimed are no longer open for distribution.</b> Their links are invalid and TTAM is auto-pausing affected ads.', '<button class="btn btn-sm" data-act="go-links-invalid">Review links</button>');
+  if (st !== 'empty' && st !== 'error'){
+    out += `<div class="toolbar"><div class="filters">
+      <label class="search">${ic('search', 14)}<input class="input" name="mk-q" data-inp="mk-q" value="${esc(f.q)}" placeholder="Search title, ID or rights holder" aria-label="Search dramas"></label>
+      ${sel('mk.lang', f.lang, [['all','All languages']].concat(langs.map(l => [l, l])), 'Language')}
+      ${sel('mk.format', f.format, [['all','All formats'],['Live action','Live action'],['AI animation','AI animation']], 'Format')}
+      ${sel('mk.source', f.source, [['all','All sources'],['Local original','Local original'],['Localized','Localized']], 'Source')}
+      ${sel('mk.genre', f.genre, [['all','All genres']].concat(genres.map(g => [g, g])), 'Genre')}
+      ${sel('mk.avail', f.avail, [['all','Any availability'],['available','Has available collections'],['claimed','Claimed by me']], 'Availability')}
+    </div><div class="filters">${sel('mk.sort', f.sort, [['pop','Sort: Popularity'],['new','Sort: Newest'],['eps','Sort: Fewest episodes']], 'Sort')}</div></div>`;
+  }
+  if (st === 'loading'){
+    out += '<div class="grid">' + Array.from({length:4}, () => '<div class="card" style="cursor:default"><div class="poster-box sk" style="border-radius:0"></div><div class="card-b"><div class="sk" style="height:14px;width:70%"></div><div class="sk" style="height:10px;width:50%"></div><div class="sk" style="height:10px;width:85%"></div></div></div>').join('') + '</div>';
+  } else if (st === 'error'){
+    out += errorBlock('dramas');
+  } else if (st === 'empty'){
+    out += '<div class="panel">' + emptyBlock('film', 'No dramas are open for distribution yet', 'Rights holders open dramas for distribution in TTDC. New dramas appear here automatically.', '<button class="btn" data-act="toast" data-msg="Checked for updates. No new dramas yet." data-type="info">' + ic('refresh', 14) + 'Check for updates</button>') + '</div>';
+  } else {
+    const list = mkFiltered();
+    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract</div>`;
+    if (!list.length) out += '<div class="panel">' + emptyBlock('search', 'No dramas match your filters', 'Try a different keyword or clear filters.', '<button class="btn" data-act="mk-clear">Clear filters</button>') + '</div>';
+    else out += '<div class="grid">' + list.map(card).join('') + '</div>';
+  }
+  return out + '</div>';
+}
+function card(c){
+  const cs = colsOf(c.id); const shares = cs.map(x => x.share); const mn = Math.min.apply(null, shares), mx = Math.max.apply(null, shares);
+  return `<button class="card" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
+    <div class="poster-box">${poster(c.id)}
+      <div class="ov-tl"><span class="tag dark">${c.format}</span></div>
+      <div class="ov-tr"><span class="tag dark">#${c.rank} Trending</span></div>
+      <div class="ov-b"><span>${c.episodes} episodes</span><span>${c.plays} plays · 30d</span></div>
+    </div>
+    <div class="card-b">
+      <div class="card-t">${c.title}</div>
+      <div class="card-m">${c.holder} · ${c.source}</div>
+      <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
+      <div class="card-m">Paywall from Ep ${c.paywall} · Launched ${c.launchL}</div>
+      <div class="card-m">${cs.map(x => x.code + ' · ' + x.lang).join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>
+      <div class="card-f"><span class="muted">Rev. share ${mn === mx ? mn + '%' : mn + '–' + mx + '%'}</span>${claimSummary(c.id)}</div>
+    </div></button>`;
+}
+
+/* Drama detail drawer + player */
+const PL = {ctr:null, ep:1, t:0, playing:false, speed:2, timer:null};
+const DS = {sel:new Set()};
+const epDur = ep => 88 + (ep * 37) % 46;
+const fmtT = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
+function stopPlayer(){ if (PL.timer){ clearInterval(PL.timer); PL.timer = null; } PL.playing = false; }
+function openDrama(ctrId, preselect){
+  stopPlayer(); PL.ctr = ctrId; PL.ep = 1; PL.t = 0; PL.speed = 2;
+  DS.sel = new Set(preselect || []);
+  openDrawer(() => dramaDrawer(ctrId), stopPlayer);
+}
+function colStatus(c){
+  if (c.dist === 'disabled') return '<span class="st err">Distribution disabled</span><div class="st-reason">Disabled by the rights holder</div>';
+  if (c.dist === 'expired') return '<span class="st err">Authorization expired</span>';
+  if (c.dist === 'removed') return '<span class="st err">Removed by rights holder</span>';
+  if (c.claim === 'claimed') return '<span class="st ok">Claimed by you</span>';
+  if (c.claim === 'confirming') return '<span class="st warn spin">Confirming claim</span>';
+  return '<span class="st info">Available</span>';
+}
+function dramaDrawer(ctrId){
+  const c = ctrOf(ctrId); const cs = colsOf(ctrId);
+  const pw = c.paywall, N = c.episodes, midA = Math.round(N * 0.55), midB = Math.round(N * 0.75);
+  const eps = Array.from({length:N}, (_, i) => i + 1).map(e => {
+    const cls = ['ep', e <= 10 ? 'hook' : '', e >= midA && e <= midB ? 'mid' : '', e > pw ? 'paid' : '', e === pw ? 'pw' : '', e === PL.ep ? 'cur' : ''].join(' ');
+    return `<button class="${cls}" data-act="pl-ep" data-ep="${e}" aria-label="Episode ${e}">${e === pw ? ic('lock', 10) : ''}${e}</button>`;
+  }).join('');
+  const availCount = cs.filter(x => x.claim === 'available' && x.dist === 'open').length;
+  const rows = cs.map(x => {
+    const can = x.claim === 'available' && x.dist === 'open';
+    return `<tr class="${DS.sel.has(x.id) ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="cl-${x.id}" data-chg="dr-sel" data-id="${x.id}" ${DS.sel.has(x.id) ? 'checked' : ''} ${can ? '' : 'disabled'} aria-label="Select ${esc(colLabel(x))}"></td>
+      <td><div class="cell-title">${x.market}</div></td><td>${x.lang}</td>
+      <td><span class="copyable"><span class="mono">${x.id}</span>${copyBtn(x.id, 'Collection ID copied')}</span></td>
+      <td class="num">${x.share}%</td><td>${colStatus(x)}</td></tr>`;
+  }).join('');
+  const body = `
+  <div class="det-top">
+    <div>
+      <div class="player ${PL.playing ? 'playing' : ''}" id="player">
+        ${poster(ctrId)}<div class="pl-dim"></div>
+        <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span><span class="tag warn" id="pl-lock" style="${PL.ep >= pw ? '' : 'display:none'}">${ic('lock', 10)}Paid episode</span></div>
+        <button class="pl-center" data-act="pl-toggle" aria-label="Play or pause">${ic(PL.playing ? 'pause' : 'play', 22)}</button>
+        <div class="pl-ctrl">
+          <div class="pl-bar" data-act="pl-seek" aria-label="Seek"><div class="trk"><div class="fill" id="pl-fill" style="width:${PL.t / epDur(PL.ep) * 100}%"></div></div></div>
+          <div class="pl-row">
+            <button class="pl-btn" data-act="pl-prev" aria-label="Previous episode">${ic('prev', 14)}</button>
+            <button class="pl-btn" data-act="pl-toggle" aria-label="Play or pause" id="pl-tbtn">${ic(PL.playing ? 'pause' : 'play', 14)}</button>
+            <button class="pl-btn" data-act="pl-next" aria-label="Next episode">${ic('next', 14)}</button>
+            <span class="pl-time" id="pl-time">${fmtT(PL.t)} / ${fmtT(epDur(PL.ep))}</span>
+            <span class="pl-speed">${[1, 1.5, 2].map(s => `<button class="${PL.speed === s ? 'on' : ''}" data-act="pl-speed" data-v="${s}">${s}x</button>`).join('')}</span>
+          </div>
+        </div>
+      </div>
+      <div class="series"><div class="trk"><div class="free" style="width:${(pw - 1) / N * 100}%"></div><div class="mark" style="left:${(pw - 1) / N * 100}%" title="Paywall"></div><div class="cur" id="pl-cur" style="left:${(PL.ep - 0.5) / N * 100}%"></div></div>
+        <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
+    </div>
+    <div>
+      <div class="kv">
+        <div><div class="k">Contract ID</div><div class="v"><span class="copyable"><span class="mono">${c.id}</span>${copyBtn(c.id, 'Contract ID copied')}</span></div></div>
+        <div><div class="k">Rights holder</div><div class="v">${c.holder}</div></div>
+        <div><div class="k">Format</div><div class="v">${c.format}</div></div>
+        <div><div class="k">Source</div><div class="v">${c.source}</div></div>
+        <div><div class="k">Episodes</div><div class="v">${N} · paywall from Ep ${pw}</div></div>
+        <div><div class="k">Launched</div><div class="v">${c.launchL}</div></div>
+        <div><div class="k">Popularity</div><div class="v">${c.rankL}</div></div>
+        <div><div class="k">Plays (30 days)</div><div class="v">${c.plays}</div></div>
+        <div><div class="k">Languages</div><div class="v">${Array.from(new Set(cs.map(x => x.lang))).join(', ')}</div></div>
+        <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
+      </div>
+      <p style="margin:14px 0 0">${c.synopsis}</p>
+      <div class="banner plain" style="margin-top:14px">${ic('info', 16)}<div class="bn-body">Preview is for content review. Most distributors check Ep 1–10 (hook), the episodes around the paywall, and a mid-to-late sample at 2x.</div></div>
+    </div>
+  </div>
+  <div class="sec"><div class="sec-h"><h4>Episodes</h4><div class="filters"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${Math.max(1, pw - 1)}">Before paywall</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div></div>
+    <div class="ep-grid" id="ep-grid">${eps}</div>
+    <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:#F4F5FB"></i>Mid-late sample</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
+  </div>
+  <div class="sec"><div class="sec-h"><h4>Collections <span class="faint" style="font-weight:400">· market and language versions</span></h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
+    <div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Market</th><th>Language</th><th style="width:170px">Collection ID</th><th style="width:90px" class="num">Rev. share</th><th style="width:170px">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <div class="faint" style="font-size:12px;margin-top:8px">Each claim is registered as Collection ID × ${BCS.main.name} (BC ${BCS.main.id}). Revenue share is set by the rights holder per collection.</div>
+  </div>`;
+  const n = DS.sel.size;
+  return {title:c.title, width:780,
+    sub:`<span>${c.holder}</span><span class="faint">·</span><span class="mono">${c.id}</span><span class="tag">${c.format}</span><span class="tag">${c.source}</span>`,
+    body,
+    footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected' : 'Select collections to claim. Claiming doesn\u2019t create ads.'}</span><button class="btn" data-act="close-drawer">Close</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
+}
+function updatePlayer(){
+  const c = ctrOf(PL.ctr); if (!c || !$('#player')){ stopPlayer(); return; }
+  const dur = epDur(PL.ep);
+  $('#pl-fill').style.width = (PL.t / dur * 100) + '%';
+  $('#pl-time').textContent = fmtT(PL.t) + ' / ' + fmtT(dur);
+  $('#pl-ep').textContent = 'Ep ' + PL.ep + ' / ' + c.episodes;
+  $('#pl-lock').style.display = PL.ep >= c.paywall ? '' : 'none';
+  $('#pl-cur').style.left = ((PL.ep - 0.5) / c.episodes * 100) + '%';
+  $('#player').classList.toggle('playing', PL.playing);
+  $$('#player [data-act="pl-toggle"] use').forEach(u => u.setAttribute('href', '#i-' + (PL.playing ? 'pause' : 'play')));
+  $$('#ep-grid .ep').forEach(b => b.classList.toggle('cur', +b.dataset.ep === PL.ep));
+}
+function setEp(ep){
+  const c = ctrOf(PL.ctr); PL.ep = Math.min(Math.max(1, ep), c.episodes); PL.t = 0; updatePlayer();
+  if (PL.ep === c.paywall) toast('Ep ' + PL.ep + ' is where the paywall starts. Viewers pay to continue from here.', 'info');
+}
+function playToggle(){
+  if (PL.playing){ stopPlayer(); updatePlayer(); return; }
+  PL.playing = true;
+  PL.timer = setInterval(() => {
+    PL.t += 0.25 * PL.speed;
+    if (PL.t >= epDur(PL.ep)){ const c = ctrOf(PL.ctr); if (PL.ep < c.episodes){ PL.ep++; PL.t = 0; } else { PL.t = epDur(PL.ep); stopPlayer(); } }
+    updatePlayer();
+  }, 250);
+  updatePlayer();
+}
+
+/* Claim flow */
+function claimConfirmModal(ctrId){
+  const c = ctrOf(ctrId); const items = Array.from(DS.sel).map(colOf);
+  return {title:'Confirm claim', width:600,
+    body:`<p style="margin:0 0 12px">You\u2019re claiming ${plural(items.length, 'collection')} of <b>${c.title}</b> for <b>${BCS.main.name}</b> (BC ${BCS.main.id}).</p>
+      <div class="panel"><table class="tbl"><thead><tr><th>Market · language</th><th style="width:160px">Collection ID</th><th class="num" style="width:100px">Rev. share</th></tr></thead><tbody>${items.map(x => `<tr><td>${colLabel(x)}</td><td class="mono">${x.id}</td><td class="num">${x.share}%</td></tr>`).join('')}</tbody></table></div>
+      <ul class="muted" style="margin:12px 0 0;padding-left:18px">
+        <li>Each claim is keyed by Collection ID × your Business Center. Submitting twice won\u2019t create a duplicate claim.</li>
+        <li>Claiming doesn\u2019t create ads. After claiming, generate distribution links and use them in TTAM.</li>
+        <li>If the rights holder changes terms while you confirm, that collection won\u2019t be claimed and you\u2019ll see why.</li></ul>`,
+    footer:`<button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="claim-submit" data-ctr="${ctrId}">Confirm claim</button>`};
+}
+function claimOutcome(ids){
+  return ids.map((id, i) => {
+    const c = colOf(id);
+    if (c.claim === 'claimed') return {col:id, r:'existed'};
+    if (S.state === 'unknown'){ c.claim = 'confirming'; return {col:id, r:'unknown'}; }
+    if (S.state === 'partial' && ids.length > 1 && i === ids.length - 1) return {col:id, r:'failed', why:'Terms changed while you were confirming (revenue share ' + c.share + '% to ' + (c.share - 2) + '%). Review the new terms and claim again.'};
+    c.claim = 'claimed'; return {col:id, r:'claimed'};
+  });
+}
+const CLAIM_R = {claimed:['ok','Claimed'], existed:['muted','Already claimed'], failed:['err','Failed'], unknown:['warn spin','Confirming']};
+function claimResultModal(res){
+  const ctr = ctrOf(colOf(res.items[0].col).ctr);
+  const n = k => res.items.filter(x => x.r === k).length;
+  const ok = n('claimed') + n('existed');
+  const unknown = n('unknown'), failed = n('failed');
+  const title = unknown ? 'Claim result pending' : failed && ok ? 'Claim partially succeeded' : failed ? 'Claim failed' : 'Collections claimed';
+  return {title, width:640, sub:ctr.title + ' · ' + BCS.main.name,
+    body:`<div class="res-sum"><div><b>${n('claimed')}</b>Claimed</div><div><b>${n('existed')}</b>Already claimed</div><div><b>${failed}</b>Failed</div><div><b>${unknown}</b>Confirming</div></div>
+      ${unknown ? banner('warn', 'We\u2019re still confirming with the rights holder system. <b>Don\u2019t submit again</b>; a repeat request won\u2019t create a duplicate, and the result updates automatically.', '', 'clock') + '<div style="height:12px"></div>' : ''}
+      <div class="panel"><table class="tbl"><thead><tr><th>Collection</th><th style="width:150px">Result</th><th>Details</th></tr></thead><tbody>${res.items.map(x => { const c = colOf(x.col); return `<tr><td><div class="cell-title">${colLabel(c)}</div><div class="cell-sub mono">${c.id}</div></td><td>${stChip(CLAIM_R, x.r)}</td><td class="cell-sub" style="white-space:normal">${x.why || (x.r === 'claimed' ? 'Ready for link generation' : x.r === 'existed' ? 'No duplicate created' : x.r === 'unknown' ? 'Waiting for confirmation' : '')}</td></tr>`; }).join('')}</tbody></table></div>`,
+    footer:`${unknown ? '<button class="btn" data-act="claim-recheck">' + ic('refresh', 14) + 'Check again</button>' : ''}${failed ? '<button class="btn" data-act="claim-retry">Review and retry failed</button>' : ''}<button class="btn" data-act="close-modal">Done</button>${ok ? '<button class="btn btn-primary" data-act="claim-to-gen">Generate links</button>' : ''}`};
+}
+let LAST_CLAIM = null;
+
+/* ---------- Distribution Management ---------- */
+function dmHeader(tab){
+  return `<div class="ph"><div><h1>Distribution Management</h1><p>Generate, copy and monitor distribution links for your claimed collections. In TTAM, the link identifies which collection you can promote.</p></div></div>
+  <div class="tabs"><a class="tab ${tab === 'links' ? 'on' : ''}" href="#${PATH.links}?state=${S.state}">Link view</a><a class="tab ${tab === 'dramas' ? 'on' : ''}" href="#${PATH.dramas}?state=${S.state}">By drama</a></div>`;
+}
+function dmBanners(){
+  let out = '';
+  const gn = globalNotice(); if (gn) out += gn;
+  const st = S.state;
+  if (st === 'partial' && D().lastGen && !UI.dismissed.has('lv-partial')) out += banner('warn', '<b>Last link generation partially succeeded:</b> 1 generated, 1 already existed, 1 failed. Generated links are ready to copy; retrying the failed one won\u2019t create duplicates.', '<button class="btn btn-sm" data-act="last-gen">View results</button><button class="btn btn-icon" data-act="dismiss" data-k="lv-partial" aria-label="Dismiss">' + ic('close', 14) + '</button>');
+  if (st === 'unknown' && linkOf('COL-US-55001').status === 'unknown') out += banner('warn', '<b>1 link status is unknown.</b> Moonblade Oath · United States is waiting for TTAM status confirmation. Auto-pause result will update when TTAM responds.', '<button class="btn btn-sm" data-act="link-details" data-col="COL-US-55001">View link</button>', 'clock');
+  if (st === 'invalid'){
+    const inv = D().links.filter(l => l.status === 'invalid').length;
+    const apc = k => D().links.filter(l => l.status === 'invalid' && l.ap === k).length;
+    const parts = [['pausing','auto-pausing'],['complete','auto-pause complete'],['partial','partially paused'],['failed','auto-pause failed']].filter(p => apc(p[0])).map(p => apc(p[0]) + ' ' + p[1]).join(', ');
+    if (inv) out += banner('err', `<b>${plural(inv, 'link')} became invalid after rights holder changes in TTDC.</b> TTAM auto-pauses affected ads: ${parts}. Failed or partial results need action in TTAM.`, '<button class="btn btn-sm" data-act="lv-only-invalid">Show invalid links</button>');
+  }
+  return out;
+}
+function lvFiltered(){
+  const f = UI.lv; const q = f.q.trim().toLowerCase();
+  return D().links.filter(l => {
+    const c = colOf(l.col), k = ctrOf(c.ctr);
+    if (q && ![k.title, k.id, c.id, l.url, l.code].join(' ').toLowerCase().includes(q)) return false;
+    if (f.status !== 'all' && l.status !== f.status) return false;
+    if (f.ap === 'attention' ? !['partial','failed','unknown'].includes(l.ap) : f.ap !== 'all' && l.ap !== f.ap) return false;
+    if (f.market !== 'all' && c.market !== f.market) return false;
+    return true;
+  });
+}
+function apCell(l){
+  const note = l.apNote || (l.ap === 'none' ? (l.ads.length ? plural(l.ads.length, 'ad') + ' delivering' : 'No ads in TTAM yet') : '');
+  const act = l.ap === 'failed' || l.ap === 'partial' ? `<div><button class="btn-link" style="font-size:12px" data-act="ttam" data-col="${l.col}">Pause in TTAM ${ic('external', 12)}</button></div>` : '';
+  return stChip(AP_ST, l.ap) + `<div class="st-reason">${note}</div>` + act;
+}
+function linkStCell(l){ return stChip(LINK_ST, l.status) + (l.reason ? `<div class="st-reason">${l.reason}</div>` : ''); }
+function pageLinks(){
+  const st = S.state; const f = UI.lv;
+  let out = dmHeader('links') + '<div class="stack">' + dmBanners();
+  if (st === 'error') return out + errorBlock('distribution links') + '</div>';
+  const L = D().links;
+  const cnt = k => L.filter(l => l.status === k).length;
+  const att = L.filter(l => ['partial','failed','unknown'].includes(l.ap)).length;
+  const pausing = L.filter(l => l.ap === 'pausing').length;
+  if (st === 'loading') out += skelKpis(5);
+  else if (st !== 'empty') out += `<div class="kpis" style="--n:5">
+    <button class="kpi ${f.status === 'all' && f.ap === 'all' ? 'on' : ''}" data-act="lv-kpi" data-s="all"><div class="kpi-l">All links</div><div class="kpi-v">${L.length}</div><div class="kpi-s">Collection × ${BCS.main.name}</div></button>
+    <button class="kpi ${f.status === 'active' ? 'on' : ''}" data-act="lv-kpi" data-s="active"><div class="kpi-l">Active</div><div class="kpi-v">${cnt('active')}</div><div class="kpi-s">Usable in TTAM</div></button>
+    <button class="kpi ${f.status === 'invalid' ? 'on' : ''}" data-act="lv-kpi" data-s="invalid"><div class="kpi-l">Invalid</div><div class="kpi-v ${cnt('invalid') ? 'err' : ''}">${cnt('invalid')}</div><div class="kpi-s">Changed in TTDC</div></button>
+    <button class="kpi ${f.status === 'unknown' ? 'on' : ''}" data-act="lv-kpi" data-s="unknown"><div class="kpi-l">Status unknown</div><div class="kpi-v ${cnt('unknown') ? 'warn' : ''}">${cnt('unknown')}</div><div class="kpi-s">Awaiting confirmation</div></button>
+    <button class="kpi ${f.ap === 'attention' ? 'on' : ''}" data-act="lv-kpi" data-s="attention"><div class="kpi-l">Auto-pause needs attention</div><div class="kpi-v ${att ? 'warn' : ''}">${att}</div><div class="kpi-s">${pausing ? pausing + ' in progress' : 'Partial, failed or unknown'}</div></button></div>`;
+  const markets = Array.from(new Set(L.map(l => colOf(l.col).market)));
+  const selN = Array.from(f.sel).filter(id => linkOf(id)).length;
+  out += `<div class="toolbar"><div class="left">
+      <button class="btn btn-primary" data-act="gen-open">${ic('plus', 14)}Generate links</button>
+      <button class="btn" data-act="copy-selected">${ic('copy', 14)}Copy selected${selN ? ' (' + selN + ')' : ''}</button>
+      <button class="btn" data-act="export-links">${ic('download', 14)}Export</button>
+    </div><div class="right">
+      <label class="search">${ic('search', 14)}<input class="input" style="width:250px" name="lv-q" data-inp="lv-q" value="${esc(f.q)}" placeholder="Search title, ID or link" aria-label="Search links"></label>
+      ${sel('lv.status', f.status, [['all','All link statuses'],['active','Active'],['invalid','Invalid'],['unknown','Status unknown']], 'Link status')}
+      ${sel('lv.ap', f.ap, [['all','All auto-pause results'],['attention','Needs attention'],['none','No action needed'],['pausing','Auto-pausing'],['complete','Auto-pause complete'],['partial','Partially paused'],['failed','Auto-pause failed'],['unknown','Result unknown']], 'Auto-pause result')}
+      ${sel('lv.market', f.market, [['all','All markets']].concat(markets.map(m => [m, m])), 'Market')}
+    </div></div>`;
+  const head = `<thead><tr><th style="width:40px"><input type="checkbox" class="cb" name="lv-all" data-chg="lv-all" aria-label="Select all" ${(() => { const fl = lvFiltered(); return fl.length && fl.every(l => f.sel.has(l.col)) ? 'checked' : ''; })()}></th><th>Drama · collection</th><th>Distribution link</th><th>Link status</th><th>Auto-pause result (TTAM)</th><th style="width:118px">Status updated</th><th style="width:124px">Actions</th></tr></thead>`;
+  if (st === 'loading') return out + `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${skelRows(5, 7)}</tbody></table></div></div></div>`;
+  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('link', 'No distribution links yet', 'Claim collections in Drama Marketplace, then generate links here. Each collection gets one link for your Business Center.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
+  const rows = lvFiltered();
+  const body = rows.length ? rows.map(l => {
+    const c = colOf(l.col), k = ctrOf(c.ctr), on = f.sel.has(l.col);
+    return `<tr class="${on ? 'sel' : ''}" data-row="${l.col}"><td><input type="checkbox" class="cb" name="lv-${l.col}" data-chg="lv-sel" data-id="${l.col}" ${on ? 'checked' : ''} aria-label="Select link"></td>
+      <td><div class="cell-title ell">${k.title}${l.isNew ? ' <span class="tag teal">New</span>' : ''}</div><div class="cell-sub ell">${colLabel(c)}</div><div class="cell-sub mono ell">${c.id} · ${k.id}</div></td>
+      <td><div class="linkbox"><span class="mono start" title="${l.url}">${l.url.replace('https://', '')}</span>${copyBtn(l.url, 'Link copied' + (l.status !== 'active' ? '. Note: this link is ' + LINK_ST[l.status][1].toLowerCase() : ''))}</div></td>
+      <td>${linkStCell(l)}</td><td>${apCell(l)}</td><td class="cell-sub">${l.updated.replace(', 2026', '').replace(' UTC', '')}<div class="faint">UTC</div></td>
+      <td><button class="btn btn-sm" data-act="link-details" data-col="${l.col}">Details</button> <button class="btn btn-icon" data-act="ttam" data-col="${l.col}" aria-label="Open TTAM" title="Open TTAM">${ic('external', 14)}</button></td></tr>`;
+  }).join('') : `<tr><td colspan="7">${emptyBlock('search', 'No links match your filters', 'Try another keyword or clear filters.', '<button class="btn" data-act="lv-clear">Clear filters</button>')}</td></tr>`;
+  out += `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${body}</tbody></table></div>
+    <div class="panel-f"><span>${plural(rows.length, 'link')} shown${selN ? ' · ' + selN + ' selected' : ''} · status synced ${SYNC}</span><span>${ic('info', 12)} Links are closed only by rights holders in TTDC. When a link becomes invalid, TTAM auto-pauses affected ads.</span></div></div>`;
+  return out + '</div>';
+}
+function pageDramas(){
+  const st = S.state; const f = UI.bd;
+  let out = dmHeader('dramas') + '<div class="stack">' + dmBanners();
+  if (st === 'error') return out + errorBlock('dramas and links') + '</div>';
+  out += `<div class="toolbar"><div class="left"><button class="btn btn-primary" data-act="gen-open">${ic('plus', 14)}Generate links</button><button class="btn" data-act="export-links">${ic('download', 14)}Export</button></div>
+    <div class="right"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label><button class="btn" data-act="bd-expand">Expand all</button><button class="btn" data-act="bd-collapse">Collapse all</button></div></div>`;
+  const head = '<thead><tr><th style="width:44px"></th><th>Drama (Contract)</th><th style="width:110px">Claimed</th><th style="width:150px">Links</th><th>Markets</th><th style="width:220px">Actions</th></tr></thead>';
+  if (st === 'loading') return out + `<div class="panel"><table class="tbl">${head}<tbody>${skelRows(4, 6)}</tbody></table></div></div>`;
+  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('film', 'No claimed dramas yet', 'Dramas appear here once you claim at least one collection in Drama Marketplace.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
+  const q = f.q.trim().toLowerCase();
+  const list = CONTRACTS.filter(k => colsOf(k.id).some(c => c.claim !== 'available') && (!q || [k.title, k.id].concat(colsOf(k.id).map(c => c.id)).join(' ').toLowerCase().includes(q)));
+  const rows = list.map(k => {
+    const cs = colsOf(k.id); const open = f.open.has(k.id);
+    const claimed = cs.filter(c => c.claim === 'claimed').length;
+    const ls = cs.map(c => linkOf(c.id)).filter(Boolean);
+    const inv = ls.filter(l => l.status === 'invalid').length, unk = ls.filter(l => l.status === 'unknown').length;
+    let r = `<tr class="clickable" data-act="bd-toggle" data-id="${k.id}"><td><button class="btn btn-icon" data-act="bd-toggle" data-id="${k.id}" aria-label="Expand" aria-expanded="${open}">${ic(open ? 'chev-down' : 'chev-right', 16)}</button></td>
+      <td><div style="display:flex;gap:10px;align-items:center"><div class="poster-box" style="width:30px;flex:none;border-radius:2px">${poster(k.id)}</div><div style="min-width:0"><div class="cell-title ell">${k.title}</div><div class="cell-sub mono">${k.id}</div></div></div></td>
+      <td>${claimed} of ${cs.length}</td>
+      <td>${ls.length} link${ls.length === 1 ? '' : 's'}${inv ? ' · <span class="st err">' + inv + ' invalid</span>' : ''}${unk ? ' · <span class="st warn">' + unk + ' unknown</span>' : ''}</td>
+      <td class="cell-sub">${cs.map(c => c.code + ' · ' + c.lang).join(', ')}</td>
+      <td><button class="btn btn-sm" data-act="open-drama" data-id="${k.id}">${ic('play', 12)}Preview</button> <button class="btn btn-sm" data-act="data-contract" data-id="${k.id}">${ic('chart', 12)}View data</button></td></tr>`;
+    if (open) r += `<tr class="sub"><td></td><td colspan="5" style="padding:4px 12px 12px"><table class="tbl" style="border:1px solid var(--border);background:#fff"><thead><tr><th>Market · language</th><th style="width:140px">Collection ID</th><th style="width:150px">Claim</th><th>Link status</th><th>Auto-pause result</th><th style="width:150px">Actions</th></tr></thead><tbody>${cs.map(c => {
+      const l = linkOf(c.id);
+      const claim = c.claim === 'claimed' ? '<span class="st ok">Claimed</span>' : c.claim === 'confirming' ? '<span class="st warn spin">Confirming</span>' : '<span class="st muted">Not claimed</span>';
+      const act = l ? `${copyBtn(l.url, 'Link copied')}<button class="btn btn-sm" data-act="link-details" data-col="${c.id}">Details</button>` : c.claim === 'claimed' ? `<button class="btn btn-sm" data-act="gen-open" data-col="${c.id}">Generate link</button>` : c.claim === 'available' ? `<button class="btn btn-sm" data-act="open-drama" data-id="${k.id}" data-pre="${c.id}">Claim</button>` : '<span class="faint">Waiting</span>';
+      return `<tr><td>${colLabel(c)}</td><td class="mono">${c.id}</td><td>${claim}</td><td>${l ? linkStCell(l) : '<span class="faint">No link</span>'}</td><td>${l ? stChip(AP_ST, l.ap) : '<span class="faint">—</span>'}</td><td>${act}</td></tr>`;
+    }).join('')}</tbody></table></td></tr>`;
+    return r;
+  }).join('');
+  out += `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${rows || `<tr><td colspan="6">${emptyBlock('search', 'No dramas match your search', 'Try another keyword.', '<button class="btn" data-act="bd-clear">Clear search</button>')}</td></tr>`}</tbody></table></div>
+    <div class="panel-f"><span>${plural(list.length, 'drama')} with claimed collections</span><span>Each row under a drama is one Collection × ${BCS.main.name}.</span></div></div>`;
+  return out + '</div>';
+}
+
+/* Generate links */
+const GS = {bc:'main', sel:new Set()};
+function genCandidates(){ return GS.bc === 'main' ? D().cols.filter(c => c.claim === 'claimed') : []; }
+function openGenerate(pre){
+  GS.bc = 'main';
+  GS.sel = new Set(pre ? [pre] : genCandidates().filter(c => !linkOf(c.id)).map(c => c.id));
+  openDrawer(genDrawer);
+}
+function genDrawer(){
+  const cands = genCandidates(); const n = GS.sel.size;
+  const rows = cands.map(c => { const l = linkOf(c.id), k = ctrOf(c.ctr), on = GS.sel.has(c.id);
+    return `<tr class="${on ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="g-${c.id}" data-chg="gen-sel" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select"></td><td><div class="cell-title ell">${k.title}</div><div class="cell-sub">${colLabel(c)}</div></td><td class="mono">${c.id}</td><td>${l ? '<span class="st muted">Link exists</span><div class="st-reason">Returns existing link</div>' : '<span class="st info">No link yet</span>'}</td></tr>`; }).join('');
+  const newN = Array.from(GS.sel).filter(id => !linkOf(id)).length;
+  return {title:'Generate links', width:680, sub:'Choose a Business Center and the claimed collections that need links',
+    body:`<div class="kv" style="grid-template-columns:1fr"><div><div class="k" style="margin-bottom:4px">Business Center</div><select class="select" style="width:100%" name="gen-bc" data-chg="gen-bc" aria-label="Business Center"><option value="main" ${GS.bc === 'main' ? 'selected' : ''}>${BCS.main.name} · ${BCS.main.role} · ${BCS.main.id}</option><option value="sub" ${GS.bc === 'sub' ? 'selected' : ''}>${BCS.sub.name} · ${BCS.sub.role} · ${BCS.sub.id}</option></select></div></div>
+      <div style="height:12px"></div>${banner('info', 'Generation is idempotent: one link per Collection × Business Center. Re-submitting, retrying, or selecting a collection that already has a link returns the existing link instead of creating a duplicate.')}
+      <div class="sec"><div class="sec-h"><h4>Claimed collections</h4><span class="filters"><button class="btn btn-xs" data-act="gen-pick" data-m="new">Select without links</button><button class="btn btn-xs" data-act="gen-pick" data-m="all">Select all</button><button class="btn btn-xs" data-act="gen-pick" data-m="none">Clear</button></span></div>
+      ${cands.length ? `<div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Drama · collection</th><th style="width:150px">Collection ID</th><th style="width:170px">Current link</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="panel">' + emptyBlock('inbox', 'No claimed collections in this Business Center', 'Studio B hasn\u2019t claimed any collections. Claims belong to the Business Center that made them.', '<button class="btn" data-act="gen-bc-main">Switch to ' + BCS.main.name + '</button>') + '</div>'}</div>`,
+    footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected · ' + newN + ' new' : 'Nothing selected'}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="gen-submit">Generate links${n ? ' (' + n + ')' : ''}</button>`};
+}
+let CODE_N = 0;
+function createLink(colId){
+  const codes = ['q4Tn7w','h9Bc2r','z6Pk3m','w2Ds8v','r7Ga5n'];
+  const l = mkLink(colId, codes[CODE_N++ % codes.length] + CODE_N, 'Nov 3, 2026 03:12 UTC'); l.isNew = true; l.history = [{t:'Nov 3, 2026 03:12 UTC', e:'Link generated', d:'Key ' + colId + ' × BC ' + BCS.main.id, k:'ok'}, {t:'Nov 3, 2026 03:12 UTC', e:'Link active', d:'Distribution enabled by the rights holder in TTDC', k:'ok'}];
+  D().links.push(l); return l;
+}
+function genOutcome(ids){
+  let nNew = 0;
+  return ids.map(id => {
+    if (linkOf(id)) return {col:id, r:'existed'};
+    if (S.state === 'unknown') return {col:id, r:'unknown'};
+    if (S.state === 'partial' && nNew++ >= 1) return {col:id, r:'failed', why:'Collection version is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.'};
+    createLink(id); return {col:id, r:'generated'};
+  });
+}
+const GEN_R = {generated:['ok','Generated'], existed:['muted','Already existed'], failed:['err','Failed'], unknown:['warn spin','Confirming']};
+let LAST_GEN = null;
+function genResultModal(){
+  const items = LAST_GEN; const n = k => items.filter(x => x.r === k).length;
+  const usable = items.filter(x => (x.r === 'generated' || x.r === 'existed') && linkOf(x.col));
+  const title = n('unknown') ? 'Link generation result pending' : n('failed') ? 'Link generation partially succeeded' : 'Links ready';
+  return {title, width:720, sub:BCS.main.name + ' · BC ' + BCS.main.id,
+    body:`<div class="res-sum"><div><b>${n('generated')}</b>Generated</div><div><b>${n('existed')}</b>Already existed</div><div><b>${n('failed')}</b>Failed</div><div><b>${n('unknown')}</b>Confirming</div></div>
+    ${n('unknown') ? banner('warn', 'The link service hasn\u2019t confirmed these yet. <b>Don\u2019t submit again.</b> Retrying is safe (no duplicates), but it\u2019s not needed; use Check again.', '', 'clock') + '<div style="height:12px"></div>' : ''}
+    ${n('existed') ? '<div class="faint" style="font-size:12px;margin-bottom:8px">Already existed: these collections already had a link for this Business Center, so the existing link was returned. No duplicate was created.</div>' : ''}
+    <div class="panel"><table class="tbl"><thead><tr><th>Collection</th><th style="width:140px">Result</th><th>Link / details</th></tr></thead><tbody>${items.map(x => { const c = colOf(x.col), l = linkOf(x.col), k = ctrOf(c.ctr);
+      return `<tr><td><div class="cell-title ell">${k.title}</div><div class="cell-sub">${colLabel(c)} · <span class="mono">${c.id}</span></div></td><td>${stChip(GEN_R, x.r)}</td><td style="white-space:normal">${l && x.r !== 'failed' && x.r !== 'unknown' ? `<div class="linkbox"><span class="mono">${l.url.replace('https://', '')}</span>${copyBtn(l.url, 'Link copied')}</div>` : `<span class="cell-sub">${x.why || 'Waiting for the link service to confirm'}</span>`}</td></tr>`; }).join('')}</tbody></table></div>`,
+    footer:`${n('unknown') ? '<button class="btn" data-act="gen-recheck">' + ic('refresh', 14) + 'Check again</button>' : ''}${n('failed') ? '<button class="btn" data-act="gen-retry">Retry failed</button>' : ''}${usable.length ? '<button class="btn" data-act="gen-copy">' + ic('copy', 14) + 'Copy ' + plural(usable.length, 'link') + '</button>' : ''}<button class="btn btn-primary" data-act="close-modal">Done</button>`};
+}
+
+/* Link details drawer */
+function linkDrawer(colId){
+  const l = linkOf(colId); const c = colOf(colId), k = ctrOf(c.ctr);
+  const ads = l.ads.length ? `<div class="panel"><table class="tbl"><thead><tr><th style="width:120px">Ad ID</th><th>Ad name</th><th>Campaign</th><th style="width:200px">Delivery (from TTAM)</th></tr></thead><tbody>${l.ads.map(a => {
+      const cls = /failed/i.test(a.st) ? 'err' : a.st === 'Paused' ? 'ok' : a.st === 'Pausing' ? 'info spin' : a.st === 'Unknown' ? 'warn' : 'muted';
+      return `<tr><td class="mono">${a.id}</td><td class="ell">${a.name}</td><td class="ell cell-sub">${a.campaign}</td><td><span class="st ${cls}">${a.st}</span></td></tr>`; }).join('')}</tbody></table></div>`
+    : '<div class="panel">' + emptyBlock('ads', 'No ads use this link yet', 'Ads you create in TTAM with this link will appear here.', '') + '</div>';
+  const recheck = l.status === 'unknown' || l.ap === 'pausing' || l.ap === 'unknown';
+  return {title:k.title + ' · ' + c.market, width:780,
+    sub:`<span>${c.lang}</span><span class="faint">·</span><span class="mono">${c.id}</span>${stChip(LINK_ST, l.status)}`,
+    body:`<div class="sec"><div class="box" style="display:flex;align-items:center;gap:8px"><span style="color:var(--text2)">${ic('link', 16)}</span><span class="mono ell" style="flex:1;font-size:13px">${l.url}</span><button class="btn btn-sm" data-act="copy" data-text="${l.url}" data-msg="Link copied">${ic('copy', 14)}Copy</button></div></div>
+      <div class="sec boxes">
+        <div class="box"><div class="box-l">Link status · from TTDC</div>${linkStCell(l)}<div class="cell-sub" style="margin-top:6px">Updated ${l.updated}</div></div>
+        <div class="box"><div class="box-l">Auto-pause result · from TTAM</div>${stChip(AP_ST, l.ap)}<div class="st-reason">${l.apNote || (l.status === 'active' ? 'Link is active; no ads need pausing.' : '')}</div>${l.ap === 'failed' || l.ap === 'partial' ? '<div style="margin-top:6px"><button class="btn-link" style="font-size:12px" data-act="ttam" data-col="' + l.col + '">Pause remaining ads in TTAM ' + ic('external', 12) + '</button></div>' : ''}</div>
+      </div>
+      <div class="sec"><div class="sec-h"><h4>Distribution relationship</h4></div><div class="kv three">
+        <div><div class="k">Identifier</div><div class="v mono">${c.id} × BC ${BCS.main.id}</div></div>
+        <div><div class="k">Business Center</div><div class="v">${BCS.main.name}</div></div>
+        <div><div class="k">Contract ID</div><div class="v mono">${k.id}</div></div>
+        <div><div class="k">Market</div><div class="v">${c.market}</div></div>
+        <div><div class="k">Language</div><div class="v">${c.lang}</div></div>
+        <div><div class="k">Revenue share</div><div class="v">${c.share}%</div></div>
+        <div><div class="k">Generated</div><div class="v">${l.created}</div></div>
+        <div><div class="k">Rights holder</div><div class="v">${k.holder}</div></div>
+        <div><div class="k">Closing a link</div><div class="v">Only the rights holder, in TTDC</div></div></div></div>
+      <div class="sec"><div class="sec-h"><h4>Ads using this link <span class="faint" style="font-weight:400">· ${plural(l.ads.length, 'ad')}</span></h4></div>${ads}</div>
+      <div class="sec"><div class="sec-h"><h4>Status history</h4></div><ul class="timeline">${l.history.slice().reverse().map(h => `<li class="${h.k}"><div class="tl-t">${h.t}</div><div class="tl-e">${h.e}</div><div class="tl-d">${h.d}</div></li>`).join('')}</ul></div>`,
+    footer:`<button class="btn" data-act="data-contract" data-id="${k.id}">${ic('chart', 14)}View distribution data</button>${recheck ? '<button class="btn" data-act="link-recheck" data-col="' + l.col + '">' + ic('refresh', 14) + 'Refresh status</button>' : ''}<button class="btn btn-primary" data-act="ttam" data-col="${l.col}">${ic('external', 14)}Open TTAM</button>`};
+}
+
+/* TTAM handoff */
+let TTAM_CTX = null;
+function ttamModal(colId){
+  const l = linkOf(colId), c = colOf(colId), k = ctrOf(c.ctr);
+  const bad = l.status !== 'active';
+  return {title:'Open TTAM', width:580, sub:'TikTok Ads Manager opens in a new tab',
+    body:`${bad ? banner('err', '<b>This link is ' + LINK_ST[l.status][1].toLowerCase() + '.</b> Don\u2019t create new ads with it. Use TTAM to review and pause affected ads.') + '<div style="height:12px"></div>' : ''}
+      <div class="box"><div class="box-l">Distribution link</div><div class="linkbox"><span class="mono" style="font-size:13px">${l.url}</span></div><div class="cell-sub" style="margin-top:4px">Identifies: ${k.title} · ${colLabel(c)} · <span class="mono">${c.id}</span></div></div>
+      <ol class="muted" style="margin:12px 0 0;padding-left:18px">
+        <li>We\u2019ll copy the link and open TTAM.</li>
+        <li>When you create a campaign, paste it in <b>Distribution link</b>. TTAM uses it to identify the collection you can promote.</li>
+        <li>Choose or create ad creatives in TTAM\u2019s Creative Library, then publish.</li></ol>
+      <div class="banner plain" style="margin-top:12px">${ic('check-circle', 16)}<div class="bn-body">When you come back, your view, filters, scroll position and selection are preserved.</div></div>`,
+    footer:`<button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="ttam-go" data-col="${colId}">${ic('external', 14)}Copy link and open TTAM</button>`};
+}
+function showTtam(colId){
+  const l = linkOf(colId), c = colOf(colId), k = ctrOf(c.ctr);
+  TTAM_CTX = {page:S.page, col:colId, scroll:window.scrollY, drawer:drawerFn, filters:Object.assign({}, UI.lv), sel:UI.lv.sel.size};
+  const el = $('#ttam');
+  el.innerHTML = `<div class="ttam-h">${ic('tiktok', 20)}<b>TikTok Ads Manager</b><span class="tag warn">Simulated for this prototype</span><span style="margin-left:auto"></span><button class="btn btn-primary" data-act="ttam-back">${ic('back', 14)}Back to Business Center</button></div>
+    <div class="ttam-b"><div class="panel"><div class="panel-h"><h3>Create campaign · Short drama distribution</h3><span class="faint" style="font-size:12px">Step 1 of 3</span></div>
+    <div style="padding:16px" class="stack"><div><div class="k muted" style="font-size:12px;margin-bottom:4px">Distribution link</div><input class="input" style="width:100%" name="ttam-link" value="${l.url}" readonly aria-label="Distribution link"></div>
+    ${l.status === 'active' ? banner('ok', `Collection identified: <b>${k.title}</b> · ${colLabel(c)} (${c.id}). You can promote this collection.`) : banner('err', `This link is ${LINK_ST[l.status][1].toLowerCase()}. ${l.ads.filter(a => !/^Paused/.test(a.st)).length} ads need review: ${l.ads.filter(a => !/^Paused/.test(a.st)).map(a => a.name).join(', ') || 'none'}.`)}
+    <div class="muted">Ad creatives come from TTAM\u2019s Creative Library. Budget, targeting and performance analysis (CTR, CPC, CPA, ROI) stay in TTAM.</div></div></div></div>`;
+  el.classList.add('show');
+}
+function backFromTtam(){
+  $('#ttam').classList.remove('show'); $('#ttam').innerHTML = '';
+  const ctx = TTAM_CTX; TTAM_CTX = null; if (!ctx) return;
+  render(); window.scrollTo(0, ctx.scroll);
+  const row = $(`[data-row="${ctx.col}"]`); if (row){ row.classList.add('flash'); }
+  const filt = ['status','ap','market'].filter(k => ctx.filters[k] !== 'all').length + (ctx.filters.q ? 1 : 0);
+  const where = ctx.page === 'links' ? 'Link view' : ctx.page === 'dramas' ? 'By drama' : 'this page';
+  toast(`Back in Business Center. Context preserved: ${where}, ${plural(filt, 'filter')}, ${ctx.sel} selected, scroll position${ctx.drawer ? ', link details' : ''}.`);
+}
+
+/* Export drawer */
+const EX = {kind:'links', scope:'all', fmt:'csv', fields:null, dataset:'daily', range:30};
+const LINK_FIELDS = [['drama','Drama'],['contract','Contract ID'],['collection','Collection ID'],['market','Market'],['lang','Language'],['link','Distribution link'],['status','Link status'],['reason','Status reason'],['ap','Auto-pause result'],['updated','Status updated']];
+function openExport(kind){
+  EX.kind = kind; EX.scope = UI.lv.sel.size && kind === 'links' ? 'selected' : 'all'; EX.fmt = 'csv'; EX.dataset = 'daily'; EX.range = UI.dd.range;
+  EX.fields = new Set(LINK_FIELDS.map(f => f[0]));
+  openDrawer(exportDrawer);
+}
+function exportDrawer(){
+  if (EX.kind === 'links'){
+    const all = D().links.length, filt = lvFiltered().length, seln = Array.from(UI.lv.sel).filter(id => linkOf(id)).length;
+    const radio = (v, l, n) => `<label class="check-row" style="margin-top:8px"><input type="radio" class="cb" name="ex-scope" data-chg="ex-scope" value="${v}" ${EX.scope === v ? 'checked' : ''}><span><b>${l}</b><div class="cell-sub">${plural(n, 'link')}</div></span></label>`;
+    return {title:'Export links', width:560, sub:'Complete export of your distribution links',
+      body:`<div class="sec"><div class="sec-h"><h4>Scope</h4></div>${radio('all', 'All links', all)}${radio('filtered', 'Links matching current filters', filt)}${radio('selected', 'Selected links', seln)}</div>
+        <div class="sec"><div class="sec-h"><h4>Columns</h4><span class="faint" style="font-size:12px">${EX.fields.size} of ${LINK_FIELDS.length}</span></div><div class="kv">${LINK_FIELDS.map(f => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" class="cb" name="ex-f-${f[0]}" data-chg="ex-field" data-f="${f[0]}" ${EX.fields.has(f[0]) ? 'checked' : ''}>${f[1]}</label>`).join('')}</div></div>
+        <div class="sec"><div class="sec-h"><h4>Format</h4></div><div class="seg"><button class="${EX.fmt === 'csv' ? 'on' : ''}" data-act="ex-fmt" data-v="csv">CSV</button><button class="${EX.fmt === 'tsv' ? 'on' : ''}" data-act="ex-fmt" data-v="tsv">TSV (paste into sheets)</button></div></div>`,
+      footer:`<span class="grow">File: distribution-links-2026-11-03.${EX.fmt}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
+  }
+  const ds = (v, l, d) => `<label class="check-row" style="margin-top:8px"><input type="radio" class="cb" name="ex-ds" data-chg="ex-ds" value="${v}" ${EX.dataset === v ? 'checked' : ''}><span><b>${l}</b><div class="cell-sub">${d}</div></span></label>`;
+  return {title:'Export distribution data', width:560, sub:BCS.main.name + ' · data as of ' + SYNC,
+    body:`${banner('warn', 'Distribution data is for reconciliation only and may be delayed. It isn\u2019t a final settlement amount. Final receivables follow your settlement statements.')}
+      <div class="sec"><div class="sec-h"><h4>Dataset</h4></div>${ds('daily', 'Daily detail · date × link', 'Finest grain. One row per day per distribution link.')}${ds('link', 'By collection / link', 'One row per link for the selected period.')}${ds('contract', 'By drama (Contract)', 'One row per Contract for the selected period.')}</div>
+      <div class="sec"><div class="sec-h"><h4>Period</h4></div><select class="select" name="ex-range" data-chg="ex-range" aria-label="Period"><option value="7" ${EX.range == 7 ? 'selected' : ''}>Last 7 days</option><option value="14" ${EX.range == 14 ? 'selected' : ''}>Last 14 days</option><option value="30" ${EX.range == 30 ? 'selected' : ''}>Last 30 days</option></select></div>
+      <div class="sec"><div class="sec-h"><h4>Included fields</h4></div><div class="cell-sub">Date, Drama, Contract ID, Collection ID, Market, Language, Link, Estimated distribution revenue (USD), Attributed GMV (USD), Data status. Ad performance metrics stay in TTAM.</div></div>`,
+    footer:`<span class="grow">File: distribution-data-${EX.dataset}-last-${EX.range}-days.csv</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
+}
+function runExport(){
+  if (EX.kind === 'links'){
+    let list = EX.scope === 'all' ? D().links : EX.scope === 'filtered' ? lvFiltered() : D().links.filter(l => UI.lv.sel.has(l.col));
+    if (!list.length){ toast('No links in this scope. Choose another scope.', 'warn'); return; }
+    if (!EX.fields.size){ toast('Choose at least one column.', 'warn'); return; }
+    const flds = LINK_FIELDS.filter(f => EX.fields.has(f[0]));
+    const val = (l, f) => { const c = colOf(l.col), k = ctrOf(c.ctr); return {drama:k.title, contract:k.id, collection:c.id, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, ap:AP_ST[l.ap][1], updated:l.updated}[f]; };
+    const rows = [flds.map(f => f[1])].concat(list.map(l => flds.map(f => val(l, f[0]))));
+    const text = EX.fmt === 'tsv' ? rows.map(r => r.join('\t')).join('\n') : csv(rows);
+    download('distribution-links-2026-11-03.' + EX.fmt, text);
+    closeDrawer(); toast('Exported ' + plural(list.length, 'link') + ' to distribution-links-2026-11-03.' + EX.fmt);
+  } else {
+    const rows = dataRows(EX.dataset, +EX.range);
+    if (rows.length < 2){ toast('No data for this period.', 'warn'); return; }
+    download(`distribution-data-${EX.dataset}-last-${EX.range}-days.csv`, csv(rows));
+    closeDrawer(); toast('Exported ' + plural(rows.length - 1, 'row') + '. Reminder: this isn\u2019t a final settlement amount.');
+  }
+}
+
+/* ---------- Revenue & Settlement ---------- */
+function rsHeader(tab){
+  return `<div class="ph"><div><h1>Revenue & Settlement</h1><p>Reconcile distribution data, then review and confirm formal settlement statements before payout.</p></div></div>
+  <div class="tabs"><a class="tab ${tab === 'data' ? 'on' : ''}" href="#${PATH.data}?state=${S.state}">Distribution data</a><a class="tab ${tab === 'settlement' ? 'on' : ''}" href="#${PATH.settlement}?state=${S.state}">Settlement management</a></div>`;
+}
+function dataLinks(){ return D().links.filter(l => colOf(l.col).base > 0); }
+function dayList(n){ const out = []; for (let i = 0; i < n; i++){ const d = new Date(Date.UTC(2026, 10, 2 - i)); out.push({i, label:MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(), iso:d.toISOString().slice(0, 10)}); } return out; }
+function daily(colId, i){
+  const c = colOf(colId); const h = hashStr(colId);
+  const rev = c.base * (0.72 + 0.56 * sr(h + i)) * (1 + 0.012 * (30 - i)) / 1.2;
+  const gmv = rev / (c.share / 100) * (0.94 + 0.12 * sr(h * 3 + i));
+  let status = 'Ready';
+  if (i <= 1) status = 'Preliminary';
+  if ((h + i) % 11 === 0 && i > 1) status = 'Adjusted';
+  if (S.data.dataNote === 'partial' && c.ctr === 'CTR-340918' && i <= 1) status = 'Delayed';
+  return {rev:Math.round(rev * 100) / 100, gmv:Math.round(gmv * 100) / 100, status};
+}
+function sumLink(colId, n){ let r = 0, g = 0; for (let i = 0; i < n; i++){ const d = daily(colId, i); r += d.rev; g += d.gmv; } return {rev:r, gmv:g}; }
+const DST = {Ready:'ok', Preliminary:'info', Adjusted:'warn', Delayed:'warn', 'Sync unknown':'warn'};
+function ctrDataStatus(ctrId){
+  if (S.state === 'unknown' && ctrId === 'CTR-550361') return 'Sync unknown';
+  if (S.data.dataNote === 'partial' && ctrId === 'CTR-340918') return 'Delayed';
+  if (ctrId === 'CTR-340918') return 'Adjusted';
+  return 'Ready';
+}
+function dataRows(kind, n){
+  const ls = dataLinks().filter(l => UI.dd.ctr === 'all' || colOf(l.col).ctr === UI.dd.ctr);
+  if (kind === 'daily'){
+    const rows = [['Date','Drama','Contract ID','Collection ID','Market','Language','Link','Estimated distribution revenue (USD)','Attributed GMV (USD)','Data status']];
+    dayList(n).forEach(d => ls.forEach(l => { const c = colOf(l.col), k = ctrOf(c.ctr), v = daily(l.col, d.i); rows.push([d.iso, k.title, k.id, c.id, c.market, c.lang, l.url, v.rev.toFixed(2), v.gmv.toFixed(2), v.status]); }));
+    return rows;
+  }
+  if (kind === 'link'){
+    const rows = [['Drama','Contract ID','Collection ID','Market','Language','Link','Link status','Estimated distribution revenue (USD)','Attributed GMV (USD)']];
+    ls.forEach(l => { const c = colOf(l.col), k = ctrOf(c.ctr), s = sumLink(l.col, n); rows.push([k.title, k.id, c.id, c.market, c.lang, l.url, LINK_ST[l.status][1], s.rev.toFixed(2), s.gmv.toFixed(2)]); });
+    return rows;
+  }
+  const rows = [['Drama','Contract ID','Collections','Estimated distribution revenue (USD)','Attributed GMV (USD)','Data status']];
+  CONTRACTS.forEach(k => { const kl = ls.filter(l => colOf(l.col).ctr === k.id); if (!kl.length) return; let r = 0, g = 0; kl.forEach(l => { const s = sumLink(l.col, n); r += s.rev; g += s.gmv; }); rows.push([k.title, k.id, kl.length, r.toFixed(2), g.toFixed(2), ctrDataStatus(k.id)]); });
+  return rows;
+}
+function pageData(){
+  const st = S.state; const f = UI.dd;
+  let out = rsHeader('data') + '<div class="stack">';
+  const gn = globalNotice(); if (gn) out += gn;
+  out += banner('warn', '<b>Distribution data isn\u2019t a final settlement amount.</b> It updates continuously and may be delayed or adjusted. Final receivables follow your monthly settlement statements.', '<button class="btn btn-sm" data-act="go" data-to="settlement">View settlement statements</button>');
+  if (st === 'partial') out += banner('warn', '<b>Some data is delayed.</b> 2 of 3 dramas are up to date. The Physician at Midnight is missing Nov 1–2 data; it will backfill automatically.', '', 'clock');
+  if (st === 'unknown') out += banner('warn', '<b>Latest data sync status is unknown.</b> Showing data as of Nov 2, 2026 02:00 UTC. Moonblade Oath may change once the sync is confirmed.', '<button class="btn btn-sm" data-act="toast" data-msg="Still confirming the latest sync. Data shown is as of Nov 2, 02:00 UTC." data-type="warn">Check again</button>', 'clock');
+  if (st === 'invalid') out += banner('err', '<b>3 links became invalid on Nov 2–3.</b> Revenue from these links stops accruing after they became invalid. Earlier revenue still counts toward settlement.', '<button class="btn btn-sm" data-act="go-links-invalid">Review links</button>');
+  if (st === 'error') return out + errorBlock('distribution data') + '</div>';
+  const ctrs = CONTRACTS.filter(k => dataLinks().some(l => colOf(l.col).ctr === k.id));
+  out += `<div class="toolbar"><div class="left">
+      ${sel('dd.range', String(f.range), [['7','Last 7 days'],['14','Last 14 days'],['30','Last 30 days']], 'Period')}
+      ${sel('dd.ctr', f.ctr, [['all','All dramas']].concat(ctrs.map(k => [k.id, k.title])), 'Drama')}
+      <span class="tag">${BCS.main.name} · BC ${BCS.main.id}</span><span class="faint" style="font-size:12px">USD · through Nov 2, 2026</span>
+    </div><div class="right"><button class="btn" data-act="export-data">${ic('download', 14)}Export full data</button></div></div>`;
+  if (st === 'loading') return out + skelKpis(5) + `<div class="panel"><table class="tbl"><tbody>${skelRows(4, 7)}</tbody></table></div></div>`;
+  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('chart', 'No distribution data for this period', 'Data appears about 24 hours after your links start getting attributed orders.', '<button class="btn" data-act="go" data-to="links">Go to Distribution Management</button>') + '</div></div>';
+  const n = +f.range;
+  const ls = dataLinks().filter(l => f.ctr === 'all' || colOf(l.col).ctr === f.ctr);
+  let R = 0, G = 0; const per = {};
+  ls.forEach(l => { const s = sumLink(l.col, n); R += s.rev; G += s.gmv; const k = colOf(l.col).ctr; per[k] = per[k] || {rev:0, gmv:0, links:[]}; per[k].rev += s.rev; per[k].gmv += s.gmv; per[k].links.push(l); });
+  const shown = Object.keys(per);
+  out += `<div class="kpis" style="--n:5">
+    <div class="kpi"><div class="kpi-l">Estimated distribution revenue</div><div class="kpi-v">${money(R)}</div><div class="kpi-s">Last ${n} days · not final</div></div>
+    <div class="kpi"><div class="kpi-l">Attributed GMV</div><div class="kpi-v">${money(G)}</div><div class="kpi-s">Orders attributed to your links</div></div>
+    <div class="kpi"><div class="kpi-l">Dramas (Contracts)</div><div class="kpi-v">${shown.length}</div><div class="kpi-s">With attributed data</div></div>
+    <div class="kpi"><div class="kpi-l">Collections / links</div><div class="kpi-v">${ls.length}</div><div class="kpi-s">${ls.filter(l => l.status === 'invalid').length} invalid now</div></div>
+    <div class="kpi"><div class="kpi-l">Data updated</div><div class="kpi-v ${st === 'unknown' ? 'warn' : ''}" style="font-size:15px">${st === 'unknown' ? 'Sync unknown' : 'Nov 3, 02:00 UTC'}</div><div class="kpi-s">Typical delay about 24 hours</div></div></div>`;
+  const rows = CONTRACTS.filter(k => per[k.id]).map(k => { const p = per[k.id]; const ds = ctrDataStatus(k.id);
+    return `<tr class="clickable" data-act="data-contract" data-id="${k.id}"><td><div style="display:flex;gap:10px;align-items:center"><div class="poster-box" style="width:28px;flex:none;border-radius:2px">${poster(k.id)}</div><div style="min-width:0"><div class="cell-title ell">${k.title}</div><div class="cell-sub mono">${k.id}</div></div></div></td>
+      <td class="num">${p.links.length}</td><td class="num">${money(p.rev)}</td><td class="num">${money(p.gmv)}</td><td><span class="st ${DST[ds]}">${ds}</span>${ds === 'Adjusted' ? '<div class="st-reason">Refunds deducted Oct 30</div>' : ds === 'Delayed' ? '<div class="st-reason">Nov 1–2 pending</div>' : ''}</td>
+      <td><button class="btn btn-sm" data-act="data-contract" data-id="${k.id}">View collections ${ic('chev-right', 12)}</button></td></tr>`; }).join('');
+  out += `<div class="panel"><div class="panel-h"><h3>By drama</h3><span class="faint" style="font-size:12px">Select a drama to see collections and links, then daily detail</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Drama (Contract)</th><th class="num" style="width:110px">Links</th><th class="num" style="width:190px">Est. distribution revenue</th><th class="num" style="width:160px">Attributed GMV</th><th style="width:170px">Data status</th><th style="width:150px"></th></tr></thead><tbody>${rows || `<tr><td colspan="6">${emptyBlock('search', 'No data for this drama', 'Choose another drama.', '')}</td></tr>`}</tbody></table></div>
+    <div class="panel-f"><span>Totals: ${money(R)} estimated revenue · ${money(G)} attributed GMV</span><span>Ad metrics such as CTR, CPC, CPA and ROI are in TTAM.</span></div></div>`;
+  return out + '</div>';
+}
+function contractDataDrawer(ctrId){
+  const k = ctrOf(ctrId), n = +UI.dd.range;
+  const ls = dataLinks().filter(l => colOf(l.col).ctr === ctrId);
+  let R = 0, G = 0;
+  const rows = ls.map(l => { const c = colOf(l.col), s = sumLink(l.col, n); R += s.rev; G += s.gmv;
+    return `<tr><td><div class="cell-title">${colLabel(c)}</div><div class="cell-sub mono">${c.id}</div></td><td><div class="mono ell">${l.url.replace('https://dist.ttbc.example', '')}</div>${stChip(LINK_ST, l.status)}</td><td class="num">${money(s.rev)}</td><td class="num">${money(s.gmv)}</td><td><button class="btn btn-sm" data-act="daily" data-col="${l.col}">Daily detail</button></td></tr>`; }).join('');
+  const other = colsOf(ctrId).filter(c => !ls.some(l => l.col === c.id));
+  return {title:k.title + ' · distribution data', width:760, sub:`<span class="mono">${k.id}</span><span class="faint">·</span><span>Last ${n} days</span><span class="faint">·</span><span>${BCS.main.name}</span>`,
+    body:`${banner('warn', 'Estimated, not final. Final amounts are in your settlement statement.')}
+      <div style="height:12px"></div><div class="kpis" style="--n:3"><div class="kpi"><div class="kpi-l">Est. distribution revenue</div><div class="kpi-v">${money(R)}</div></div><div class="kpi"><div class="kpi-l">Attributed GMV</div><div class="kpi-v">${money(G)}</div></div><div class="kpi"><div class="kpi-l">Data status</div><div class="kpi-v" style="font-size:15px"><span class="st ${DST[ctrDataStatus(ctrId)]}" style="font-size:15px">${ctrDataStatus(ctrId)}</span></div></div></div>
+      <div class="sec"><div class="sec-h"><h4>By collection / link</h4></div>${ls.length ? `<div class="panel"><table class="tbl"><thead><tr><th>Collection</th><th style="width:190px">Link</th><th class="num" style="width:140px">Est. revenue</th><th class="num" style="width:130px">Attributed GMV</th><th style="width:120px"></th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="panel">' + emptyBlock('chart', 'No data yet', 'This drama has no links with attributed data in this period.', '') + '</div>'}
+      ${other.length ? `<div class="faint" style="font-size:12px;margin-top:8px">No data: ${other.map(c => colLabel(c) + ' (' + (linkOf(c.id) ? 'link has no attributed orders yet' : 'no link') + ')').join(', ')}</div>` : ''}</div>`,
+    footer:`<button class="btn" data-act="export-ctr" data-id="${ctrId}">${ic('download', 14)}Export this drama</button><button class="btn btn-primary" data-act="close-drawer">Close</button>`};
+}
+function dailyModal(colId){
+  const l = linkOf(colId), c = colOf(colId), k = ctrOf(c.ctr), n = +UI.dd.range;
+  const days = dayList(n);
+  let R = 0, G = 0;
+  const rows = days.map(d => { const v = daily(colId, d.i); R += v.rev; G += v.gmv; return `<tr><td>${d.label}</td><td class="num">${money(v.rev)}</td><td class="num">${money(v.gmv)}</td><td><span class="st ${DST[v.status]}">${v.status}</span></td><td class="cell-sub">${v.status === 'Preliminary' ? 'May still change' : v.status === 'Adjusted' ? 'Refund deducted' : v.status === 'Delayed' ? 'Backfilling' : ''}</td></tr>`; }).join('');
+  return {title:'Daily detail', width:720, sub:`${k.title} · ${colLabel(c)} · <span class="mono">${l.url.replace('https://', '')}</span>`,
+    body:`<div class="faint" style="font-size:12px;margin-bottom:8px">Date × link · last ${n} days · USD · estimated, not final settlement</div><div class="panel" style="max-height:52vh;overflow:auto"><table class="tbl"><thead><tr><th>Date (UTC)</th><th class="num">Est. distribution revenue</th><th class="num">Attributed GMV</th><th style="width:120px">Data status</th><th style="width:130px">Note</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td style="font-weight:600;border-top:1px solid var(--border)">Total</td><td class="num" style="font-weight:600;border-top:1px solid var(--border)">${money(R)}</td><td class="num" style="font-weight:600;border-top:1px solid var(--border)">${money(G)}</td><td colspan="2" style="border-top:1px solid var(--border)"></td></tr></tfoot></table></div>`,
+    footer:`<button class="btn" data-act="close-modal">Close</button><button class="btn btn-primary" data-act="export-daily" data-col="${colId}">${ic('download', 14)}Export CSV</button>`};
+}
+
+function stmFiltered(){
+  const f = UI.st;
+  return D().statements.filter(s => (f.period === 'all' || s.period === f.period) && (f.bc === 'all' || s.bc === f.bc) && (f.status === 'all' || s.status === f.status) && !(D().stmPartial && s.bc === 'sub'));
+}
+function pageSettlement(){
+  const st = S.state; const f = UI.st;
+  let out = rsHeader('settlement') + '<div class="stack">';
+  out += banner('info', 'Settlement statements are the formal receivable amounts, split by Business Center and drama. You must confirm each statement before payout. Viewing or downloading doesn\u2019t confirm it.');
+  if (st === 'error') return out + errorBlock('settlement statements') + '</div>';
+  const S2 = D().statements.filter(s => !(D().stmPartial && s.bc === 'sub'));
+  const pend = S2.filter(s => s.status === 'pending'), failed = S2.filter(s => s.status === 'failed'), conf = S2.filter(s => s.status === 'confirming');
+  if (pend.length){ const rv = pend.find(s => s.revised) || pend[0]; out += banner('warn', `<b>${plural(pend.length, 'statement')} need${pend.length === 1 ? 's' : ''} your confirmation by Nov 10, 2026.</b> ${rv.revised ? rv.id + ' was revised from v1 to v2 (adjustment ' + money(rv.adj) + '), so it needs re-confirmation.' : 'Payout starts only after you confirm.'}`, `<button class="btn btn-sm btn-primary" data-act="open-stm" data-id="${rv.id}">Review ${rv.id}</button>`); }
+  if (failed.length) out += banner('err', `<b>Payout failed for ${failed.map(s => s.id).join(', ')}: beneficiary name mismatch.</b> Update the beneficiary name in Billing to match your bank account, then request a payout retry.`, `<button class="btn btn-sm" data-act="open-stm" data-id="${failed[0].id}">View log and fix</button>`);
+  if (conf.length) out += banner('warn', `<b>Confirmation result unknown for ${conf[0].id}.</b> Your confirmation was submitted but not yet acknowledged. Don\u2019t confirm again.`, `<button class="btn btn-sm" data-act="stm-check" data-id="${conf[0].id}">${ic('refresh', 14)}Check status</button>`, 'clock');
+  if (D().stmPartial && !UI.dismissed.has('st-partial')) out += banner('warn', '<b>Some statements couldn\u2019t load.</b> Statements for Shike Interactive · Studio B (Sub BC) are temporarily unavailable. Main BC statements are complete.', '<button class="btn btn-sm" data-act="st-partial-retry">' + ic('refresh', 14) + 'Retry Studio B</button>');
+  if (st === 'invalid') out += banner('plain', 'Some links became invalid on Nov 2–3. Revenue earned before that is still included in statements; nothing changes for already issued statements.');
+  if (st === 'loading') return out + skelKpis(4) + `<div class="panel"><table class="tbl"><tbody>${skelRows(5, 8)}</tbody></table></div></div>`;
+  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('file', 'No settlement statements yet', 'Monthly statements are generated after each period closes, usually by the 2nd of the following month.', '<button class="btn" data-act="go" data-to="data">View distribution data</button>') + '</div></div>';
+  const sum = arr => arr.reduce((a, s) => a + stmFinal(s), 0);
+  const proc = S2.filter(s => s.status === 'processing');
+  const paid = S2.filter(s => s.status === 'paid');
+  out += `<div class="kpis" style="--n:4">
+    <button class="kpi ${f.status === 'pending' ? 'on' : ''}" data-act="st-kpi" data-s="pending"><div class="kpi-l">Pending confirmation</div><div class="kpi-v ${pend.length ? 'warn' : ''}">${money(sum(pend))}</div><div class="kpi-s">${plural(pend.length, 'statement')} · confirm by Nov 10</div></button>
+    <button class="kpi ${f.status === 'processing' ? 'on' : ''}" data-act="st-kpi" data-s="processing"><div class="kpi-l">Processing</div><div class="kpi-v">${money(sum(proc))}</div><div class="kpi-s">${plural(proc.length, 'statement')} queued for payout</div></button>
+    <button class="kpi ${f.status === 'paid' ? 'on' : ''}" data-act="st-kpi" data-s="paid"><div class="kpi-l">Paid · last 90 days</div><div class="kpi-v">${money(sum(paid))}</div><div class="kpi-s">${plural(paid.length, 'statement')}</div></button>
+    <button class="kpi ${f.status === 'failed' ? 'on' : ''}" data-act="st-kpi" data-s="failed"><div class="kpi-l">Payout exceptions</div><div class="kpi-v ${failed.length ? 'err' : ''}">${failed.length}</div><div class="kpi-s">${failed.length ? 'Action needed' : 'None'}</div></button></div>`;
+  out += `<div class="toolbar"><div class="left">${sel('st.period', f.period, [['all','All periods'],['Oct 2026','Oct 2026'],['Sep 2026','Sep 2026'],['Aug 2026','Aug 2026']], 'Period')}${sel('st.bc', f.bc, [['all','All Business Centers'],['main', BCS.main.name + ' (Main)'],['sub', 'Studio B (Sub)']], 'Business Center')}${sel('st.status', f.status, [['all','All statuses'],['pending','Pending confirmation'],['confirming','Confirming'],['processing','Processing'],['paid','Paid'],['failed','Payout failed']], 'Status')}</div><div class="right"><span class="faint" style="font-size:12px">Monthly · USD</span></div></div>`;
+  const list = stmFiltered();
+  const rows = list.map(s => { const b = BCS[s.bc];
+    const act = s.status === 'pending' ? `<button class="btn btn-sm btn-primary" data-act="open-stm" data-id="${s.id}">Review and confirm</button>` : s.status === 'failed' ? `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">Fix payout</button>` : s.status === 'confirming' ? `<button class="btn btn-sm" data-act="stm-check" data-id="${s.id}">Check status</button>` : `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">View</button>`;
+    return `<tr class="clickable" data-act="open-stm" data-id="${s.id}"><td><div class="cell-title mono" style="font-size:13px">${s.id}</div><div class="cell-sub">${s.generated}</div></td><td>${s.period}</td><td><div class="ell">${b.name}</div><div class="cell-sub">${b.role}</div></td><td class="num">${s.split.length}</td><td class="num"><b>${money(stmFinal(s))}</b>${s.adj ? '<div class="cell-sub">' + money(s.adj) + ' adj.</div>' : ''}</td><td>v${s.version}${s.revised ? ' <span class="tag warn">Revised</span>' : ''}</td><td>${stChip(STM_ST, s.status)}${s.failReason ? '<div class="st-reason">' + s.failReason + '</div>' : ''}</td><td>${act}</td></tr>`; }).join('');
+  out += `<div class="panel"><div class="panel-h"><h3>Statements</h3><span class="faint" style="font-size:12px">${plural(list.length, 'statement')}</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:150px">Statement</th><th style="width:90px">Period</th><th>Business Center</th><th class="num" style="width:70px">Dramas</th><th class="num" style="width:130px">Final amount</th><th style="width:100px">Version</th><th style="width:190px">Status</th><th style="width:150px">Action</th></tr></thead><tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No statements match your filters', '', '<button class="btn" data-act="st-clear">Clear filters</button>')}</td></tr>`}</tbody></table></div></div>`;
+  const logs = D().logs.filter(l => !(D().stmPartial && l.stm.endsWith('-S')));
+  out += `<div class="panel"><div class="panel-h"><h3>Payout logs</h3><span class="faint" style="font-size:12px">Confirmation, payout and exception events</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:170px">Time (UTC)</th><th style="width:140px">Statement</th><th style="width:280px">Event</th><th>Details</th></tr></thead><tbody>${logs.map(l => `<tr><td class="cell-sub">${l.t.replace(' UTC', '')}</td><td><button class="btn-link mono" data-act="open-stm" data-id="${l.stm}">${l.stm}</button></td><td><span class="st ${l.k || 'muted'}" style="white-space:normal;line-height:16px">${l.e}</span></td><td class="cell-sub" style="white-space:normal">${l.d}</td></tr>`).join('')}</tbody></table></div></div>`;
+  return out + '</div>';
+}
+function stmDrawer(id){
+  const s = stmOf(id), b = BCS[s.bc];
+  const logs = D().logs.filter(l => l.stm === id);
+  const split = s.split.map(([ctrId, cols]) => { const k = ctrOf(ctrId); const tot = cols.reduce((a, c) => a + c[1], 0);
+    return `<tr><td><div class="cell-title">${k.title}</div><div class="cell-sub mono">${k.id}</div></td><td class="cell-sub" style="white-space:normal">${cols.map(c => { const cc = COLLECTIONS.find(x => x.id === c[0]); return cc.code + ' · ' + cc.lang + ' <span class="mono">' + c[0] + '</span> ' + money(c[1]); }).join('<br>')}</td><td class="num">${money(tot)}</td></tr>`; }).join('');
+  let foot = `<button class="btn" data-act="stm-download" data-id="${id}">${ic('download', 14)}Download statement</button>`;
+  if (s.status === 'pending') foot = `<span class="grow">Downloading doesn\u2019t confirm this statement.</span>` + foot + `<button class="btn btn-primary" data-act="stm-confirm" data-id="${id}">Confirm settlement</button>`;
+  else if (s.status === 'failed') foot += `<button class="btn" data-act="outside" data-name="Billing">Update beneficiary in Billing</button><button class="btn btn-primary" data-act="stm-retry" data-id="${id}">Request payout retry</button>`;
+  else if (s.status === 'confirming') foot += `<button class="btn btn-primary" data-act="stm-check" data-id="${id}">${ic('refresh', 14)}Check status</button>`;
+  else foot += `<button class="btn btn-primary" data-act="close-drawer">Close</button>`;
+  return {title:'Settlement statement ' + s.id, width:760, sub:`<span>${s.period}</span><span class="faint">·</span><span>${b.name}</span><span class="faint">·</span><span>Version ${s.version}</span>${stChip(STM_ST, s.status)}`,
+    body:`${s.revised ? banner('warn', '<b>Amount revised: v1 to v2.</b> An adjustment of ' + money(s.adj) + ' was added on Nov 2 (' + s.adjNote + '). Please review and confirm again; your earlier review doesn\u2019t apply to the new version.') + '<div style="height:12px"></div>' : ''}
+      ${s.status === 'failed' ? banner('err', '<b>Payout failed · ' + s.failReason + '.</b> The bank rejected the transfer because the account holder name doesn\u2019t match the beneficiary on file. Update the beneficiary name in Billing, then request a payout retry.') + '<div style="height:12px"></div>' : ''}
+      <div class="boxes"><div class="box"><div class="box-l">Final amount · ${s.status === 'pending' ? 'requires your confirmation' : 'formal receivable'}</div><div class="amount-xl">${money(stmFinal(s))}</div><div class="cell-sub">USD · gross ${money(s.gross)} · adjustments ${money(s.adj)}</div></div>
+      <div class="box"><div class="kv"><div><div class="k">Business Center</div><div class="v">${b.name} (${b.role})</div></div><div><div class="k">BC ID</div><div class="v mono">${b.id}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div><div><div class="k">Confirm by</div><div class="v">${s.due}</div></div></div></div></div>
+      <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4><span class="faint" style="font-size:12px">${plural(s.split.length, 'Contract')}</span></div><div class="panel"><table class="tbl"><thead><tr><th style="width:220px">Drama (Contract)</th><th>Collections</th><th class="num" style="width:130px">Amount</th></tr></thead><tbody>${split}
+        ${s.adj ? `<tr><td><div class="cell-title">Adjustments</div></td><td class="cell-sub">${s.adjNote}</td><td class="num">${money(s.adj)}</td></tr>` : ''}
+        <tr><td style="font-weight:600">Final amount</td><td></td><td class="num" style="font-weight:600">${money(stmFinal(s))}</td></tr></tbody></table></div></div>
+      <div class="sec"><div class="sec-h"><h4>Payout and activity log</h4></div>${logs.length ? '<ul class="timeline">' + logs.map(l => `<li class="${l.k}"><div class="tl-t">${l.t}</div><div class="tl-e">${l.e}</div><div class="tl-d">${l.d}</div></li>`).join('') + '</ul>' : '<div class="faint">No activity yet.</div>'}</div>`,
+    footer:foot};
+}
+const CS = {ack:false};
+function stmConfirmModal(id){
+  const s = stmOf(id), b = BCS[s.bc];
+  return {title:'Confirm settlement', width:540,
+    body:`<p style="margin:0 0 12px">Confirming tells us the final amount is correct and starts payout. You can\u2019t undo this. If the amount or version changes later, you\u2019ll be asked to confirm again.</p>
+      <div class="box"><div class="kv"><div><div class="k">Statement</div><div class="v mono">${s.id} · v${s.version}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div><div><div class="k">Business Center</div><div class="v">${b.name}</div></div><div><div class="k">Final amount</div><div class="v"><b>${money(stmFinal(s))}</b> USD</div></div></div></div>
+      <label class="check-row"><input type="checkbox" class="cb" name="stm-ack" data-chg="stm-ack" ${CS.ack ? 'checked' : ''}><span>I reviewed the breakdown by drama and confirm <b>${money(stmFinal(s))}</b> for ${b.name}, ${s.period}, version ${s.version}.</span></label>`,
+    footer:`<button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="stm-confirm-submit" data-id="${id}" ${CS.ack ? '' : 'disabled'}>Confirm settlement</button>`};
+}
+
+/* ---------- Demo controller ---------- */
+const DEMO = {open:false};
+function renderDemo(){
+  const el = $('#demo');
+  if (!DEMO.open){ el.innerHTML = `<button class="demo-pill" data-act="demo-open" aria-label="Open demo controls">${ic('sliders', 14)}Demo controls <em>${STATES.find(x => x[0] === S.state)[1]}</em></button>`; return; }
+  el.innerHTML = `<div class="demo-panel" role="region" aria-label="Prototype demo controls"><div class="demo-h">${ic('sliders', 14)}<div><b>Demo controls</b><small>Prototype tool · not part of the product</small></div><button class="x" data-act="demo-close" aria-label="Collapse demo controls">${ic('minimize', 16)}</button></div>
+    <div class="demo-s"><div class="lbl">Page</div>${PAGES.map(p => `<button class="demo-opt ${S.page === p[0] ? 'on' : ''}" data-act="demo-page" data-p="${p[0]}"><i></i>${p[1]}</button>`).join('')}</div>
+    <div class="demo-s"><div class="lbl">Global state</div>${STATES.map(s => `<button class="demo-opt ${S.state === s[0] ? 'on' : ''}" data-act="demo-state" data-s="${s[0]}"><i></i>${s[1]}</button>`).join('')}</div>
+    <div class="demo-f"><button data-act="demo-reset">${ic('refresh', 13)}Reset</button><button data-act="demo-copy">${ic('link', 13)}Copy demo link</button></div></div>`;
+}
+
+/* ---------- Actions ---------- */
+const ACT = {
+  'toast': el => toast(el.dataset.msg, el.dataset.type),
+  'outside': el => toast(el.dataset.name + ' is outside this prototype.', 'info'),
+  'nav-toggle': () => { NAV_OPEN.dc = !NAV_OPEN.dc; renderSidebar(); },
+  'go': el => go(el.dataset.to),
+  'copy': el => copyText(el.dataset.text, el.dataset.msg),
+  'close-drawer': () => closeDrawer(),
+  'close-modal': () => closeModal(),
+  'dismiss': el => { UI.dismissed.add(el.dataset.k); render(); },
+  'retry': el => { const b = el; busy(b, 700, () => { setState('normal'); toast('Loaded successfully.'); }); },
+  'mk-clear': () => { UI.mk = freshUI().mk; render(); },
+  'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
+  'pl-toggle': () => playToggle(),
+  'pl-prev': () => setEp(PL.ep - 1),
+  'pl-next': () => setEp(PL.ep + 1),
+  'pl-ep': el => setEp(+el.dataset.ep),
+  'pl-speed': el => { PL.speed = +el.dataset.v; $$('.pl-speed button').forEach(b => b.classList.toggle('on', +b.dataset.v === PL.speed)); toast('Playback speed ' + PL.speed + 'x', 'info'); },
+  'pl-seek': (el, e) => { const r = el.getBoundingClientRect(); PL.t = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * epDur(PL.ep); updatePlayer(); },
+  'claim-open': () => { if (!DS.sel.size){ toast('Select at least one available collection to claim.', 'warn'); return; } openModal(() => claimConfirmModal(PL.ctr)); },
+  'claim-submit': el => busy(el, 800, () => {
+    const ids = Array.from(DS.sel); const items = claimOutcome(ids);
+    LAST_CLAIM = {items}; DS.sel = new Set(items.filter(x => x.r === 'failed').map(x => x.col));
+    refreshDrawer(); render(); openModal(() => claimResultModal(LAST_CLAIM));
+  }),
+  'claim-recheck': el => busy(el, 700, () => {
+    LAST_CLAIM.items.forEach(x => { if (x.r === 'unknown'){ colOf(x.col).claim = 'claimed'; x.r = 'claimed'; x.why = 'Confirmed on recheck'; } });
+    refreshModal(); refreshDrawer(); render(); toast('Claim confirmed.');
+  }),
+  'claim-retry': () => { closeModal(); toast('Review the updated terms, then claim again. Failed collections are still selected.', 'info'); },
+  'claim-to-gen': () => { const ids = LAST_CLAIM.items.filter(x => x.r === 'claimed' || x.r === 'existed').map(x => x.col).filter(id => !linkOf(id)); closeAll(); stopPlayer(); go('links', () => { openGenerate(); if (ids.length){ GS.sel = new Set(ids); refreshDrawer(); } }); },
+  'last-claim': () => { LAST_CLAIM = D().lastClaim; openModal(() => claimResultModal(LAST_CLAIM)); },
+  'recheck-claim': el => busy(el, 700, () => { colOf(el.dataset.col).claim = 'claimed'; S.state === 'unknown' && UI.dismissed.add('mk-unknown'); toast('Claim confirmed: A House by the Tide · Mexico · Spanish.'); render(); }),
+  'go-links-invalid': () => { UI.lv.status = 'invalid'; UI.lv.ap = 'all'; go('links'); },
+  'lv-only-invalid': () => { UI.lv.status = 'invalid'; UI.lv.ap = 'all'; render(); },
+  'lv-kpi': el => { const s = el.dataset.s; if (s === 'attention'){ UI.lv.status = 'all'; UI.lv.ap = 'attention'; } else { UI.lv.status = s; UI.lv.ap = 'all'; } render(); },
+  'lv-clear': () => { const s = UI.lv.sel; UI.lv = freshUI().lv; UI.lv.sel = s; render(); },
+  'copy-selected': () => {
+    const ls = D().links.filter(l => UI.lv.sel.has(l.col));
+    if (!ls.length){ toast('Select links to copy.', 'warn'); return; }
+    const ok = ls.filter(l => l.status === 'active');
+    if (!ok.length){ toast('None of the selected links are active. Invalid or unknown links weren\u2019t copied.', 'warn'); return; }
+    copyText(ok.map(l => l.url).join('\n'), 'Copied ' + plural(ok.length, 'link') + (ls.length > ok.length ? '. Skipped ' + (ls.length - ok.length) + ' not active' : ''));
+  },
+  'export-links': () => openExport('links'),
+  'export-data': () => openExport('data'),
+  'ex-fmt': el => { EX.fmt = el.dataset.v; refreshDrawer(); },
+  'ex-run': () => runExport(),
+  'gen-open': (el, e) => { if (e) e.stopPropagation(); openGenerate(el.dataset.col); },
+  'gen-pick': el => { const m = el.dataset.m; const c = genCandidates(); GS.sel = new Set(m === 'none' ? [] : c.filter(x => m === 'all' || !linkOf(x.id)).map(x => x.id)); refreshDrawer(); },
+  'gen-bc-main': () => { GS.bc = 'main'; refreshDrawer(); },
+  'gen-submit': el => {
+    if (!GS.sel.size){ toast('Select at least one collection.', 'warn'); return; }
+    busy(el, 900, () => { LAST_GEN = genOutcome(Array.from(GS.sel)); closeDrawer(); render(); openModal(genResultModal); });
+  },
+  'gen-recheck': el => busy(el, 700, () => { LAST_GEN.forEach(x => { if (x.r === 'unknown'){ if (!linkOf(x.col)) createLink(x.col); x.r = 'generated'; } }); refreshModal(); render(); toast('Links confirmed and ready to copy.'); }),
+  'gen-retry': el => busy(el, 700, () => { LAST_GEN.forEach(x => { if (x.r === 'failed'){ if (!linkOf(x.col)) createLink(x.col); x.r = 'generated'; x.why = ''; } }); refreshModal(); render(); toast('Retry succeeded. Same key, no duplicates.'); }),
+  'gen-copy': () => { const ls = LAST_GEN.map(x => linkOf(x.col)).filter(l => l && l.status === 'active'); copyText(ls.map(l => l.url).join('\n'), 'Copied ' + plural(ls.length, 'link')); },
+  'last-gen': () => { LAST_GEN = D().lastGen; openModal(genResultModal); },
+  'link-details': (el, e) => { if (e) e.stopPropagation(); const c = el.dataset.col; openDrawer(() => linkDrawer(c)); },
+  'link-recheck': el => busy(el, 800, () => {
+    const l = linkOf(el.dataset.col);
+    if (l.status === 'unknown'){ l.status = 'active'; l.reason = ''; l.ap = 'none'; l.apNote = ''; l.ads.forEach(a => a.st = 'Delivering'); l.updated = 'Nov 3, 2026 03:14 UTC'; l.history.push({t:'Nov 3, 2026 03:14 UTC', e:'TTAM confirmed status', d:'Link active; no ads need pausing', k:'ok'}); toast('Status confirmed: link is active.'); }
+    else if (l.ap === 'pausing'){ l.ap = 'complete'; l.apNote = '5 of 5 ads paused'; l.ads.forEach(a => a.st = 'Paused'); l.history.push({t:'Nov 3, 2026 03:14 UTC', e:'TTAM: auto-pause complete', d:'All 5 affected ads paused', k:'ok'}); toast('Auto-pause complete: all affected ads are paused.'); }
+    else if (l.ap === 'unknown'){ l.ap = 'none'; toast('Auto-pause result confirmed.'); }
+    refreshDrawer(); render();
+  }),
+  'ttam': (el, e) => { if (e) e.stopPropagation(); const c = el.dataset.col; openModal(() => ttamModal(c)); },
+  'ttam-go': el => { const c = el.dataset.col; const l = linkOf(c); closeModal(); copyText(l.url, 'Link copied. Opening TTAM...'); setTimeout(() => showTtam(c), 350); },
+  'ttam-back': () => backFromTtam(),
+  'bd-toggle': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; UI.bd.open.has(id) ? UI.bd.open.delete(id) : UI.bd.open.add(id); render(); },
+  'bd-expand': () => { CONTRACTS.forEach(k => UI.bd.open.add(k.id)); render(); },
+  'bd-collapse': () => { UI.bd.open.clear(); render(); },
+  'bd-clear': () => { UI.bd.q = ''; render(); },
+  'data-contract': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; if (S.page !== 'data'){ UI.dd.ctr = 'all'; go('data', () => openDrawer(() => contractDataDrawer(id))); } else openDrawer(() => contractDataDrawer(id)); },
+  'daily': el => { const c = el.dataset.col; openModal(() => dailyModal(c)); },
+  'export-daily': el => { const c = el.dataset.col, n = +UI.dd.range; const l = linkOf(c), cc = colOf(c), k = ctrOf(cc.ctr);
+    const rows = [['Date','Drama','Collection ID','Link','Estimated distribution revenue (USD)','Attributed GMV (USD)','Data status']].concat(dayList(n).map(d => { const v = daily(c, d.i); return [d.iso, k.title, c, l.url, v.rev.toFixed(2), v.gmv.toFixed(2), v.status]; }));
+    download(`daily-${c}-last-${n}-days.csv`, csv(rows)); toast('Exported ' + n + ' days for ' + c + '. Estimated, not final settlement.'); },
+  'export-ctr': el => { const id = el.dataset.id; const prev = UI.dd.ctr; UI.dd.ctr = id; const rows = dataRows('daily', +UI.dd.range); UI.dd.ctr = prev; download(`distribution-data-${id}.csv`, csv(rows)); toast('Exported ' + plural(rows.length - 1, 'row') + ' for ' + ctrOf(id).title + '.'); },
+  'open-stm': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; if (S.page !== 'settlement') go('settlement', () => openDrawer(() => stmDrawer(id))); else openDrawer(() => stmDrawer(id)); },
+  'st-kpi': el => { UI.st.status = UI.st.status === el.dataset.s ? 'all' : el.dataset.s; render(); },
+  'st-clear': () => { UI.st = freshUI().st; render(); },
+  'st-partial-retry': el => busy(el, 800, () => { D().stmPartial = false; render(); toast('Studio B statements loaded.'); }),
+  'stm-download': el => { const s = stmOf(el.dataset.id); const rows = [['Statement','Period','Business Center','BC ID','Version','Contract ID','Drama','Collection ID','Amount (USD)']];
+    s.split.forEach(([k, cols]) => cols.forEach(c => rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, k, ctrOf(k).title, c[0], c[1].toFixed(2)])));
+    if (s.adj) rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, '', 'Adjustments', '', s.adj.toFixed(2)]);
+    rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, '', 'Final amount', '', stmFinal(s).toFixed(2)]);
+    download(s.id + '-v' + s.version + '.csv', csv(rows)); toast('Statement downloaded.' + (s.status === 'pending' ? ' It still needs your confirmation.' : ''), s.status === 'pending' ? 'warn' : ''); },
+  'stm-confirm': el => { CS.ack = false; const id = el.dataset.id; openModal(() => stmConfirmModal(id)); },
+  'stm-confirm-submit': el => { if (!CS.ack){ toast('Check the confirmation box first.', 'warn'); return; } const id = el.dataset.id; busy(el, 900, () => {
+    const s = stmOf(id); closeModal();
+    if (S.state === 'unknown'){ s.status = 'confirming'; D().logs.unshift({t:'Nov 3, 2026 03:15 UTC', stm:id, e:'Confirmation submitted · result unknown', k:'warn', d:'Not yet acknowledged. Don\u2019t confirm again; use Check status.'}); toast('Submitted. Result not confirmed yet; don\u2019t confirm again.', 'warn'); }
+    else { s.status = 'processing'; s.revised = false; s.updated = 'Nov 3, 2026 03:15 UTC'; D().logs.unshift({t:'Nov 3, 2026 03:15 UTC', stm:id, e:'Confirmed by you · queued for payout', k:'info', d:'Version ' + s.version + ' · ' + money(stmFinal(s)) + ' · expected by Nov 15, 2026'}); toast('Settlement confirmed. ' + id + ' is queued for payout.'); }
+    refreshDrawer(); render(); }); },
+  'stm-check': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; busy(el, 800, () => { const s = stmOf(id); s.status = 'processing'; D().logs.unshift({t:'Nov 3, 2026 03:16 UTC', stm:id, e:'Confirmation acknowledged · queued for payout', k:'info', d:'Your earlier confirmation was received. No second confirmation was recorded.'}); toast('Confirmation received. ' + id + ' is processing.'); refreshDrawer(); render(); }); },
+  'stm-retry': el => { const id = el.dataset.id; openModal(() => ({title:'Request payout retry', width:500, body:'<p style="margin:0">Request a retry only after the beneficiary name in Billing matches your bank account exactly (\u201cSHIKE INTERACTIVE TECH LTD\u201d). Otherwise the payout will fail again.</p>', footer:`<button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="stm-retry-submit" data-id="${id}">I updated it, request retry</button>`})); },
+  'stm-retry-submit': el => { const id = el.dataset.id; busy(el, 800, () => { const s = stmOf(id); s.status = 'processing'; s.failReason = ''; D().logs.unshift({t:'Nov 3, 2026 03:16 UTC', stm:id, e:'Payout retry requested · queued', k:'info', d:'Beneficiary details re-verified. Expected by Nov 6, 2026.'}); closeModal(); refreshDrawer(); render(); toast('Payout retry requested for ' + id + '.'); }); },
+  'demo-open': () => { DEMO.open = true; renderDemo(); },
+  'demo-close': () => { DEMO.open = false; renderDemo(); },
+  'demo-page': el => go(el.dataset.p),
+  'demo-state': el => setState(el.dataset.s),
+  'demo-reset': () => { Object.assign(UI, freshUI()); closeAll(); stopPlayer(); S.data = null; S.state = '__'; location.hash = '#' + PATH.marketplace + '?state=normal'; if (location.hash === '#/marketplace?state=normal') onRoute(); toast('Demo reset to Normal.'); },
+  'demo-copy': () => copyText(location.href.split('#')[0] + '#' + PATH[S.page] + '?state=' + S.state, 'Demo link copied for this page and state')
+};
+function setState(st){ location.hash = '#' + PATH[S.page] + '?state=' + st; }
+
+const CHG = {
+  'filter': el => { const [grp, key] = el.name.split('.'); UI[grp][key] = grp === 'dd' && key === 'range' ? +el.value : el.value; render(); },
+  'dr-sel': el => { el.checked ? DS.sel.add(el.dataset.id) : DS.sel.delete(el.dataset.id); refreshDrawer(); },
+  'lv-sel': el => { el.checked ? UI.lv.sel.add(el.dataset.id) : UI.lv.sel.delete(el.dataset.id); render(); },
+  'lv-all': el => { lvFiltered().forEach(l => el.checked ? UI.lv.sel.add(l.col) : UI.lv.sel.delete(l.col)); render(); },
+  'gen-sel': el => { el.checked ? GS.sel.add(el.dataset.id) : GS.sel.delete(el.dataset.id); refreshDrawer(); },
+  'gen-bc': el => { GS.bc = el.value; GS.sel = new Set(genCandidates().filter(c => !linkOf(c.id)).map(c => c.id)); refreshDrawer(); },
+  'ex-scope': el => { EX.scope = el.value; },
+  'ex-field': el => { el.checked ? EX.fields.add(el.dataset.f) : EX.fields.delete(el.dataset.f); refreshDrawer(); },
+  'ex-ds': el => { EX.dataset = el.value; refreshDrawer(); },
+  'ex-range': el => { EX.range = +el.value; refreshDrawer(); },
+  'stm-ack': el => { CS.ack = el.checked; const b = $('[data-act="stm-confirm-submit"]'); if (b) b.disabled = !CS.ack; }
+};
+const INP = {
+  'mk-q': el => { UI.mk.q = el.value; render(); },
+  'lv-q': el => { UI.lv.q = el.value; render(); },
+  'bd-q': el => { UI.bd.q = el.value; render(); }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-act]');
+  if (!el || el.disabled) return;
+  if (el.tagName === 'TR' && e.target.closest('button, a, input, select, label')) return;
+  const fn = ACT[el.dataset.act];
+  if (fn){ e.preventDefault(); fn(el, e); }
+});
+document.addEventListener('change', e => { const el = e.target.closest('[data-chg]'); if (el && CHG[el.dataset.chg]) CHG[el.dataset.chg](el); });
+document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && INP[el.dataset.inp]) INP[el.dataset.inp](el); });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if ($('#ttam').classList.contains('show')) backFromTtam();
+  else if (modalFn) closeModal();
+  else if (drawerFn){ closeDrawer(); }
+});
+window.addEventListener('hashchange', onRoute);
+onRoute();
+})();
+</script>
+</body>
+</html>
