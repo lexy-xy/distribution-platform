@@ -245,6 +245,26 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .dr-b{flex:1;overflow-y:auto;padding:16px 24px 24px}
 .dr-f{min-height:60px;padding:12px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:flex-end;gap:8px}
 .dr-f .grow{margin-right:auto;color:var(--text2);font-size:12px}
+.dr-tabs{padding:0 24px;margin:0;flex:none;gap:24px}
+.dr-tabs .tab{height:36px;font-size:13px}
+.ld-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
+.ld-vis{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.ld-vis label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;user-select:none}
+.ld-range{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px;flex-wrap:wrap}
+.ld-range .input{width:138px}
+.ld-export-row{display:flex;justify-content:flex-end;margin:4px 0 12px}
+.bi{border:1px solid var(--border);border-radius:4px;padding:10px 12px 8px;margin-bottom:16px;background:#fff}
+.bi-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.bi-h h4{margin:0;font-size:13px;font-weight:600}
+.bi-svg{display:block;width:100%;height:200px}
+.ld-tbl th{white-space:normal;line-height:15px;height:auto;padding:8px 12px}
+.bi-leg{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:6px;font-size:11px;color:var(--text2)}
+.bi-leg span{display:inline-flex;align-items:center;gap:6px}
+.bi-leg i{width:16px;height:0;border-top:2px solid currentColor;display:inline-block}
+.bi-leg i.dash{border-top-style:dashed}
+.bi-note{color:var(--text3);font-size:11px}
+.num-link{border:0;background:none;padding:0;color:inherit;font:inherit;font-variant-numeric:tabular-nums;cursor:pointer;text-align:right;width:100%}
+.num-link:hover{color:var(--primary-t);text-decoration:underline}
 .modal-mask{z-index:200}
 .modal{position:fixed;left:50%;top:50%;transform:translate(-50%,-48%);opacity:0;width:min(var(--w,560px),calc(100vw - 48px));max-height:calc(100vh - 80px);background:#fff;border-radius:4px;z-index:201;display:flex;flex-direction:column;transition:all .15s}
 .modal.show{opacity:1;transform:translate(-50%,-50%)}
@@ -747,7 +767,7 @@ function openDrawer(fn, onClose){
   requestAnimationFrame(() => { $$('#drawer-root .mask, #drawer-root .drawer').forEach(e => e.classList.add('show')); });
 }
 function drawerInner(r){
-  return `<div class="dr-h"><div class="t"><h2>${r.title}</h2>${r.sub ? '<div class="s">' + r.sub + '</div>' : ''}</div><button class="btn btn-icon" data-act="close-drawer" aria-label="Close">${ic('close', 18)}</button></div><div class="dr-b">${r.body}</div>${r.footer ? '<div class="dr-f">' + r.footer + '</div>' : ''}`;
+  return `<div class="dr-h"><div class="t"><h2>${r.title}</h2>${r.sub ? '<div class="s">' + r.sub + '</div>' : ''}</div><button class="btn btn-icon" data-act="close-drawer" aria-label="Close">${ic('close', 18)}</button></div>${r.tabs ? r.tabs : ''}<div class="dr-b">${r.body}</div>${r.footer ? '<div class="dr-f">' + r.footer + '</div>' : ''}`;
 }
 function refreshDrawer(){
   if (!drawerFn) return;
@@ -759,7 +779,7 @@ function refreshDrawer(){
 }
 function closeDrawer(){
   if (drawerClose) { try { drawerClose(); } catch (e) { /* ignore */ } }
-  drawerFn = null; drawerClose = null; $('#drawer-root').innerHTML = '';
+  drawerFn = null; drawerClose = null; LD.col = null; $('#drawer-root').innerHTML = '';
 }
 function openModal(fn){
   modalFn = fn;
@@ -813,10 +833,15 @@ function onRoute(){
   const page = ROUTE[path];
   const st = STATES.some(x => x[0] === state) ? state : 'normal';
   if (!page || state !== st || PATH[page] !== path){ location.replace('#' + PATH[page || 'marketplace'] + '?state=' + st); return; }
-  if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv = freshUI().lv; UI.pick.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); }
-  if (page !== S.page){ const first = S.page === null; S.page = page; closeAll(); stopPlayer(); if (!first) window.scrollTo(0, 0); }
+  const keepLink = (drawerFn && LD.col) ? {col: LD.col, tab: LD.tab} : null;
+  let closed = false;
+  if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv = freshUI().lv; UI.pick.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); closed = true; }
+  if (page !== S.page){ const first = S.page === null; S.page = page; closeAll(); stopPlayer(); closed = true; if (!first) window.scrollTo(0, 0); }
   render();
   if (S.after){ const f = S.after; S.after = null; f(); }
+  if (closed && keepLink && (S.page === 'links' || S.page === 'dramas')){
+    openLinkDrawer(keepLink.col, keepLink.tab);
+  }
 }
 
 function render(){
@@ -967,6 +992,8 @@ function coverLeave(){
 /* Drama detail drawer + player */
 const PL = {ctr:null, ep:1, t:0, playing:false, speed:2, timer:null};
 const DS = {sel:new Set()};
+const LD = {col:null, tab:'drama', grain:'daily', vis:{bc:true, account:true, date:true}, from:'2026-10-15', to:'2026-10-21', page:1, size:10};
+function resetLDKeepCol(){ LD.grain = 'daily'; LD.vis = {bc:true, account:true, date:true}; LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.page = 1; LD.size = 10; }
 const epDur = ep => 88 + (ep * 37) % 46;
 const fmtT = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
 function stopPlayer(){ if (PL.timer){ clearInterval(PL.timer); PL.timer = null; } PL.playing = false; }
@@ -983,7 +1010,7 @@ function colStatus(c){
   if (c.claim === 'confirming') return '<span class="st warn spin">Confirming claim</span>';
   return '<span class="st info">Available</span>';
 }
-function dramaDrawer(ctrId){
+function dramaBody(ctrId){
   const c = ctrOf(ctrId); const cs = colsOf(ctrId);
   const pw = c.paywall, N = c.episodes;
   const eps = Array.from({length:N}, (_, i) => i + 1).map(e => {
@@ -1043,13 +1070,22 @@ function dramaDrawer(ctrId){
   <div class="sec"><div class="sec-h"><h4>Collections</h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
     <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
   </div>`;
+  return {body, availCount};
+}
+function dramaClaimFooter(availCount){
   const n = DS.sel.size;
+  const claimed = !availCount;
+  return `<button class="btn btn-primary" data-act="claim-open" ${claimed ? 'disabled title="All collections on this drama are already claimed"' : ''}>Claim selected${n ? ' (' + n + ')' : ''}</button>`;
+}
+function dramaDrawer(ctrId){
+  const c = ctrOf(ctrId);
+  const {body, availCount} = dramaBody(ctrId);
   const nav = dramaNeighbors(ctrId);
   const prevTip = nav.prev ? 'Previous: ' + ctrOf(nav.prev).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'First drama in the current Marketplace list';
   const nextTip = nav.next ? 'Next: ' + ctrOf(nav.next).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
   return {title:c.title,
     body,
-    footer:`<button class="btn" data-act="drama-prev" ${nav.prev ? 'data-id="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="drama-next" ${nav.next ? 'data-id="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
+    footer:`<button class="btn" data-act="drama-prev" ${nav.prev ? 'data-id="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="drama-next" ${nav.next ? 'data-id="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button>${dramaClaimFooter(availCount)}`};
 }
 function dramaNeighbors(ctrId){
   const order = mkFiltered().map(k => k.id);
@@ -1289,8 +1325,8 @@ function pageLinks(){
       <td><div class="cell-title ell" title="${esc(pubOf(c))}">${esc(pubOf(c))}</div><div class="cell-sub ell">${esc(colLabel(c))}</div></td>
       <td><button type="button" class="dist-url" data-act="copy" data-text="${esc(l.url)}" data-msg="${esc('Link copied' + note)}" title="${esc(l.url)}">${esc(l.url.replace('https://', ''))}</button></td>
       <td>${linkStCell(l)}</td>
-      <td class="num usd">${usd(l.iaa)}</td>
-      <td class="num usd">${usd(l.est)}</td>
+      <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.iaa)}</button></td>
+      <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.est)}</button></td>
       <td class="cell-sub nowrap">${esc(l.created)}</td>
       <td class="act"><div class="act-row"><button type="button" class="btn-link" data-act="link-details" data-col="${l.col}">Details</button><span class="more-wrap"><button type="button" class="btn-more ${f.menu === l.col ? 'on' : ''}" data-act="lv-more" data-col="${l.col}" aria-label="More actions" aria-haspopup="menu" aria-expanded="${f.menu === l.col ? 'true' : 'false'}">${ic('more', 16)}</button>${lvMenu(l)}</span></div></td></tr>`;
   }).join('') : `<tr><td colspan="8">${emptyBlock('search', 'No links match your filters', 'Try another time range, keyword, or clear filters.', '<button class="btn" data-act="lv-clear">Clear filters</button>')}</td></tr>`;
@@ -1342,33 +1378,253 @@ function createLink(colId){
 }
 
 /* Link details drawer */
-function linkDrawer(colId){
-  const l = linkOf(colId); const c = colOf(colId), k = ctrOf(c.ctr);
-  const ads = l.ads.length ? `<div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:100px">Ad ID</th><th>Ad name</th><th>Campaign</th><th style="width:160px">Delivery (from TTAM)</th></tr></thead><tbody>${l.ads.map(a => {
-      const cls = /failed/i.test(a.st) ? 'err' : a.st === 'Paused' ? 'ok' : a.st === 'Pausing' ? 'info spin' : a.st === 'Unknown' ? 'warn' : 'muted';
-      return `<tr><td class="mono">${a.id}</td><td class="ell">${a.name}</td><td class="ell cell-sub">${a.campaign}</td><td><span class="st ${cls}">${a.st}</span></td></tr>`; }).join('')}</tbody></table></div></div>`
-    : '<div class="panel">' + emptyBlock('ads', 'No ads use this link yet', 'Ads you create in TTAM with this link will appear here.', '') + '</div>';
-  const recheck = l.status === 'unknown' || l.ap === 'pausing' || l.ap === 'unknown';
-  return {title:k.title + ' · ' + c.market,
-    sub:`<span>${c.lang}</span><span class="faint">·</span><span class="mono">${c.id}</span>${stChip(LINK_ST, l.status)}`,
-    body:`<div class="dr-cols"><div class="dr-main"><div class="sec"><div class="box" style="display:flex;align-items:center;gap:8px"><span style="color:var(--text2)">${ic('link', 16)}</span><span class="mono ell" style="flex:1;font-size:13px">${l.url}</span><button class="btn btn-sm" data-act="copy" data-text="${l.url}" data-msg="Link copied">${ic('copy', 14)}Copy</button></div></div>
-      <div class="sec boxes">
-        <div class="box"><div class="box-l">Link status · from TTDC</div>${linkStCell(l)}<div class="cell-sub" style="margin-top:6px">Updated ${l.updated}</div></div>
-        <div class="box"><div class="box-l">Auto-pause result · from TTAM</div>${stChip(AP_ST, l.ap)}<div class="st-reason">${l.apNote || (l.status === 'active' ? 'Link is active; no ads need pausing.' : '')}</div>${l.ap === 'failed' || l.ap === 'partial' ? '<div style="margin-top:6px"><button class="btn-link" style="font-size:12px" data-act="ttam" data-col="' + l.col + '">Pause remaining ads in TTAM ' + ic('external', 12) + '</button></div>' : ''}</div>
+const AD_ACCT_POOL = ['Northstar Stories US','Northstar Drama UK','MapleReel Studio','Harbor Lane Media'];
+const AD_ACCT_COLORS = ['#009995','#2463D1','#B76E00','#7C3AED'];
+function isoAddDays(iso, n){
+  const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function datesBetween(from, to){
+  if (!from || !to || from > to) return [];
+  const out = [];
+  for (let d = from; d <= to; d = isoAddDays(d, 1)) out.push(d);
+  return out;
+}
+function weekStart(iso){
+  const d = new Date(iso + 'T00:00:00Z');
+  d.setUTCDate(d.getUTCDate() - ((d.getUTCDay() + 6) % 7));
+  return d.toISOString().slice(0, 10);
+}
+function fmtMd(iso){
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const p = iso.split('-');
+  return months[+p[1] - 1] + ' ' + (+p[2]);
+}
+function seedFrom(s){
+  let h = 2166136261;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619);
+  return h >>> 0;
+}
+function adAccountsFor(colId){
+  const c = colOf(colId); const pub = c ? pubOf(c) : AD_ACCT_POOL[0];
+  const rest = AD_ACCT_POOL.filter(a => a !== pub);
+  return [pub].concat(rest).slice(0, 3);
+}
+function linkMetricRows(colId){
+  const c = colOf(colId); const share = ((c && c.share) || 85) / 100;
+  const accts = adAccountsFor(colId);
+  const seed = seedFrom(colId);
+  const dates = datesBetween('2026-10-01', DEMO_TODAY);
+  const rows = [];
+  accts.forEach((acct, ai) => {
+    dates.forEach((date, di) => {
+      const base = 338 + ai * 72;
+      const wave = Math.sin((seed % 97) / 16 + di * 0.48 + ai * 1.15) * 38;
+      const drift = (dates.length - 1 - di) * 2.15;
+      const iaa = Math.round((base + wave + drift) * 100) / 100;
+      const est = Math.round(iaa * share * 100) / 100;
+      rows.push({bc: BCS.main.name, account: acct, date, iaa, est});
+    });
+  });
+  const order = accts;
+  return rows.sort((a, b) => (order.indexOf(a.account) - order.indexOf(b.account)) || b.date.localeCompare(a.date) || a.bc.localeCompare(b.bc));
+}
+function ldFilteredRows(colId){
+  return linkMetricRows(colId).filter(r => (!LD.from || r.date >= LD.from) && (!LD.to || r.date <= LD.to));
+}
+function ldChartSeries(rows){
+  const accts = [];
+  const seen = new Set();
+  rows.forEach(r => { if (!seen.has(r.account)){ seen.add(r.account); accts.push(r.account); } });
+  const grain = LD.grain;
+  const buckets = [];
+  const bIndex = new Map();
+  const addBucket = (key, label) => { if (!bIndex.has(key)){ bIndex.set(key, buckets.length); buckets.push({key, label}); } };
+  if (grain === 'weekly'){
+    const weeks = Array.from(new Set(rows.map(r => weekStart(r.date)))).sort();
+    weeks.forEach(w => addBucket(w, fmtMd(w) + '–' + fmtMd(isoAddDays(w, 6))));
+  } else {
+    Array.from(new Set(rows.map(r => r.date))).sort().forEach(d => addBucket(d, fmtMd(d)));
+  }
+  const series = accts.map((acct, i) => {
+    const color = AD_ACCT_COLORS[i % AD_ACCT_COLORS.length];
+    const iaa = buckets.map(() => 0), est = buckets.map(() => 0);
+    rows.filter(r => r.account === acct).forEach(r => {
+      const k = grain === 'weekly' ? weekStart(r.date) : r.date;
+      const idx = bIndex.get(k); if (idx == null) return;
+      iaa[idx] += r.iaa; est[idx] += r.est;
+    });
+    return {account: acct, color, iaa: iaa.map(n => Math.round(n * 100) / 100), est: est.map(n => Math.round(n * 100) / 100)};
+  });
+  return {buckets, series};
+}
+function niceMax(v){
+  if (v <= 0) return 1;
+  const exp = Math.pow(10, Math.floor(Math.log10(v)));
+  const step = exp < 1 ? 1 : exp / 2;
+  return Math.ceil(v / step) * step;
+}
+function biChartSvg(model){
+  const W = 880, H = 200, l = 42, r = 36, t = 10, b = 28;
+  const iw = W - l - r, ih = H - t - b;
+  const {buckets, series} = model;
+  if (!buckets.length || !series.length){
+    return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="No chart data"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#8A8F99" font-size="12" font-family="inherit">No rows in this date range</text></svg>`;
+  }
+  let max = 0;
+  series.forEach(s => { s.iaa.forEach(v => { if (v > max) max = v; }); s.est.forEach(v => { if (v > max) max = v; }); });
+  max = niceMax(max * 1.08);
+  const n = buckets.length;
+  const xAt = i => l + (n === 1 ? iw / 2 : iw * i / (n - 1));
+  const yAt = v => t + ih - (v / max) * ih;
+  const ticks = 4;
+  let grid = '';
+  for (let i = 0; i <= ticks; i++){
+    const v = max * (1 - i / ticks), y = t + ih * i / ticks;
+    grid += `<line x1="${l}" y1="${y.toFixed(1)}" x2="${W-r}" y2="${y.toFixed(1)}" stroke="#EEF0F2" stroke-width="1"/>`;
+    const lab = v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0) + 'k' : String(Math.round(v));
+    grid += `<text x="${l-6}" y="${(y + 3).toFixed(1)}" text-anchor="end" fill="#8A8F99" font-size="10" font-family="inherit">${lab}</text>`;
+  }
+  const step = n > 8 ? Math.ceil(n / 7) : 1;
+  let xlbl = '';
+  buckets.forEach((bk, i) => {
+    if (i % step !== 0 && i !== n - 1) return;
+    const anchor = i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle';
+    xlbl += `<text x="${xAt(i).toFixed(1)}" y="${H-8}" text-anchor="${anchor}" fill="#8A8F99" font-size="10" font-family="inherit">${esc(bk.label)}</text>`;
+  });
+  const pathOf = vals => vals.map((v, i) => (i ? 'L' : 'M') + xAt(i).toFixed(1) + ',' + yAt(v).toFixed(1)).join(' ');
+  let lines = '';
+  series.forEach(s => {
+    lines += `<path d="${pathOf(s.iaa)}" fill="none" stroke="${s.color}" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>`;
+    lines += `<path d="${pathOf(s.est)}" fill="none" stroke="${s.color}" stroke-width="1.5" stroke-dasharray="4 3" stroke-linejoin="round" stroke-linecap="round"/>`;
+  });
+  return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Revenue by ad account">${grid}${lines}${xlbl}</svg>`;
+}
+function ldPagerHtml(total){
+  const size = LD.size || 10;
+  const pages = Math.max(1, Math.ceil(total / size));
+  const p = Math.min(Math.max(1, LD.page || 1), pages);
+  let nums = '';
+  const win = 7;
+  let a = Math.max(1, p - Math.floor(win / 2)), z = Math.min(pages, a + win - 1);
+  a = Math.max(1, z - win + 1);
+  for (let i = a; i <= z; i++) nums += `<button type="button" class="pg-btn ${i === p ? 'on' : ''}" data-act="ld-page" data-p="${i}" ${i === p ? 'aria-current="page"' : ''}>${i}</button>`;
+  const from = total ? (p - 1) * size + 1 : 0, to = Math.min(p * size, total);
+  return `<div class="pager">
+    <label class="faint" style="display:inline-flex;align-items:center;gap:6px">Rows per page
+      <select class="select" style="width:68px" name="ld-size" data-chg="ld-size" aria-label="Rows per page">${[10, 20].map(n => `<option value="${n}" ${size === n ? 'selected' : ''}>${n}</option>`).join('')}</select>
+    </label>
+    <div class="pg-pages">
+      <button type="button" class="pg-btn" data-act="ld-page" data-p="${p - 1}" ${p <= 1 ? 'disabled' : ''} aria-label="Previous page">${ic('chev-left', 14)}</button>
+      ${nums}
+      <button type="button" class="pg-btn" data-act="ld-page" data-p="${p + 1}" ${p >= pages ? 'disabled' : ''} aria-label="Next page">${ic('chev-right', 14)}</button>
+    </div>
+    <span class="faint">${from}–${to} of ${plural(total, 'row')}</span>
+  </div>`;
+}
+function ldDataBody(colId){
+  const st = S.state;
+  if (st === 'loading'){
+    return `<div class="bi"><div class="sk" style="height:14px;width:40%;margin-bottom:12px"></div><div class="sk" style="height:160px;width:100%"></div></div>
+      <div class="ld-tools"><div class="sk" style="height:16px;width:240px"></div><div class="sk" style="height:32px;width:280px"></div></div>
+      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>BC</th><th>Ad account</th><th>Date</th><th class="num">IAA revenue</th><th class="num">Estimated distribution revenue</th></tr></thead><tbody>${skelRows(6, 5)}</tbody></table></div></div>`;
+  }
+  if (st === 'error') return errorBlock('distribution data');
+  if (st === 'empty'){
+    return '<div class="panel">' + emptyBlock('inbox', 'No distribution data yet', 'Data appears after you claim collections and ads start delivering in TTAM.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>';
+  }
+  const vis = LD.vis;
+  const all = ldFilteredRows(colId);
+  const model = ldChartSeries(all);
+  const legend = model.series.map(s => `<span style="color:${s.color}"><i></i>${esc(s.account)}</span>`).join('') +
+    '<span class="bi-note"><i></i>IAA revenue</span><span class="bi-note"><i class="dash"></i>Estimated distribution revenue</span>';
+  const chk = (k, label) => `<label><input type="checkbox" class="cb" name="ld-vis-${k}" data-chg="ld-vis" data-k="${k}" ${vis[k] ? 'checked' : ''}>${label}</label>`;
+  const cols = [
+    vis.bc ? ['bc','BC'] : null,
+    vis.account ? ['account','Ad account'] : null,
+    vis.date ? ['date','Date'] : null,
+    ['iaa','IAA revenue'],
+    ['est','Estimated distribution revenue']
+  ].filter(Boolean);
+  const size = LD.size || 10;
+  const pages = Math.max(1, Math.ceil(all.length / size));
+  const page = Math.min(Math.max(1, LD.page || 1), pages);
+  const slice = all.slice((page - 1) * size, page * size);
+  const td = (r, k) => k === 'iaa' || k === 'est' ? `<td class="num usd">${usd(r[k])}</td>` : `<td class="ell" title="${esc(r[k])}">${esc(r[k])}</td>`;
+  const body = slice.length
+    ? slice.map(r => '<tr>' + cols.map(c => td(r, c[0])).join('') + '</tr>').join('')
+    : `<tr><td colspan="${cols.length}">${emptyBlock('search', 'No rows in this date range', 'Try a wider range, or reset to 15–21 Oct 2026.', '<button class="btn" data-act="ld-reset-range">Reset date range</button>')}</td></tr>`;
+  const colW = {bc:'18%', account:'22%', date:'14%', iaa:'20%', est:'26%'};
+  return `<div class="bi">
+      <div class="bi-h"><h4>Revenue by ad account</h4>
+        <div class="seg" role="group" aria-label="Chart grain">
+          <button type="button" class="${LD.grain === 'daily' ? 'on' : ''}" data-act="ld-grain" data-v="daily">Daily</button>
+          <button type="button" class="${LD.grain === 'weekly' ? 'on' : ''}" data-act="ld-grain" data-v="weekly">Weekly</button>
+        </div>
       </div>
-      <div class="sec"><div class="sec-h"><h4>Ads using this link <span class="faint" style="font-weight:400">· ${plural(l.ads.length, 'ad')}</span></h4></div>${ads}</div>
-      <div class="sec"><div class="sec-h"><h4>Status history</h4></div><ul class="timeline">${l.history.slice().reverse().map(h => `<li class="${h.k}"><div class="tl-t">${h.t}</div><div class="tl-e">${h.e}</div><div class="tl-d">${h.d}</div></li>`).join('')}</ul></div></div>
-      <div class="dr-aside">      <div class="sec"><div class="sec-h"><h4>Distribution relationship</h4></div><div class="kv one">
-        <div><div class="k">Identifier</div><div class="v mono">${c.id} × BC ${BCS.main.id}</div></div>
-        <div><div class="k">Business Center</div><div class="v">${BCS.main.name}</div></div>
-        <div><div class="k">Contract ID</div><div class="v mono">${k.id}</div></div>
-        <div><div class="k">Market</div><div class="v">${c.market}</div></div>
-        <div><div class="k">Language</div><div class="v">${c.lang}</div></div>
-        <div><div class="k">Revenue share</div><div class="v">${c.share}%</div></div>
-        <div><div class="k">Generated</div><div class="v">${l.created}</div></div>
-        <div><div class="k">Rights holder</div><div class="v">${k.holder}</div></div>
-        <div><div class="k">Closing a link</div><div class="v">Only the rights holder, in TTDC</div></div></div></div></div></div>`,
-    footer:`${recheck ? '<button class="btn" data-act="link-recheck" data-col="' + l.col + '">' + ic('refresh', 14) + 'Refresh status</button>' : ''}<button class="btn btn-primary" data-act="ttam" data-col="${l.col}">${ic('external', 14)}Open TTAM</button>`};
+      ${biChartSvg(model)}
+      <div class="bi-leg">${legend}</div>
+    </div>
+    <div class="ld-tools">
+      <div class="ld-vis">${chk('bc','BC')}${chk('account','Ad account')}${chk('date','Date')}</div>
+      <div class="ld-range"><span>Date range</span>
+        <input class="input" type="date" name="ld-from" data-chg="ld-from" value="${esc(LD.from)}" aria-label="From date">
+        <span>to</span>
+        <input class="input" type="date" name="ld-to" data-chg="ld-to" value="${esc(LD.to)}" aria-label="To date">
+      </div>
+    </div>
+    <div class="ld-export-row"><button type="button" class="btn btn-primary" data-act="ld-export">${ic('download', 14)}Export</button></div>
+    <div class="panel"><div class="tbl-wrap"><table class="tbl ld-tbl"><thead><tr>${cols.map(c => `<th class="${c[0]==='iaa'||c[0]==='est'?'num':''}" style="width:${colW[c[0]]}">${c[1]}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>${all.length ? ldPagerHtml(all.length) : ''}</div>`;
+}
+function linkNeighbors(colId){
+  const order = (S.state === 'empty' || S.state === 'loading' || S.state === 'error') ? [] : lvFiltered().map(l => l.col);
+  const at = order.indexOf(colId);
+  return {at, prev: at > 0 ? order[at - 1] : null, next: at >= 0 ? order[at + 1] : null};
+}
+function linkTabs(){
+  return `<div class="tabs dr-tabs" role="tablist" aria-label="Link details">
+    <button type="button" class="tab ${LD.tab === 'drama' ? 'on' : ''}" role="tab" aria-selected="${LD.tab === 'drama'}" data-act="ld-tab" data-tab="drama">Drama details</button>
+    <button type="button" class="tab ${LD.tab === 'data' ? 'on' : ''}" role="tab" aria-selected="${LD.tab === 'data'}" data-act="ld-tab" data-tab="data">Data details</button>
+  </div>`;
+}
+function openLinkDrawer(colId, tab){
+  const c = colOf(colId);
+  LD.col = colId; LD.tab = tab || 'drama'; LD.page = 1;
+  stopPlayer();
+  if (c){ PL.ctr = c.ctr; PL.ep = 1; PL.t = 0; PL.speed = 2; }
+  DS.sel = new Set();
+  openDrawer(() => linkDrawer(colId), stopPlayer);
+}
+function goLink(colId){
+  if (!colId) return;
+  const c = colOf(colId); if (!c) return;
+  stopPlayer(); PL.ctr = c.ctr; PL.ep = 1; PL.t = 0; DS.sel = new Set();
+  LD.col = colId; LD.page = 1;
+  drawerFn = () => linkDrawer(colId); refreshDrawer();
+  const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0;
+}
+function linkDrawer(colId){
+  const l = linkOf(colId); const c = colOf(colId); const k = c ? ctrOf(c.ctr) : null;
+  const title = k ? k.title + ' · ' + c.market : 'Link details';
+  const sub = c ? `<span>${c.lang}</span><span class="faint">·</span><span class="mono">${c.id}</span>${l ? stChip(LINK_ST, l.status) : ''}` : '';
+  const tabs = linkTabs();
+  if (LD.tab === 'data'){
+    return {title, sub, tabs, body: ldDataBody(colId)};
+  }
+  const st = S.state;
+  if (st === 'loading') return {title, sub, tabs, body: `<div class="det"><div class="det-l"><div class="sk" style="aspect-ratio:9/16;width:100%"></div></div><div class="det-r"><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:14px;width:80%;margin-top:10px"></div><div class="sk" style="height:72px;width:100%;margin-top:16px"></div></div></div>`};
+  if (st === 'error') return {title, sub, tabs, body: errorBlock('drama details')};
+  if (st === 'empty' || !k){
+    return {title, sub, tabs, body: '<div class="panel">' + emptyBlock('film', 'No drama details yet', 'Claim a collection in Drama Marketplace to see the drama and its data here.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>'};
+  }
+  const {body, availCount} = dramaBody(c.ctr);
+  const nav = linkNeighbors(colId);
+  const prevTitle = nav.prev ? ctrOf(colOf(nav.prev).ctr).title : '';
+  const nextTitle = nav.next ? ctrOf(colOf(nav.next).ctr).title : '';
+  const prevTip = nav.prev ? 'Previous: ' + prevTitle : 'First link in the current list';
+  const nextTip = nav.next ? 'Next: ' + nextTitle : 'Last link in the current list';
+  return {title, sub, tabs, body,
+    footer:`<button class="btn" data-act="link-nav" ${nav.prev ? 'data-col="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="link-nav" ${nav.next ? 'data-col="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button>${dramaClaimFooter(availCount)}`};
 }
 
 /* TTAM handoff */
@@ -1594,14 +1850,31 @@ const ACT = {
   'export-links': () => openExport(),
   'ex-fmt': el => { EX.fmt = el.dataset.v; refreshDrawer(); },
   'ex-run': () => runExport(),
-  'link-details': (el, e) => { if (e) e.stopPropagation(); UI.lv.menu = null; const c = el.dataset.col; openDrawer(() => linkDrawer(c)); },
-  'link-recheck': el => busy(el, 800, () => {
-    const l = linkOf(el.dataset.col);
-    if (l.status === 'unknown'){ l.status = 'active'; l.reason = ''; l.ap = 'none'; l.apNote = ''; l.ads.forEach(a => a.st = 'Delivering'); l.updated = 'Nov 3, 2026 03:14 UTC'; l.history.push({t:'Nov 3, 2026 03:14 UTC', e:'TTAM confirmed status', d:'Link active; no ads need pausing', k:'ok'}); toast('Status confirmed: link is active.'); }
-    else if (l.ap === 'pausing'){ l.ap = 'complete'; l.apNote = '5 of 5 ads paused'; l.ads.forEach(a => a.st = 'Paused'); l.history.push({t:'Nov 3, 2026 03:14 UTC', e:'TTAM: auto-pause complete', d:'All 5 affected ads paused', k:'ok'}); toast('Auto-pause complete: all affected ads are paused.'); }
-    else if (l.ap === 'unknown'){ l.ap = 'none'; toast('Auto-pause result confirmed.'); }
-    refreshDrawer(); render();
-  }),
+  'link-details': (el, e) => { if (e) e.stopPropagation(); UI.lv.menu = null; openLinkDrawer(el.dataset.col, el.dataset.tab || 'drama'); },
+  'ld-tab': el => { LD.tab = el.dataset.tab; if (LD.tab !== 'drama') stopPlayer(); refreshDrawer(); const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0; },
+  'ld-grain': el => { LD.grain = el.dataset.v; refreshDrawer(); },
+  'ld-page': el => { const p = +el.dataset.p; if (!p || p < 1) return; LD.page = p; refreshDrawer(); },
+  'ld-export': () => {
+    const colId = LD.col; if (!colId) return;
+    if (S.state === 'empty'){ toast('No distribution data to export.', 'warn'); return; }
+    if (S.state === 'error'){ toast('Data failed to load. Retry, then export.', 'warn'); return; }
+    const vis = LD.vis;
+    const cols = [
+      vis.bc ? ['bc','BC'] : null,
+      vis.account ? ['account','Ad account'] : null,
+      vis.date ? ['date','Date'] : null,
+      ['iaa','IAA revenue'],
+      ['est','Estimated distribution revenue']
+    ].filter(Boolean);
+    const rows = ldFilteredRows(colId);
+    if (!rows.length){ toast('No rows in this date range.', 'warn'); return; }
+    const val = (r, k) => k === 'iaa' || k === 'est' ? usd(r[k]) : r[k];
+    const name = 'distribution-data-' + colId + '-' + DEMO_TODAY + '.csv';
+    download(name, csv([cols.map(c => c[1])].concat(rows.map(r => cols.map(c => val(r, c[0]))))));
+    toast('Exported ' + plural(rows.length, 'row') + ' to ' + name);
+  },
+  'ld-reset-range': () => { LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.page = 1; refreshDrawer(); },
+  'link-nav': el => goLink(el.dataset.col),
   'ttam': (el, e) => { if (e) e.stopPropagation(); UI.lv.menu = null; render(); const c = el.dataset.col; openModal(() => ttamModal(c)); },
   'ttam-go': el => { const c = el.dataset.col; const l = linkOf(c); closeModal(); copyText(l.url, 'Link copied. Opening TTAM...'); setTimeout(() => showTtam(c), 350); },
   'ttam-back': () => backFromTtam(),
@@ -1638,7 +1911,7 @@ const ACT = {
   'demo-page': el => go(el.dataset.p),
   'demo-state': el => setState(el.dataset.s),
   'demo-cover': el => { DEMO.cover = el.dataset.v; coverLeave(); renderDemo(); if (S.page === 'marketplace') render(); },
-  'demo-reset': () => { DEMO.cover = 'mixed'; Object.assign(UI, freshUI()); closeAll(); stopPlayer(); S.data = null; S.state = '__'; location.hash = '#' + PATH.marketplace + '?state=normal'; if (location.hash === '#/marketplace?state=normal') onRoute(); toast('Demo reset to Normal.'); },
+  'demo-reset': () => { DEMO.cover = 'mixed'; Object.assign(UI, freshUI()); resetLDKeepCol(); LD.col = null; LD.tab = 'drama'; closeAll(); stopPlayer(); S.data = null; S.state = '__'; location.hash = '#' + PATH.marketplace + '?state=normal'; if (location.hash === '#/marketplace?state=normal') onRoute(); toast('Demo reset to Normal.'); },
   'demo-copy': () => copyText(location.href.split('#')[0] + '#' + PATH[S.page] + '?state=' + S.state, 'Demo link copied for this page and state')
 };
 function setState(st){ location.hash = '#' + PATH[S.page] + '?state=' + st; }
@@ -1659,6 +1932,10 @@ const CHG = {
   'lv-size': el => { UI.lv.size = +el.value || 10; UI.lv.page = 1; UI.lv.menu = null; render(); },
   'lv-from': el => { UI.lv.from = el.value; UI.lv.page = 1; render(); },
   'lv-to': el => { UI.lv.to = el.value; UI.lv.page = 1; render(); },
+  'ld-vis': el => { LD.vis[el.dataset.k] = el.checked; refreshDrawer(); },
+  'ld-from': el => { LD.from = el.value; LD.page = 1; refreshDrawer(); },
+  'ld-to': el => { LD.to = el.value; LD.page = 1; refreshDrawer(); },
+  'ld-size': el => { LD.size = +el.value || 10; LD.page = 1; refreshDrawer(); },
   'ex-scope': el => { EX.scope = el.value; refreshDrawer(); },
   'ex-field': el => { el.checked ? EX.fields.add(el.dataset.f) : EX.fields.delete(el.dataset.f); refreshDrawer(); },
   'stm-ack': el => { CS.ack = el.checked; const b = $('[data-act="stm-confirm-submit"]'); if (b) b.disabled = !CS.ack; }
