@@ -248,16 +248,28 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .dr-tabs{padding:0 24px;margin:0;flex:none;gap:24px}
 .dr-tabs .tab{height:36px;font-size:13px}
 .drawer .toolbar{margin-bottom:12px}
-.bi{border:1px solid var(--border);border-radius:4px;padding:10px 12px 8px;margin-bottom:12px;background:#fff}
-.bi-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
-.bi-h h4{margin:0;font-size:13px;font-weight:600}
-.bi-ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-.bi-svg{display:block;width:100%;height:200px}
+.bi{border:1px solid var(--border);border-radius:4px;padding:12px 12px 10px;margin-bottom:12px;background:#fff}
+.bi-h{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:8px}
+.bi-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px;flex:none}
+.bi-ctrl{display:flex;align-items:center;gap:8px;flex-wrap:nowrap}
+.bi-ctrl .select{height:36px;border-radius:8px}
+.bi-svg{display:block;width:100%;height:248px}
 .ld-tbl th{white-space:normal;line-height:15px;height:auto;padding:8px 12px}
-.bi-leg{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:6px;font-size:11px;color:var(--text2)}
+.bi-leg{display:flex;flex-wrap:wrap;gap:8px 14px;align-items:center;justify-content:flex-end;font-size:12px;color:var(--text2);line-height:18px}
 .bi-leg span{display:inline-flex;align-items:center;gap:6px}
-.bi-leg i.sw{width:8px;height:8px;border-radius:1px;background:currentColor;display:inline-block}
-.bi-leg i.line{width:16px;height:0;border-top:2px solid #161823;display:inline-block}
+.bi-leg i.dot{width:8px;height:8px;border-radius:50%;background:currentColor;display:inline-block;flex:none}
+.met-wrap{position:relative;flex:1;min-width:0}
+.met-combo{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:36px;width:100%;padding:4px 32px 4px 6px;border:1px solid var(--border2);border-radius:8px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6068' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;cursor:pointer;text-align:left}
+.met-combo:hover,.met-combo.on{border-color:var(--primary)}
+.met-chip{display:inline-flex;align-items:center;gap:2px;height:24px;padding:0 4px 0 8px;border-radius:4px;background:#F1F2F4;color:#4A4F57;font-size:12px;font-weight:500;max-width:100%}
+.met-chip .met-x{border:0;background:none;width:18px;height:18px;padding:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:#8A8F99;border-radius:2px;font-size:14px;line-height:1;font-weight:500}
+.met-chip .met-x:hover{color:var(--text);background:#E3E5E8}
+.met-menu{left:0;right:0;top:calc(100% + 4px);min-width:0;z-index:40;padding:6px 0}
+.met-menu label{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:13px}
+.met-menu label:hover{background:var(--hover)}
+.grain-sel{width:120px}
+.focus-sel{width:140px}
+.focus-sel.week{width:168px}
 .vp-wrap{position:relative;display:inline-flex}
 .vp-btn{height:32px;padding:0 28px 0 10px;border:1px solid var(--border2);border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6068' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center;min-width:120px;text-align:left;cursor:pointer;font:inherit}
 .vp-btn:hover,.vp-btn.on{border-color:var(--primary)}
@@ -993,8 +1005,8 @@ function coverLeave(){
 /* Drama detail drawer + player */
 const PL = {ctr:null, ep:1, t:0, playing:false, speed:2, timer:null};
 const DS = {sel:new Set()};
-const LD = {col:null, tab:'drama', grain:'daily', vis:{bc:true, account:true, date:true}, visOpen:false, from:'2026-10-15', to:'2026-10-21', day:null, week:null, page:1, size:10};
-function resetLDKeepCol(){ LD.grain = 'daily'; LD.vis = {bc:true, account:true, date:true}; LD.visOpen = false; LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.day = null; LD.week = null; LD.page = 1; LD.size = 10; }
+const LD = {col:null, tab:'drama', grain:'daily', metrics:['iaa','est'], metOpen:false, vis:{bc:true, account:true, date:true}, visOpen:false, from:'2026-10-15', to:'2026-10-21', day:null, week:null, page:1, size:10};
+function resetLDKeepCol(){ LD.grain = 'daily'; LD.metrics = ['iaa','est']; LD.metOpen = false; LD.vis = {bc:true, account:true, date:true}; LD.visOpen = false; LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.day = null; LD.week = null; LD.page = 1; LD.size = 10; }
 const epDur = ep => 88 + (ep * 37) % 46;
 const fmtT = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
 function stopPlayer(){ if (PL.timer){ clearInterval(PL.timer); PL.timer = null; } PL.playing = false; }
@@ -1380,7 +1392,16 @@ function createLink(colId){
 
 /* Link details drawer */
 const AD_ACCT_POOL = ['Northstar Stories US','Northstar Drama UK','MapleReel Studio','Harbor Lane Media'];
-const AD_ACCT_COLORS = ['#009995','#2463D1','#B76E00','#7C3AED'];
+const CHART_METRICS = [
+  {id:'iaa', label:'IAA revenue'},
+  {id:'est', label:'Estimated distribution revenue'},
+  {id:'cost', label:'Cost'},
+  {id:'impr', label:'Impressions'}
+];
+const BAR_COLORS = ['#C5C7F5','#0E3A48'];
+const LINE_COLORS = ['#C989A8','#8B5A3C','#4BA3C7'];
+const COST_CURVE = [1.72,1.58,1.38,1.22,1.12,1.02,0.94,0.86,0.8,0.74,0.68,0.64,0.6,0.56,0.5,0.44,0.4,0.42,0.36,0.34,0.26,0.18,0.1,0.04];
+const IMPR_CURVE = [0.42,0.48,0.4,0.52,0.62,0.58,0.5,0.64,0.7,0.78,0.72,0.8,0.86,0.9,0.84,0.96,1.02,1.18,1.12,1.08,1.22,1.16,1.34,1.48];
 function isoAddDays(iso, n){
   const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n);
   return d.toISOString().slice(0, 10);
@@ -1470,41 +1491,59 @@ function ldFocusWeek(){
   return wins.find(w => w.id === id) || wins[wins.length - 1];
 }
 const HOUR_CURVE = [0.32,0.24,0.2,0.18,0.2,0.28,0.48,0.72,0.92,1.02,1.08,1.12,1.14,1.1,1.08,1.12,1.28,1.48,1.72,1.95,1.82,1.42,0.92,0.55];
-function splitHours(daily, colId, acct, date, ai){
-  const seed = seedFrom(colId + acct + date);
-  const raw = HOUR_CURVE.map((c, h) => c * (1 + 0.14 * Math.sin((seed % 47) / 9 + h * 0.38 + ai)));
+function splitHours(daily, colId, key, date, ai, curve){
+  const src = curve || HOUR_CURVE;
+  const seed = seedFrom(colId + key + date);
+  const raw = src.map((c, h) => c * (1 + 0.14 * Math.sin((seed % 47) / 9 + h * 0.38 + ai)));
   const sum = raw.reduce((a, b) => a + b, 0) || 1;
   const hours = raw.map(v => Math.round(daily * v / sum * 100) / 100);
+  const peak = src.indexOf(Math.max.apply(null, src));
   const diff = Math.round((daily - hours.reduce((a, b) => a + b, 0)) * 100) / 100;
-  hours[19] = Math.round((hours[19] + diff) * 100) / 100;
+  hours[peak] = Math.round((hours[peak] + diff) * 100) / 100;
   return hours;
+}
+function ldSelectedMetrics(){
+  const ids = (LD.metrics && LD.metrics.length) ? LD.metrics : ['iaa','est'];
+  return ids.map(id => CHART_METRICS.find(m => m.id === id)).filter(Boolean);
+}
+function dailyMetricTotal(rows, id){
+  const iaa = rows.reduce((s, r) => s + r.iaa, 0);
+  const est = rows.reduce((s, r) => s + r.est, 0);
+  if (id === 'iaa') return Math.round(iaa * 100) / 100;
+  if (id === 'est') return Math.round(est * 100) / 100;
+  if (id === 'cost') return Math.round(iaa * 0.41 * 100) / 100;
+  if (id === 'impr') return Math.round(iaa * 28);
+  return 0;
+}
+function metricHourCurve(id){
+  if (id === 'cost') return COST_CURVE;
+  if (id === 'impr') return IMPR_CURVE;
+  return HOUR_CURVE;
+}
+function ldSeriesValues(colId, id, buckets, grain, dailyRows){
+  const phase = {iaa:0, est:1.15, cost:2.4, impr:3.2}[id] || 0;
+  if (grain === 'daily'){
+    const day = ldFocusDay();
+    const total = dailyMetricTotal(dailyRows.filter(r => r.date === day), id);
+    return splitHours(total, colId, id, day, phase, metricHourCurve(id));
+  }
+  return buckets.map(bk => dailyMetricTotal(dailyRows.filter(r => r.date === bk.key), id));
 }
 function ldChartModel(colId){
   const daily = ldFilteredRows(colId);
-  const accts = adAccountsFor(colId);
-  if (!daily.length || !accts.length) return {buckets:[], series:[], totals:[]};
-  if (LD.grain === 'daily'){
-    const day = ldFocusDay();
-    const buckets = Array.from({length:24}, (_, h) => ({key:h, label:String(h).padStart(2, '0')}));
-    const series = accts.map((acct, i) => {
-      const row = daily.find(r => r.account === acct && r.date === day);
-      return {account:acct, color:AD_ACCT_COLORS[i % AD_ACCT_COLORS.length], values: splitHours(row ? row.iaa : 0, colId, acct, day, i)};
-    });
-    const totals = buckets.map((_, h) => Math.round(series.reduce((s, x) => s + x.values[h], 0) * 100) / 100);
-    return {buckets, series, totals, grain:'daily'};
-  }
-  const win = ldFocusWeek();
-  const days = win ? datesBetween(win.start, win.end) : [];
-  const buckets = days.map(d => ({key:d, label:fmtMd(d)}));
-  const series = accts.map((acct, i) => ({
-    account:acct, color:AD_ACCT_COLORS[i % AD_ACCT_COLORS.length],
-    values: days.map(d => {
-      const row = daily.find(r => r.account === acct && r.date === d);
-      return row ? row.iaa : 0;
-    })
-  }));
-  const totals = buckets.map((_, i) => Math.round(series.reduce((s, x) => s + x.values[i], 0) * 100) / 100);
-  return {buckets, series, totals, grain:'weekly'};
+  const metrics = ldSelectedMetrics();
+  if (!daily.length || !metrics.length) return {buckets:[], series:[]};
+  const win = LD.grain === 'daily' ? null : ldFocusWeek();
+  const buckets = LD.grain === 'daily'
+    ? Array.from({length:24}, (_, h) => ({key:h, label:String(h)}))
+    : (win ? datesBetween(win.start, win.end) : []).map(d => ({key:d, label:fmtMd(d)}));
+  const series = metrics.map((m, i) => {
+    const kind = i < 2 ? 'bar' : 'line';
+    const color = kind === 'bar' ? BAR_COLORS[i % BAR_COLORS.length] : LINE_COLORS[(i - 2) % LINE_COLORS.length];
+    const values = ldSeriesValues(colId, m.id, buckets, LD.grain, daily);
+    return {id:m.id, label:m.label, kind, color, values, max: values.reduce((a, b) => a > b ? a : b, 0)};
+  });
+  return {buckets, series, grain: LD.grain};
 }
 function niceMax(v){
   if (v <= 0) return 1;
@@ -1513,24 +1552,34 @@ function niceMax(v){
   return Math.ceil(v / step) * step;
 }
 function biChartSvg(model){
-  const W = 880, H = 200, l = 42, r = 16, t = 10, b = 28;
+  const W = 880, H = 248, l = 40, r = 10, t = 8, b = 26;
   const iw = W - l - r, ih = H - t - b;
-  const {buckets, series, totals} = model;
+  const {buckets, series} = model;
   if (!buckets.length || !series.length){
     return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="No chart data"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#8A8F99" font-size="12" font-family="inherit">No rows in this date range</text></svg>`;
   }
   const n = buckets.length;
+  const bars = series.filter(s => s.kind === 'bar');
+  const lines = series.filter(s => s.kind === 'line');
   let max = 0;
-  totals.forEach(v => { if (v > max) max = v; });
-  max = niceMax(max * 1.12);
+  (bars.length ? bars : lines).forEach(s => s.values.forEach(v => { if (v > max) max = v; }));
+  max = niceMax(max * 1.08);
   const band = iw / n;
-  const barW = Math.max(4, Math.min(22, band * 0.58));
-  const yAt = v => t + ih - (v / max) * ih;
+  const nB = Math.max(1, bars.length);
+  const gap = 2;
+  const groupW = Math.min(band * 0.58, nB * 26 + (nB - 1) * gap);
+  const barW = Math.max(5, (groupW - (nB - 1) * gap) / nB);
   const xMid = i => l + band * i + band / 2;
+  const yBar = v => t + ih - (max ? v / max : 0) * ih;
+  const yLine = (s, v) => {
+    const m = niceMax((s.max || 0) * 1.08);
+    return t + ih - (m ? v / m : 0) * ih;
+  };
   let grid = '';
-  for (let i = 0; i <= 3; i++){
-    const v = max * (1 - i / 3), y = t + ih * i / 3;
-    grid += `<line x1="${l}" y1="${y.toFixed(1)}" x2="${W-r}" y2="${y.toFixed(1)}" stroke="#EEF0F2" stroke-width="1"/>`;
+  for (let i = 0; i <= 4; i++){
+    const v = max * (1 - i / 4), y = t + ih * i / 4;
+    const base = i === 4;
+    grid += `<line x1="${l}" y1="${y.toFixed(1)}" x2="${W-r}" y2="${y.toFixed(1)}" stroke="${base ? '#D0D3D8' : '#EEF0F2'}" stroke-width="1"/>`;
     const lab = v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0) + 'k' : String(Math.round(v));
     grid += `<text x="${l-6}" y="${(y + 3).toFixed(1)}" text-anchor="end" fill="#8A8F99" font-size="10" font-family="inherit">${lab}</text>`;
   }
@@ -1540,20 +1589,22 @@ function biChartSvg(model){
     if (i % step !== 0 && i !== n - 1) return;
     xlbl += `<text x="${xMid(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8A8F99" font-size="10" font-family="inherit">${esc(bk.label)}</text>`;
   });
-  let bars = '';
+  let barG = '';
   for (let i = 0; i < n; i++){
-    let y = t + ih;
-    const x = xMid(i) - barW / 2;
-    series.forEach(s => {
+    const pack = nB * barW + (nB - 1) * gap;
+    let x = xMid(i) - pack / 2;
+    bars.forEach(s => {
       const v = s.values[i] || 0;
-      const h = (v / max) * ih;
-      y -= h;
-      if (h > 0.4) bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${s.color}"/>`;
+      const h = max ? (v / max) * ih : 0;
+      if (h > 0.4) barG += `<rect x="${x.toFixed(1)}" y="${yBar(v).toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" rx="2" fill="${s.color}"/>`;
+      x += barW + gap;
     });
   }
-  const line = totals.map((v, i) => (i ? 'L' : 'M') + xMid(i).toFixed(1) + ',' + yAt(v).toFixed(1)).join(' ');
-  const dots = totals.map((v, i) => n <= 12 ? `<circle cx="${xMid(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="2" fill="#161823"/>` : '').join('');
-  return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Revenue by ad account">${grid}${bars}<path d="${line}" fill="none" stroke="#161823" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>${dots}${xlbl}</svg>`;
+  const lineG = lines.map(s => {
+    const d = s.values.map((v, i) => (i ? 'L' : 'M') + xMid(i).toFixed(1) + ',' + yLine(s, v).toFixed(1)).join(' ');
+    return `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/>`;
+  }).join('');
+  return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Selected metrics">${grid}${barG}${lineG}${xlbl}</svg>`;
 }
 function ldPagerHtml(total){
   const size = LD.size || 10;
@@ -1580,7 +1631,7 @@ function ldPagerHtml(total){
 function ldDataBody(colId){
   const st = S.state;
   if (st === 'loading'){
-    return `<div class="bi"><div class="sk" style="height:14px;width:40%;margin-bottom:12px"></div><div class="sk" style="height:160px;width:100%"></div></div>
+    return `<div class="bi"><div class="bi-h"><div class="sk" style="height:36px;flex:1"></div><div class="sk" style="height:36px;width:120px"></div></div><div class="sk" style="height:200px;width:100%"></div></div>
       <div class="toolbar"><div class="left"><div class="sk" style="height:32px;width:120px"></div><div class="sk" style="height:32px;width:260px"></div></div><div class="right"><div class="sk" style="height:32px;width:88px"></div></div></div>
       <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>BC</th><th>Ad account</th><th>Date</th><th class="num">IAA revenue</th><th class="num">Estimated distribution revenue</th></tr></thead><tbody>${skelRows(6, 5)}</tbody></table></div></div>`;
   }
@@ -1591,12 +1642,16 @@ function ldDataBody(colId){
   const vis = LD.vis;
   const all = ldFilteredRows(colId);
   const model = ldChartModel(colId);
-  const legend = model.series.map(s => `<span style="color:${s.color}"><i class="sw"></i>${esc(s.account)}</span>`).join('') +
-    '<span><i class="line"></i>Total IAA revenue</span>';
+  const selected = ldSelectedMetrics();
+  const legend = selected.length
+    ? model.series.map(s => `<span style="color:${s.color}"><i class="dot"></i>${esc(s.label)}</span>`).join('')
+    : '';
   const chk = (k, label) => `<label><input type="checkbox" class="cb" name="ld-vis-${k}" data-chg="ld-vis" data-k="${k}" ${vis[k] ? 'checked' : ''}>${label}</label>`;
+  const metChk = m => `<label><input type="checkbox" class="cb" name="ld-met-${m.id}" data-chg="ld-met" data-k="${m.id}" ${selected.some(x => x.id === m.id) ? 'checked' : ''}>${esc(m.label)}</label>`;
+  const chips = selected.map(m => `<span class="met-chip">${esc(m.label)}<button type="button" class="met-x" data-act="ld-met-remove" data-k="${m.id}" aria-label="Remove ${esc(m.label)}">×</button></span>`).join('');
   const focus = LD.grain === 'daily'
-    ? `<select class="select" style="width:132px" name="ld-day" data-chg="ld-day" aria-label="Day">${ldRangeDates().map(d => `<option value="${d}" ${d === ldFocusDay() ? 'selected' : ''}>${fmtMd(d)}</option>`).join('')}</select>`
-    : `<select class="select" style="width:168px" name="ld-week" data-chg="ld-week" aria-label="Week">${ldWeekWindows().map(w => `<option value="${w.id}" ${(ldFocusWeek() || {}).id === w.id ? 'selected' : ''}>${esc(w.label)}</option>`).join('')}</select>`;
+    ? `<select class="select focus-sel" name="ld-day" data-chg="ld-day" aria-label="Day">${ldRangeDates().map(d => `<option value="${d}" ${d === ldFocusDay() ? 'selected' : ''}>${fmtMd(d)}</option>`).join('')}</select>`
+    : `<select class="select focus-sel week" name="ld-week" data-chg="ld-week" aria-label="Week">${ldWeekWindows().map(w => `<option value="${w.id}" ${(ldFocusWeek() || {}).id === w.id ? 'selected' : ''}>${esc(w.label)}</option>`).join('')}</select>`;
   const cols = [
     vis.bc ? ['bc','BC'] : null,
     vis.account ? ['account','Ad account'] : null,
@@ -1614,17 +1669,23 @@ function ldDataBody(colId){
     : `<tr><td colspan="${cols.length}">${emptyBlock('search', 'No rows in this date range', 'Try a wider range, or reset to 15–21 Oct 2026.', '<button class="btn" data-act="ld-reset-range">Reset date range</button>')}</td></tr>`;
   const colW = {bc:'18%', account:'22%', date:'14%', iaa:'20%', est:'26%'};
   return `<div class="bi">
-      <div class="bi-h"><h4>Revenue by ad account</h4>
-        <div class="bi-ctrl">
-          <div class="seg" role="group" aria-label="Chart grain">
-            <button type="button" class="${LD.grain === 'daily' ? 'on' : ''}" data-act="ld-grain" data-v="daily">Daily</button>
-            <button type="button" class="${LD.grain === 'weekly' ? 'on' : ''}" data-act="ld-grain" data-v="weekly">Weekly</button>
+      <div class="bi-h">
+        <div class="met-wrap">
+          <div class="met-combo ${LD.metOpen ? 'on' : ''}" data-act="ld-met-toggle" role="combobox" aria-haspopup="listbox" aria-expanded="${LD.metOpen}" aria-label="Metrics" tabindex="0">${chips}</div>
+          ${LD.metOpen ? `<div class="menu met-menu" role="listbox">${CHART_METRICS.map(metChk).join('')}</div>` : ''}
+        </div>
+        <div class="bi-right">
+          <div class="bi-ctrl">
+            <select class="select grain-sel" name="ld-grain" data-chg="ld-grain" aria-label="Chart grain">
+              <option value="daily" ${LD.grain === 'daily' ? 'selected' : ''}>By hour</option>
+              <option value="weekly" ${LD.grain === 'weekly' ? 'selected' : ''}>By day</option>
+            </select>
+            ${focus}
           </div>
-          ${focus}
+          <div class="bi-leg">${legend}</div>
         </div>
       </div>
       ${biChartSvg(model)}
-      <div class="bi-leg">${legend}</div>
     </div>
     <div class="toolbar">
       <div class="left">
@@ -1919,9 +1980,16 @@ const ACT = {
   'ex-fmt': el => { EX.fmt = el.dataset.v; refreshDrawer(); },
   'ex-run': () => runExport(),
   'link-details': (el, e) => { if (e) e.stopPropagation(); UI.lv.menu = null; openLinkDrawer(el.dataset.col, el.dataset.tab || 'drama'); },
-  'ld-tab': el => { LD.tab = el.dataset.tab; LD.visOpen = false; if (LD.tab !== 'drama') stopPlayer(); refreshDrawer(); const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0; },
-  'ld-grain': el => { LD.grain = el.dataset.v; LD.visOpen = false; refreshDrawer(); },
-  'ld-vp-toggle': (el, e) => { if (e) e.stopPropagation(); LD.visOpen = !LD.visOpen; refreshDrawer(); },
+  'ld-tab': el => { LD.tab = el.dataset.tab; LD.visOpen = false; LD.metOpen = false; if (LD.tab !== 'drama') stopPlayer(); refreshDrawer(); const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0; },
+  'ld-met-toggle': (el, e) => { if (e) e.stopPropagation(); LD.metOpen = !LD.metOpen; LD.visOpen = false; refreshDrawer(); },
+  'ld-met-remove': (el, e) => {
+    if (e) e.stopPropagation();
+    const cur = (LD.metrics && LD.metrics.length) ? LD.metrics.slice() : ['iaa','est'];
+    if (cur.length <= 1){ toast('Select at least one metric.', 'warn'); return; }
+    LD.metrics = cur.filter(id => id !== el.dataset.k);
+    refreshDrawer();
+  },
+  'ld-vp-toggle': (el, e) => { if (e) e.stopPropagation(); LD.visOpen = !LD.visOpen; LD.metOpen = false; refreshDrawer(); },
   'ld-page': el => { const p = +el.dataset.p; if (!p || p < 1) return; LD.page = p; refreshDrawer(); },
   'ld-export': () => {
     const colId = LD.col; if (!colId) return;
@@ -2002,6 +2070,19 @@ const CHG = {
   'lv-from': el => { UI.lv.from = el.value; UI.lv.page = 1; render(); },
   'lv-to': el => { UI.lv.to = el.value; UI.lv.page = 1; render(); },
   'ld-vis': el => { LD.vis[el.dataset.k] = el.checked; refreshDrawer(); },
+  'ld-met': el => {
+    const k = el.dataset.k;
+    const cur = (LD.metrics && LD.metrics.length) ? LD.metrics.slice() : ['iaa','est'];
+    if (el.checked){
+      if (!cur.includes(k)) cur.push(k);
+      LD.metrics = cur;
+    } else {
+      if (cur.length <= 1){ el.checked = true; toast('Select at least one metric.', 'warn'); return; }
+      LD.metrics = cur.filter(id => id !== k);
+    }
+    refreshDrawer();
+  },
+  'ld-grain': el => { LD.grain = el.value; LD.metOpen = false; LD.visOpen = false; refreshDrawer(); },
   'ld-from': el => { LD.from = el.value; LD.page = 1; LD.day = null; LD.week = null; refreshDrawer(); },
   'ld-to': el => { LD.to = el.value; LD.page = 1; LD.day = null; LD.week = null; refreshDrawer(); },
   'ld-day': el => { LD.day = el.value; refreshDrawer(); },
@@ -2028,6 +2109,10 @@ document.addEventListener('click', e => {
     LD.visOpen = false;
     if (drawerFn) refreshDrawer();
   }
+  if (LD.metOpen && !e.target.closest('.met-wrap')){
+    LD.metOpen = false;
+    if (drawerFn) refreshDrawer();
+  }
   if (!el || el.disabled) return;
   const inner = e.target.closest('button, a, input, select, label');
   if (inner && inner !== el && el.contains(inner)) return;
@@ -2037,11 +2122,12 @@ document.addEventListener('click', e => {
 document.addEventListener('change', e => { const el = e.target.closest('[data-chg]'); if (el && CHG[el.dataset.chg]) CHG[el.dataset.chg](el); });
 document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && INP[el.dataset.inp]) INP[el.dataset.inp](el); });
 document.addEventListener('keydown', e => {
-  const rb = e.target.closest && e.target.closest('[role="button"][data-act]');
+  const rb = e.target.closest && e.target.closest('[role="button"][data-act], [role="combobox"][data-act]');
   if (rb && rb === e.target && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); rb.click(); return; }
   if (e.key !== 'Escape') return;
   if ($('#ttam').classList.contains('show')) backFromTtam();
   else if (modalFn) closeModal();
+  else if (LD.metOpen){ LD.metOpen = false; refreshDrawer(); }
   else if (LD.visOpen){ LD.visOpen = false; refreshDrawer(); }
   else if (drawerFn){ closeDrawer(); }
 });
