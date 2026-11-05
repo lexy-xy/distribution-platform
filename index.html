@@ -212,7 +212,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 /* Drawer & modal */
 .mask{position:fixed;inset:0;background:rgba(22,24,35,.45);z-index:100;opacity:0;transition:opacity .15s}
 .mask.show{opacity:1}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(var(--w,760px),calc(100vw - 80px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(1125px,calc(100vw - 48px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
 .drawer.show{transform:none}
 .dr-h{min-height:56px;padding:12px 20px 12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
 .dr-h .t{flex:1;min-width:0}
@@ -233,6 +233,11 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .sec-h h4{margin:0;font-size:14px;font-weight:600}
 .kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px}
 .kv.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.kv.four{grid-template-columns:repeat(4,minmax(0,1fr))}
+.kv.one{grid-template-columns:minmax(0,1fr);gap:10px}
+.dr-cols{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.dr-aside{display:flex;flex-direction:column;gap:20px;min-width:0}
+.dr-aside .sec{margin-top:0}
 .kv .k{font-size:12px;color:var(--text2)}
 .kv .v{font-size:13px;word-break:break-word}
 .box{border:1px solid var(--border);border-radius:4px;padding:12px 14px}
@@ -255,8 +260,9 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* Player */
-.det-top{display:grid;grid-template-columns:232px minmax(0,1fr);gap:20px}
-.player{position:relative;width:232px;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
+.det{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start}
+.det-l{position:sticky;top:0}
+.player{position:relative;width:100%;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
 .player svg.poster{position:absolute;inset:0;width:100%;height:100%}
 .player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .player .pl-dim{position:absolute;inset:0;background:rgba(0,0,0,.18)}
@@ -275,13 +281,13 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .pl-speed{display:flex;border:1px solid rgba(255,255,255,.35);border-radius:3px;overflow:hidden}
 .pl-speed button{border:0;background:transparent;color:#fff;font-size:11px;height:20px;padding:0 5px;cursor:pointer;font-weight:600}
 .pl-speed button.on{background:#fff;color:#111}
-.series{margin-top:10px;width:232px}
+.series{margin-top:10px;width:100%}
 .series .trk{position:relative;height:6px;background:#E9EBEE;border-radius:3px}
 .series .free{position:absolute;left:0;top:0;bottom:0;background:#C7E9E6;border-radius:3px 0 0 3px}
 .series .mark{position:absolute;top:-4px;width:2px;height:14px;background:var(--warn)}
 .series .cur{position:absolute;top:-3px;width:12px;height:12px;border-radius:50%;background:var(--primary);border:2px solid #fff;box-shadow:0 0 0 1px var(--primary);transform:translateX(-6px)}
 .series .lbls{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:6px}
-.ep-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:4px}
+.ep-grid{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:4px}
 .ep{height:26px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;padding:0;font-variant-numeric:tabular-nums}
 .ep:hover{border-color:var(--primary)}
 .ep.hook{background:#F0FAF9}
@@ -319,6 +325,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .demo-pill{height:36px;border-radius:18px;background:#15171A;border:1px dashed #F5B83D;color:#F5F6F7;display:flex;align-items:center;gap:8px;padding:0 14px 0 12px;cursor:pointer;font-size:12px;font-weight:600;box-shadow:0 4px 14px rgba(0,0,0,.3)}
 .demo-pill .ic{color:#F5B83D}
 .demo-pill em{font-style:normal;color:#A9AFB8;font-weight:500}
+#drawer-root:has(.drawer) ~ .demo .demo-pill em{display:none}
 .demo-panel{width:300px;background:#15171A;border:1px dashed #F5B83D;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:hidden}
 .demo-h{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 14px;border-bottom:1px solid #2C3036}
 .demo-h b{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#F5B83D}
@@ -657,7 +664,7 @@ let drawerFn = null, modalFn = null, drawerClose = null;
 function openDrawer(fn, onClose){
   drawerFn = fn; drawerClose = onClose || null;
   const r = fn();
-  $('#drawer-root').innerHTML = `<div class="mask" data-act="close-drawer"></div><aside class="drawer" role="dialog" aria-modal="true" style="--w:${r.width || 760}px">${drawerInner(r)}</aside>`;
+  $('#drawer-root').innerHTML = `<div class="mask" data-act="close-drawer"></div><aside class="drawer" role="dialog" aria-modal="true">${drawerInner(r)}</aside>`;
   requestAnimationFrame(() => { $$('#drawer-root .mask, #drawer-root .drawer').forEach(e => e.classList.add('show')); });
 }
 function drawerInner(r){
@@ -667,7 +674,7 @@ function refreshDrawer(){
   if (!drawerFn) return;
   const dr = $('#drawer-root .drawer'); if (!dr) return;
   const b = $('.dr-b', dr); const top = b ? b.scrollTop : 0;
-  const r = drawerFn(); dr.style.setProperty('--w', (r.width || 760) + 'px'); dr.innerHTML = drawerInner(r);
+  const r = drawerFn(); dr.innerHTML = drawerInner(r);
   const nb = $('.dr-b', dr); if (nb) nb.scrollTop = top;
   if (r.after) r.after();
 }
@@ -913,8 +920,8 @@ function dramaDrawer(ctrId){
       <td class="num">${x.share}%</td><td>${colStatus(x)}</td></tr>`;
   }).join('');
   const body = `
-  <div class="det-top">
-    <div>
+  <div class="det">
+    <div class="det-l">
       <div class="player ${PL.playing ? 'playing' : ''}" id="player">
         ${poster(ctrId)}<img class="pl-frame" id="pl-frame" src="${frameSrc(ctrId, (PL.ep - 1) % MEDIA[ctrId][1] + 1)}" alt=""><div class="pl-dim"></div>
         <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span><span class="tag warn" id="pl-lock" style="${PL.ep >= pw ? '' : 'display:none'}">${ic('lock', 10)}Paid episode</span></div>
@@ -933,36 +940,33 @@ function dramaDrawer(ctrId){
       <div class="series"><div class="trk"><div class="free" style="width:${(pw - 1) / N * 100}%"></div><div class="mark" style="left:${(pw - 1) / N * 100}%" title="Paywall"></div><div class="cur" id="pl-cur" style="left:${(PL.ep - 0.5) / N * 100}%"></div></div>
         <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
     </div>
-    <div>
-      <div class="kv">
-        <div><div class="k">Contract ID</div><div class="v"><span class="copyable"><span class="mono">${c.id}</span>${copyBtn(c.id, 'Contract ID copied')}</span></div></div>
+    <div class="det-r">
+      <div class="kv four">
         <div><div class="k">Rights holder</div><div class="v">${c.holder}</div></div>
         <div><div class="k">Format</div><div class="v">${c.format}</div></div>
         <div><div class="k">Source</div><div class="v">${c.source}</div></div>
         <div><div class="k">Episodes</div><div class="v">${N} · paywall from Ep ${pw}</div></div>
         <div><div class="k">Launched</div><div class="v">${c.launchL}</div></div>
-        <div><div class="k">Popularity</div><div class="v">${c.rankL}</div></div>
         <div><div class="k">Plays (30 days)</div><div class="v">${c.plays}</div></div>
         <div><div class="k">Languages</div><div class="v">${Array.from(new Set(cs.map(x => x.lang))).join(', ')}</div></div>
         <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
       </div>
       <p style="margin:14px 0 0">${c.synopsis}</p>
-      <div class="banner plain" style="margin-top:14px">${ic('info', 16)}<div class="bn-body">Preview is for content review. Most distributors check Ep 1–10 (hook), the episodes around the paywall, and a mid-to-late sample at 2x.</div></div>
-    </div>
-  </div>
-  <div class="sec"><div class="sec-h"><h4>Episodes</h4><div class="filters"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${Math.max(1, pw - 1)}">Before paywall</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div></div>
+  <div class="sec"><div class="sec-h"><h4>Episodes</h4><div class="filters"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div></div>
     <div class="ep-grid" id="ep-grid">${eps}</div>
     <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:#F4F5FB"></i>Mid-late sample</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
   </div>
-  <div class="sec"><div class="sec-h"><h4>Collections <span class="faint" style="font-weight:400">· market and language versions</span></h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
+  <div class="sec"><div class="sec-h"><h4>Collections</h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
     <div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Market</th><th>Language</th><th style="width:170px">Collection ID</th><th style="width:90px" class="num">Rev. share</th><th style="width:170px">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <div class="faint" style="font-size:12px;margin-top:8px">Each claim is registered as Collection ID × ${BCS.main.name} (BC ${BCS.main.id}). Revenue share is set by the rights holder per collection.</div>
+  </div>
+    </div>
   </div>`;
   const n = DS.sel.size;
-  return {title:c.title, width:780,
-    sub:`<span>${c.holder}</span><span class="faint">·</span><span class="mono">${c.id}</span><span class="tag">${c.format}</span><span class="tag">${c.source}</span>`,
+  const order = mkFiltered().map(k => k.id); const at = order.indexOf(ctrId); const next = at >= 0 ? order[at + 1] : null;
+  const nextTip = next ? 'Next: ' + ctrOf(next).title : at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
+  return {title:c.title,
     body,
-    footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected · links are generated automatically' : 'Select collections to claim. Links are generated automatically; no ads are created.'}</span><button class="btn" data-act="close-drawer">Close</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
+    footer:`<button class="btn" data-act="close-drawer">Close</button><button class="btn" data-act="drama-next" ${next ? 'data-id="' + next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
 }
 function updatePlayer(){
   const c = ctrOf(PL.ctr); if (!c || !$('#player')){ stopPlayer(); return; }
@@ -1194,13 +1198,13 @@ function openGenerate(pre){
 function genDrawer(){
   const cands = genCandidates(); const n = GS.sel.size;
   const rows = cands.map(c => { const l = linkOf(c.id), k = ctrOf(c.ctr), on = GS.sel.has(c.id);
-    return `<tr class="${on ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="g-${c.id}" data-chg="gen-sel" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select"></td><td><div class="cell-title ell">${k.title}</div><div class="cell-sub">${colLabel(c)}</div></td><td class="mono">${c.id}</td><td>${l ? '<span class="st muted">Link exists</span><div class="st-reason">Returns existing link</div>' : '<span class="st info">No link yet</span>'}</td></tr>`; }).join('');
+    return `<tr class="${on ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="g-${c.id}" data-chg="gen-sel" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select"></td><td><div class="cell-title ell">${k.title}</div><div class="cell-sub mono">${k.id}</div></td><td>${colLabel(c)}</td><td class="mono">${c.id}</td><td class="num">${c.share}%</td><td>${l ? '<span class="st muted">Link exists</span><div class="st-reason">Returns existing link</div>' : '<span class="st info">No link yet</span>'}</td></tr>`; }).join('');
   const newN = Array.from(GS.sel).filter(id => !linkOf(id)).length;
-  return {title:'Generate links', width:680, sub:'Choose a Business Center and the claimed collections that need links',
+  return {title:'Generate links', sub:'Choose a Business Center and the claimed collections that need links',
     body:`${banner('info', 'Generation is idempotent: one link per Collection × Business Center. Re-submitting, retrying, or selecting a collection that already has a link returns the existing link instead of creating a duplicate.')}
       <div class="sec"><div class="sec-h"><h4>Claimed collections</h4><span class="faint" style="font-size:12px">BC ${BCS[GS.bc].id}</span></div>
       <div class="toolbar" style="margin-bottom:8px"><div class="left"><select class="select" style="width:250px" name="gen-bc" data-chg="gen-bc" aria-label="Business Center"><option value="main" ${GS.bc === 'main' ? 'selected' : ''}>${BCS.main.name} (${BCS.main.role})</option><option value="sub" ${GS.bc === 'sub' ? 'selected' : ''}>Studio B (${BCS.sub.role})</option></select></div><div class="right"><button class="btn" data-act="gen-pick" data-m="new">Select without links</button><button class="btn" data-act="gen-pick" data-m="all">Select all</button><button class="btn" data-act="gen-pick" data-m="none">Clear</button></div></div>
-      ${cands.length ? `<div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Drama · collection</th><th style="width:150px">Collection ID</th><th style="width:170px">Current link</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="panel">' + emptyBlock('inbox', 'No claimed collections in this Business Center', 'Studio B hasn\u2019t claimed any collections. Claims belong to the Business Center that made them.', '<button class="btn" data-act="gen-bc-main">Switch to ' + BCS.main.name + '</button>') + '</div>'}</div>`,
+      ${cands.length ? `<div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Drama (Contract)</th><th style="width:240px">Market · language</th><th style="width:160px">Collection ID</th><th style="width:100px" class="num">Rev. share</th><th style="width:190px">Current link</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="panel">' + emptyBlock('inbox', 'No claimed collections in this Business Center', 'Studio B hasn\u2019t claimed any collections. Claims belong to the Business Center that made them.', '<button class="btn" data-act="gen-bc-main">Switch to ' + BCS.main.name + '</button>') + '</div>'}</div>`,
     footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected · ' + newN + ' new' : 'Nothing selected'}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="gen-submit">Generate links${n ? ' (' + n + ')' : ''}</button>`};
 }
 let CODE_N = 0;
@@ -1241,14 +1245,16 @@ function linkDrawer(colId){
       return `<tr><td class="mono">${a.id}</td><td class="ell">${a.name}</td><td class="ell cell-sub">${a.campaign}</td><td><span class="st ${cls}">${a.st}</span></td></tr>`; }).join('')}</tbody></table></div>`
     : '<div class="panel">' + emptyBlock('ads', 'No ads use this link yet', 'Ads you create in TTAM with this link will appear here.', '') + '</div>';
   const recheck = l.status === 'unknown' || l.ap === 'pausing' || l.ap === 'unknown';
-  return {title:k.title + ' · ' + c.market, width:780,
+  return {title:k.title + ' · ' + c.market,
     sub:`<span>${c.lang}</span><span class="faint">·</span><span class="mono">${c.id}</span>${stChip(LINK_ST, l.status)}`,
-    body:`<div class="sec"><div class="box" style="display:flex;align-items:center;gap:8px"><span style="color:var(--text2)">${ic('link', 16)}</span><span class="mono ell" style="flex:1;font-size:13px">${l.url}</span><button class="btn btn-sm" data-act="copy" data-text="${l.url}" data-msg="Link copied">${ic('copy', 14)}Copy</button></div></div>
+    body:`<div class="dr-cols"><div class="dr-main"><div class="sec"><div class="box" style="display:flex;align-items:center;gap:8px"><span style="color:var(--text2)">${ic('link', 16)}</span><span class="mono ell" style="flex:1;font-size:13px">${l.url}</span><button class="btn btn-sm" data-act="copy" data-text="${l.url}" data-msg="Link copied">${ic('copy', 14)}Copy</button></div></div>
       <div class="sec boxes">
         <div class="box"><div class="box-l">Link status · from TTDC</div>${linkStCell(l)}<div class="cell-sub" style="margin-top:6px">Updated ${l.updated}</div></div>
         <div class="box"><div class="box-l">Auto-pause result · from TTAM</div>${stChip(AP_ST, l.ap)}<div class="st-reason">${l.apNote || (l.status === 'active' ? 'Link is active; no ads need pausing.' : '')}</div>${l.ap === 'failed' || l.ap === 'partial' ? '<div style="margin-top:6px"><button class="btn-link" style="font-size:12px" data-act="ttam" data-col="' + l.col + '">Pause remaining ads in TTAM ' + ic('external', 12) + '</button></div>' : ''}</div>
       </div>
-      <div class="sec"><div class="sec-h"><h4>Distribution relationship</h4></div><div class="kv three">
+      <div class="sec"><div class="sec-h"><h4>Ads using this link <span class="faint" style="font-weight:400">· ${plural(l.ads.length, 'ad')}</span></h4></div>${ads}</div>
+      <div class="sec"><div class="sec-h"><h4>Status history</h4></div><ul class="timeline">${l.history.slice().reverse().map(h => `<li class="${h.k}"><div class="tl-t">${h.t}</div><div class="tl-e">${h.e}</div><div class="tl-d">${h.d}</div></li>`).join('')}</ul></div></div>
+      <div class="dr-aside">      <div class="sec"><div class="sec-h"><h4>Distribution relationship</h4></div><div class="kv one">
         <div><div class="k">Identifier</div><div class="v mono">${c.id} × BC ${BCS.main.id}</div></div>
         <div><div class="k">Business Center</div><div class="v">${BCS.main.name}</div></div>
         <div><div class="k">Contract ID</div><div class="v mono">${k.id}</div></div>
@@ -1257,9 +1263,7 @@ function linkDrawer(colId){
         <div><div class="k">Revenue share</div><div class="v">${c.share}%</div></div>
         <div><div class="k">Generated</div><div class="v">${l.created}</div></div>
         <div><div class="k">Rights holder</div><div class="v">${k.holder}</div></div>
-        <div><div class="k">Closing a link</div><div class="v">Only the rights holder, in TTDC</div></div></div></div>
-      <div class="sec"><div class="sec-h"><h4>Ads using this link <span class="faint" style="font-weight:400">· ${plural(l.ads.length, 'ad')}</span></h4></div>${ads}</div>
-      <div class="sec"><div class="sec-h"><h4>Status history</h4></div><ul class="timeline">${l.history.slice().reverse().map(h => `<li class="${h.k}"><div class="tl-t">${h.t}</div><div class="tl-e">${h.e}</div><div class="tl-d">${h.d}</div></li>`).join('')}</ul></div>`,
+        <div><div class="k">Closing a link</div><div class="v">Only the rights holder, in TTDC</div></div></div></div></div></div>`,
     footer:`${recheck ? '<button class="btn" data-act="link-recheck" data-col="' + l.col + '">' + ic('refresh', 14) + 'Refresh status</button>' : ''}<button class="btn btn-primary" data-act="ttam" data-col="${l.col}">${ic('external', 14)}Open TTAM</button>`};
 }
 
@@ -1310,19 +1314,26 @@ function openExport(){
 function exportDrawer(){
   const all = D().links.length, filt = lvFiltered().length, seln = Array.from(UI.lv.sel).filter(id => linkOf(id)).length;
   const radio = (v, l, n) => `<label class="check-row" style="margin-top:8px"><input type="radio" class="cb" name="ex-scope" data-chg="ex-scope" value="${v}" ${EX.scope === v ? 'checked' : ''}><span><b>${l}</b><div class="cell-sub">${plural(n, 'link')}</div></span></label>`;
-  return {title:'Export links', width:560, sub:'Complete export of your distribution links',
-    body:`<div class="sec"><div class="sec-h"><h4>Scope</h4></div>${radio('all', 'All links', all)}${radio('filtered', 'Links matching current filters', filt)}${radio('selected', 'Selected links', seln)}</div>
-      <div class="sec"><div class="sec-h"><h4>Columns</h4><span class="faint" style="font-size:12px">${EX.fields.size} of ${LINK_FIELDS.length}</span></div><div class="kv">${LINK_FIELDS.map(f => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" class="cb" name="ex-f-${f[0]}" data-chg="ex-field" data-f="${f[0]}" ${EX.fields.has(f[0]) ? 'checked' : ''}>${f[1]}</label>`).join('')}</div></div>
-      <div class="sec"><div class="sec-h"><h4>Format</h4></div><div class="seg"><button class="${EX.fmt === 'csv' ? 'on' : ''}" data-act="ex-fmt" data-v="csv">CSV</button><button class="${EX.fmt === 'tsv' ? 'on' : ''}" data-act="ex-fmt" data-v="tsv">TSV (paste into sheets)</button></div></div>`,
+  const scoped = exScope(); const flds = LINK_FIELDS.filter(f => EX.fields.has(f[0]));
+  const preview = !scoped.length ? '<div class="panel">' + emptyBlock('inbox', 'No links in this scope', 'Choose another scope to see a preview.', '') + '</div>'
+    : !flds.length ? '<div class="panel">' + emptyBlock('file', 'No columns selected', 'Choose at least one column to export.', '') + '</div>'
+    : `<div class="panel" style="overflow-x:auto"><table class="tbl" style="min-width:${flds.length * 140}px"><thead><tr>${flds.map(f => '<th>' + f[1] + '</th>').join('')}</tr></thead><tbody>${scoped.slice(0, 5).map(l => '<tr>' + flds.map(f => `<td class="ell ${f[0] === 'link' || f[0] === 'contract' || f[0] === 'collection' ? 'mono' : ''}" title="${esc(String(exVal(l, f[0])))}">${esc(String(exVal(l, f[0])))}</td>`).join('') + '</tr>').join('')}</tbody></table></div>${scoped.length > 5 ? '<div class="faint" style="font-size:12px;margin-top:8px">Showing 5 of ' + plural(scoped.length, 'row') + '.</div>' : ''}`;
+  return {title:'Export links', sub:'Complete export of your distribution links',
+    body:`<div class="dr-cols"><div class="dr-main">
+      <div class="sec"><div class="sec-h"><h4>Columns</h4><span class="faint" style="font-size:12px">${EX.fields.size} of ${LINK_FIELDS.length}</span></div><div class="kv four">${LINK_FIELDS.map(f => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" class="cb" name="ex-f-${f[0]}" data-chg="ex-field" data-f="${f[0]}" ${EX.fields.has(f[0]) ? 'checked' : ''}>${f[1]}</label>`).join('')}</div></div>
+      <div class="sec"><div class="sec-h"><h4>Preview</h4><span class="faint" style="font-size:12px">${plural(scoped.length, 'row')}</span></div>${preview}</div></div>
+      <div class="dr-aside"><div class="sec"><div class="sec-h"><h4>Scope</h4></div>${radio('all', 'All links', all)}${radio('filtered', 'Links matching current filters', filt)}${radio('selected', 'Selected links', seln)}</div>
+      <div class="sec"><div class="sec-h"><h4>Format</h4></div><div class="seg"><button class="${EX.fmt === 'csv' ? 'on' : ''}" data-act="ex-fmt" data-v="csv">CSV</button><button class="${EX.fmt === 'tsv' ? 'on' : ''}" data-act="ex-fmt" data-v="tsv">TSV (paste into sheets)</button></div></div></div></div>`,
     footer:`<span class="grow">File: distribution-links-2026-11-03.${EX.fmt}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
 }
+function exScope(){ return EX.scope === 'all' ? D().links : EX.scope === 'filtered' ? lvFiltered() : D().links.filter(l => UI.lv.sel.has(l.col)); }
+function exVal(l, f){ const c = colOf(l.col), k = ctrOf(c.ctr); return {drama:k.title, contract:k.id, collection:c.id, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, ap:AP_ST[l.ap][1], updated:l.updated}[f]; }
 function runExport(){
-  let list = EX.scope === 'all' ? D().links : EX.scope === 'filtered' ? lvFiltered() : D().links.filter(l => UI.lv.sel.has(l.col));
+  const list = exScope();
   if (!list.length){ toast('No links in this scope. Choose another scope.', 'warn'); return; }
   if (!EX.fields.size){ toast('Choose at least one column.', 'warn'); return; }
   const flds = LINK_FIELDS.filter(f => EX.fields.has(f[0]));
-  const val = (l, f) => { const c = colOf(l.col), k = ctrOf(c.ctr); return {drama:k.title, contract:k.id, collection:c.id, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, ap:AP_ST[l.ap][1], updated:l.updated}[f]; };
-  const rows = [flds.map(f => f[1])].concat(list.map(l => flds.map(f => val(l, f[0]))));
+  const rows = [flds.map(f => f[1])].concat(list.map(l => flds.map(f => exVal(l, f[0]))));
   const text = EX.fmt === 'tsv' ? rows.map(r => r.join('\t')).join('\n') : csv(rows);
   download('distribution-links-2026-11-03.' + EX.fmt, text);
   closeDrawer(); toast('Exported ' + plural(list.length, 'link') + ' to distribution-links-2026-11-03.' + EX.fmt);
@@ -1385,15 +1396,16 @@ function stmDrawer(id){
   else if (s.status === 'failed') foot += `<button class="btn" data-act="outside" data-name="Billing">Update beneficiary in Billing</button><button class="btn btn-primary" data-act="stm-retry" data-id="${id}">Request payout retry</button>`;
   else if (s.status === 'confirming') foot += `<button class="btn btn-primary" data-act="stm-check" data-id="${id}">${ic('refresh', 14)}Check status</button>`;
   else foot += `<button class="btn btn-primary" data-act="close-drawer">Close</button>`;
-  return {title:'Settlement statement ' + s.id, width:760, sub:`<span>${s.period}</span><span class="faint">·</span><span>${b.name}</span><span class="faint">·</span><span>Version ${s.version}</span>${stChip(STM_ST, s.status)}`,
+  return {title:'Settlement statement ' + s.id, sub:`<span>${s.period}</span><span class="faint">·</span><span>${b.name}</span><span class="faint">·</span><span>Version ${s.version}</span>${stChip(STM_ST, s.status)}`,
     body:`${s.revised ? banner('warn', '<b>Amount revised: v1 to v2.</b> An adjustment of ' + money(s.adj) + ' was added on Nov 2 (' + s.adjNote + '). Please review and confirm again; your earlier review doesn\u2019t apply to the new version.') + '<div style="height:12px"></div>' : ''}
       ${s.status === 'failed' ? banner('err', '<b>Payout failed · ' + s.failReason + '.</b> The bank rejected the transfer because the account holder name doesn\u2019t match the beneficiary on file. Update the beneficiary name in Billing, then request a payout retry.') + '<div style="height:12px"></div>' : ''}
-      <div class="boxes"><div class="box"><div class="box-l">Final amount · ${s.status === 'pending' ? 'requires your confirmation' : 'formal receivable'}</div><div class="amount-xl">${money(stmFinal(s))}</div><div class="cell-sub">USD · gross ${money(s.gross)} · adjustments ${money(s.adj)}</div></div>
-      <div class="box"><div class="kv"><div><div class="k">Business Center</div><div class="v">${b.name} (${b.role})</div></div><div><div class="k">BC ID</div><div class="v mono">${b.id}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div><div><div class="k">Confirm by</div><div class="v">${s.due}</div></div></div></div></div>
+      <div class="dr-cols"><div class="dr-main">
       <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4><span class="faint" style="font-size:12px">${plural(s.split.length, 'Contract')}</span></div><div class="panel"><table class="tbl"><thead><tr><th style="width:220px">Drama (Contract)</th><th>Collections</th><th class="num" style="width:130px">Amount</th></tr></thead><tbody>${split}
         ${s.adj ? `<tr><td><div class="cell-title">Adjustments</div></td><td class="cell-sub">${s.adjNote}</td><td class="num">${money(s.adj)}</td></tr>` : ''}
         <tr><td style="font-weight:600">Final amount</td><td></td><td class="num" style="font-weight:600">${money(stmFinal(s))}</td></tr></tbody></table></div></div>
-      <div class="sec"><div class="sec-h"><h4>Payout and activity log</h4></div>${logs.length ? '<ul class="timeline">' + logs.map(l => `<li class="${l.k}"><div class="tl-t">${l.t}</div><div class="tl-e">${l.e}</div><div class="tl-d">${l.d}</div></li>`).join('') + '</ul>' : '<div class="faint">No activity yet.</div>'}</div>`,
+      <div class="sec"><div class="sec-h"><h4>Payout and activity log</h4></div>${logs.length ? '<ul class="timeline">' + logs.map(l => `<li class="${l.k}"><div class="tl-t">${l.t}</div><div class="tl-e">${l.e}</div><div class="tl-d">${l.d}</div></li>`).join('') + '</ul>' : '<div class="faint">No activity yet.</div>'}</div></div>
+      <div class="dr-aside"><div class="box"><div class="box-l">Final amount · ${s.status === 'pending' ? 'requires your confirmation' : 'formal receivable'}</div><div class="amount-xl">${money(stmFinal(s))}</div><div class="cell-sub">USD · gross ${money(s.gross)} · adjustments ${money(s.adj)}</div></div>
+      <div class="box"><div class="kv one"><div><div class="k">Business Center</div><div class="v">${b.name} (${b.role})</div></div><div><div class="k">BC ID</div><div class="v mono">${b.id}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div><div><div class="k">Version</div><div class="v">${s.version}</div></div><div><div class="k">Confirm by</div><div class="v">${s.due}</div></div></div></div></div></div>`,
     footer:foot};
 }
 const CS = {ack:false};
@@ -1437,6 +1449,12 @@ const ACT = {
   'pl-ep': el => setEp(+el.dataset.ep),
   'pl-speed': el => { PL.speed = +el.dataset.v; $$('.pl-speed button').forEach(b => b.classList.toggle('on', +b.dataset.v === PL.speed)); toast('Playback speed ' + PL.speed + 'x', 'info'); },
   'pl-seek': (el, e) => { const r = el.getBoundingClientRect(); PL.t = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * epDur(PL.ep); updatePlayer(); },
+  'drama-next': el => {
+    const id = el.dataset.id; if (!id) return;
+    stopPlayer(); PL.ctr = id; PL.ep = 1; PL.t = 0; DS.sel = new Set();
+    drawerFn = () => dramaDrawer(id); refreshDrawer();
+    const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0;
+  },
   'claim-open': () => { if (!DS.sel.size){ toast('Select at least one available collection to claim.', 'warn'); return; } openClaimFlow([PL.ctr], Array.from(DS.sel).map(id => mkKey(colOf(id)))); },
   'bulk-claim': () => { if (!UI.pick.size){ toast('Select at least one drama.', 'warn'); return; } openClaimFlow(CONTRACTS.map(c => c.id).filter(id => UI.pick.has(id)), []); },
   'pick-clear': () => { UI.pick.clear(); render(); },
@@ -1538,7 +1556,7 @@ const CHG = {
   'lv-all': el => { lvFiltered().forEach(l => el.checked ? UI.lv.sel.add(l.col) : UI.lv.sel.delete(l.col)); render(); },
   'gen-sel': el => { el.checked ? GS.sel.add(el.dataset.id) : GS.sel.delete(el.dataset.id); refreshDrawer(); },
   'gen-bc': el => { GS.bc = el.value; GS.sel = new Set(genCandidates().filter(c => !linkOf(c.id)).map(c => c.id)); refreshDrawer(); },
-  'ex-scope': el => { EX.scope = el.value; },
+  'ex-scope': el => { EX.scope = el.value; refreshDrawer(); },
   'ex-field': el => { el.checked ? EX.fields.add(el.dataset.f) : EX.fields.delete(el.dataset.f); refreshDrawer(); },
   'stm-ack': el => { CS.ack = el.checked; const b = $('[data-act="stm-confirm-submit"]'); if (b) b.disabled = !CS.ack; }
 };
