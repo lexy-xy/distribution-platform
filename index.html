@@ -295,6 +295,9 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .player .pl-dim{position:absolute;inset:0;background:rgba(0,0,0,.18)}
 .player .pl-top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;gap:6px}
+.player .pl-actions{display:flex;align-items:center;gap:6px;flex:none}
+.player .pl-dl{width:28px;height:28px;border:0;border-radius:4px;background:rgba(0,0,0,.5);color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;padding:0}
+.player .pl-dl:hover{background:rgba(0,0,0,.7)}
 .player .pl-center{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.5);border:0;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .player.playing .pl-center{opacity:0}
 .player:hover .pl-center{opacity:1}
@@ -709,11 +712,14 @@ function copyText(text, msg){
   };
   if (navigator.clipboard && window.isSecureContext){ navigator.clipboard.writeText(text).then(done, fallback); } else fallback();
 }
-function download(name, text){
-  const blob = new Blob([text], {type:'text/csv;charset=utf-8'});
+function download(name, text, type){
+  const blob = new Blob([text], {type: type || 'text/csv;charset=utf-8'});
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+function fileSlug(s){
+  return String(s).toLowerCase().replace(/['\u2019]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '') || 'drama';
 }
 const csv = rows => rows.map(r => r.map(v => { const s = String(v == null ? '' : v); return /[",\n\t]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }).join(',')).join('\n');
 const stChip = (map, k) => `<span class="st ${map[k][0]}">${map[k][1]}</span>`;
@@ -998,7 +1004,9 @@ function dramaDrawer(ctrId){
     <div class="det-l">
       <div class="player ${PL.playing ? 'playing' : ''}" id="player">
         ${poster(ctrId)}<img class="pl-frame" id="pl-frame" src="${frameSrc(ctrId, (PL.ep - 1) % MEDIA[ctrId][1] + 1)}" alt=""><div class="pl-dim"></div>
-        <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span><span class="tag warn" id="pl-lock" style="${PL.ep >= pw ? '' : 'display:none'}">${ic('lock', 10)}Paid episode</span></div>
+        <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span>
+          <span class="pl-actions"><span class="tag warn" id="pl-lock" style="${PL.ep >= pw ? '' : 'display:none'}">${ic('lock', 10)}Paid episode</span>
+            <button class="pl-dl" data-act="dl-ep" aria-label="Download this episode" title="Download this episode">${ic('download', 14)}</button></span></div>
         <button class="pl-center" data-act="pl-toggle" aria-label="Play or pause">${ic(PL.playing ? 'pause' : 'play', 22)}</button>
         <div class="pl-ctrl">
           <div class="pl-bar" data-act="pl-seek" aria-label="Seek"><div class="trk"><div class="fill" id="pl-fill" style="width:${PL.t / epDur(PL.ep) * 100}%"></div></div></div>
@@ -1026,7 +1034,8 @@ function dramaDrawer(ctrId){
         <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
       </div>
       <p class="det-syn">${c.synopsis}</p>
-      <div class="sec"><div class="sec-h"><h4>Episodes</h4><div class="filters"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div></div>
+      <div class="sec"><div class="sec-h"><h4>Episodes</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
+        <div class="filters" style="margin-bottom:8px"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div>
         <div class="ep-grid" id="ep-grid">${eps}</div>
         <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:#F4F5FB"></i>Mid-late sample</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
       </div>
@@ -1036,11 +1045,29 @@ function dramaDrawer(ctrId){
     <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
   </div>`;
   const n = DS.sel.size;
-  const order = mkFiltered().map(k => k.id); const at = order.indexOf(ctrId); const next = at >= 0 ? order[at + 1] : null;
-  const nextTip = next ? 'Next: ' + ctrOf(next).title : at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
+  const nav = dramaNeighbors(ctrId);
+  const prevTip = nav.prev ? 'Previous: ' + ctrOf(nav.prev).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'First drama in the current Marketplace list';
+  const nextTip = nav.next ? 'Next: ' + ctrOf(nav.next).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
   return {title:c.title,
     body,
-    footer:`<button class="btn" data-act="close-drawer">Close</button><button class="btn" data-act="drama-next" ${next ? 'data-id="' + next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
+    footer:`<button class="btn" data-act="drama-prev" ${nav.prev ? 'data-id="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="drama-next" ${nav.next ? 'data-id="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
+}
+function dramaNeighbors(ctrId){
+  const order = mkFiltered().map(k => k.id);
+  const at = order.indexOf(ctrId);
+  return {at, prev: at > 0 ? order[at - 1] : null, next: at >= 0 ? order[at + 1] : null};
+}
+function goDrama(id){
+  if (!id) return;
+  stopPlayer(); PL.ctr = id; PL.ep = 1; PL.t = 0; DS.sel = new Set();
+  drawerFn = () => dramaDrawer(id); refreshDrawer();
+  const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0;
+}
+function mockDramaFile(c, ep){
+  const payload = ep == null
+    ? {prototype:true, kind:'series', drama:c.title, contractId:c.id, episodes:c.episodes, files:Array.from({length:c.episodes}, (_, i) => ({episode:i + 1, durationSec:epDur(i + 1)})), note:'Placeholder for the prototype. No video file is included.'}
+    : {prototype:true, kind:'episode', drama:c.title, contractId:c.id, episode:ep, episodes:c.episodes, durationSec:epDur(ep), note:'Placeholder for the prototype. No video file is included.'};
+  return JSON.stringify(payload, null, 2);
 }
 function updatePlayer(){
   const c = ctrOf(PL.ctr); if (!c || !$('#player')){ stopPlayer(); return; }
@@ -1527,11 +1554,19 @@ const ACT = {
   'pl-ep': el => setEp(+el.dataset.ep),
   'pl-speed': el => { PL.speed = +el.dataset.v; $$('.pl-speed button').forEach(b => b.classList.toggle('on', +b.dataset.v === PL.speed)); toast('Playback speed ' + PL.speed + 'x', 'info'); },
   'pl-seek': (el, e) => { const r = el.getBoundingClientRect(); PL.t = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * epDur(PL.ep); updatePlayer(); },
-  'drama-next': el => {
-    const id = el.dataset.id; if (!id) return;
-    stopPlayer(); PL.ctr = id; PL.ep = 1; PL.t = 0; DS.sel = new Set();
-    drawerFn = () => dramaDrawer(id); refreshDrawer();
-    const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0;
+  'drama-prev': el => goDrama(el.dataset.id),
+  'drama-next': el => goDrama(el.dataset.id),
+  'dl-ep': () => {
+    const c = ctrOf(PL.ctr); if (!c) return;
+    const name = fileSlug(c.title) + '-ep-' + String(PL.ep).padStart(2, '0') + '.json';
+    toast('Downloading Ep ' + PL.ep + ' of ' + c.title);
+    download(name, mockDramaFile(c, PL.ep), 'application/json');
+  },
+  'dl-series': () => {
+    const c = ctrOf(PL.ctr); if (!c) return;
+    const name = fileSlug(c.title) + '-all-episodes.json';
+    toast('Downloading all ' + c.episodes + ' episodes of ' + c.title);
+    download(name, mockDramaFile(c), 'application/json');
   },
   'claim-open': () => { if (!DS.sel.size){ toast('Select at least one available collection to claim.', 'warn'); return; } openClaimFlow([PL.ctr], Array.from(DS.sel).map(id => mkKey(colOf(id)))); },
   'bulk-claim': () => { if (!UI.pick.size){ toast('Select at least one drama.', 'warn'); return; } openClaimFlow(CONTRACTS.map(c => c.id).filter(id => UI.pick.has(id)), []); },
