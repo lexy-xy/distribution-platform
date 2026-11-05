@@ -1,6 +1,6 @@
 # Distribution Center — TTBC Short-Drama Distributor Workbench (Prototype)
 
-An interactive, single-file HTML prototype of a **short-drama distributor workbench** hosted inside TikTok Business Center (TTBC). Distributors browse dramas that rights holders have opened for distribution, claim collections, generate distribution links for use in TTAM, track link health (with auto-pause when a link becomes invalid), and review distribution data and settlements.
+An interactive, single-file HTML prototype of a **short-drama distributor workbench** hosted inside TikTok Business Center (TTBC). Distributors browse dramas that rights holders have opened for distribution, claim collections, generate distribution links for use in TTAM, track link health (with auto-pause when a link becomes invalid), and review, confirm, and track payouts for settlement statements.
 
 **Live demo:** https://lexy-xy.github.io/distribution-platform/
 
@@ -10,14 +10,14 @@ Three business modules, all under **Creatives → Distribution Center** in the l
 
 - **Drama Marketplace** — browse distributable dramas and claim collections.
 - **Distribution Management** — link view and by-drama view; copy/export links, monitor link validity and auto-pause results.
-- **Revenue & Settlement** — distribution data, settlement statements, confirmation, and payout logs.
+- **Settlement** — settlement statements, confirmation, and payout logs.
 
-A **floating demo controller** (bottom-left, dashed yellow outline — not part of the product UI) switches between **5 views × 9 states**:
+A **floating demo controller** (bottom-left, dashed yellow outline — not part of the product UI) switches between **4 views × 9 states**:
 
-- Views: Drama Marketplace · Link view · By drama · Distribution data · Settlement management
+- Views: Drama Marketplace · Link view · By drama · Settlement
 - States: Normal · Empty · Loading · Error · Partial success · Result unknown · Link invalid & auto-pausing · Settlement pending confirmation · Payout exception
 
-Each view/state combination is deep-linkable, e.g. `#/distribution/links?state=invalid`, and the controller's **Copy demo link** button copies the current one.
+Each view/state combination is deep-linkable, e.g. `#/distribution/links?state=invalid` or `#/settlement?state=payout`, and the controller's **Copy demo link** button copies the current one.
 
 ## Screenshots
 
@@ -25,7 +25,7 @@ Each view/state combination is deep-linkable, e.g. `#/distribution/links?state=i
 
 ![Distribution Management — link invalid, auto-pausing](screenshots/link-invalid-autopause.png)
 
-![Revenue & Settlement — settlement management](screenshots/settlement.png)
+![Settlement](screenshots/settlement.png)
 
 More in [`screenshots/`](screenshots/).
 

@@ -80,7 +80,7 @@ button,input,select{font:inherit;color:inherit}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .btn.loading{pointer-events:none;opacity:.8}
 .input,.select{height:32px;border:1px solid var(--border2);border-radius:4px;background:#fff;padding:0 10px;outline:none;min-width:0}
-.select{padding-right:28px;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6068' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;cursor:pointer}
+.select{padding-right:28px;text-overflow:ellipsis;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6068' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;cursor:pointer}
 .input:focus,.select:focus{border-color:var(--primary)}
 .search{position:relative;display:inline-flex;align-items:center}
 .search .ic{position:absolute;left:9px;color:var(--text3);pointer-events:none}
@@ -90,6 +90,7 @@ button,input,select{font:inherit;color:inherit}
 .filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .toolbar .left,.toolbar .right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.toolbar .right{margin-left:auto}
 .seg{display:inline-flex;border:1px solid var(--border2);border-radius:4px;overflow:hidden}
 .seg button{border:0;background:#fff;height:26px;padding:0 9px;font-size:12px;font-weight:500;cursor:pointer;border-right:1px solid var(--border2)}
 .seg button:last-child{border-right:0}
@@ -339,7 +340,6 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
     <symbol id="i-clock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 7v5l3 2"/></symbol>
     <symbol id="i-refresh" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 1-15.5 6.3L3 16"/><path d="M3 21v-5h5"/><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8"/><path d="M21 3v5h-5"/></symbol>
     <symbol id="i-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.5.5l3-3a5 5 0 0 0-7-7l-1.7 1.7"/><path d="M14 11a5 5 0 0 0-7.5-.5l-3 3a5 5 0 0 0 7 7l1.7-1.7"/></symbol>
-    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/></symbol>
     <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M8 13h8M8 17h5"/></symbol>
     <symbol id="i-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></symbol>
     <symbol id="i-sliders" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></symbol>
@@ -383,12 +383,8 @@ const $$ = (s, r) => Array.from((r || document).querySelectorAll(s));
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ic = (n, s, cls) => `<svg class="ic ${cls || ''}" width="${s || 16}" height="${s || 16}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
 const money = n => (n < 0 ? '-$' : '$') + Math.abs(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-const money0 = n => '$' + Math.round(n).toLocaleString('en-US');
 const plural = (n, w, p) => n + ' ' + (n === 1 ? w : (p || w + 's'));
 let uid = 0;
-const hashStr = s => { let h = 7; for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100003; return h; };
-const sr = n => { const x = Math.sin(n * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 /* ---------- Static mock data ---------- */
 const BCS = {
@@ -406,14 +402,14 @@ const CONTRACTS = [
    synopsis:'A night-shift doctor treats a mysterious patient whose injuries seem to predict crimes that haven\u2019t happened yet.'}
 ];
 const COLLECTIONS = [
-  {id:'COL-US-18421', ctr:'CTR-902184', market:'United States', code:'US', lang:'English', share:45, base:820},
-  {id:'COL-GB-18422', ctr:'CTR-902184', market:'United Kingdom', code:'GB', lang:'English', share:40, base:310},
-  {id:'COL-BR-77310', ctr:'CTR-781230', market:'Brazil', code:'BR', lang:'Portuguese', share:42, base:0},
-  {id:'COL-MX-77311', ctr:'CTR-781230', market:'Mexico', code:'MX', lang:'Spanish', share:42, base:0},
-  {id:'COL-US-55001', ctr:'CTR-550361', market:'United States', code:'US', lang:'English', share:50, base:640},
-  {id:'COL-JP-55002', ctr:'CTR-550361', market:'Japan', code:'JP', lang:'Japanese', share:45, base:0},
-  {id:'COL-TH-34001', ctr:'CTR-340918', market:'Thailand', code:'TH', lang:'Thai', share:38, base:180},
-  {id:'COL-ID-34002', ctr:'CTR-340918', market:'Indonesia', code:'ID', lang:'Indonesian', share:38, base:0}
+  {id:'COL-US-18421', ctr:'CTR-902184', market:'United States', code:'US', lang:'English', share:45},
+  {id:'COL-GB-18422', ctr:'CTR-902184', market:'United Kingdom', code:'GB', lang:'English', share:40},
+  {id:'COL-BR-77310', ctr:'CTR-781230', market:'Brazil', code:'BR', lang:'Portuguese', share:42},
+  {id:'COL-MX-77311', ctr:'CTR-781230', market:'Mexico', code:'MX', lang:'Spanish', share:42},
+  {id:'COL-US-55001', ctr:'CTR-550361', market:'United States', code:'US', lang:'English', share:50},
+  {id:'COL-JP-55002', ctr:'CTR-550361', market:'Japan', code:'JP', lang:'Japanese', share:45},
+  {id:'COL-TH-34001', ctr:'CTR-340918', market:'Thailand', code:'TH', lang:'Thai', share:38},
+  {id:'COL-ID-34002', ctr:'CTR-340918', market:'Indonesia', code:'ID', lang:'Indonesian', share:38}
 ];
 const ADS = {
   'COL-US-18421': [['1812004417','LC_US_hook_courtroom_v3','LC US · Broad · Oct'],['1812004418','LC_US_reveal_clause_v1','LC US · Broad · Oct'],['1812004431','LC_US_romance_cut_v2','LC US · Lookalike'],['1812004432','LC_US_ep12_tease','LC US · Lookalike'],['1812004450','LC_US_trailer_15s','LC US · Retarget']],
@@ -434,9 +430,9 @@ function poster(ctrId){
 }
 
 const STATES = [['normal','Normal'],['empty','Empty'],['loading','Loading'],['error','Error'],['partial','Partial success'],['unknown','Result unknown'],['invalid','Link invalid & auto-pausing'],['pending','Settlement pending confirmation'],['payout','Payout exception']];
-const PAGES = [['marketplace','Drama Marketplace','/marketplace'],['links','Distribution Management · Link view','/distribution/links'],['dramas','Distribution Management · By drama','/distribution/dramas'],['data','Revenue & Settlement · Distribution data','/revenue/data'],['settlement','Revenue & Settlement · Settlement management','/revenue/settlement']];
+const PAGES = [['marketplace','Drama Marketplace','/marketplace'],['links','Distribution Management · Link view','/distribution/links'],['dramas','Distribution Management · By drama','/distribution/dramas'],['settlement','Settlement','/settlement']];
 const PATH = Object.fromEntries(PAGES.map(p => [p[0], p[2]]));
-const ROUTE = Object.fromEntries(PAGES.map(p => [p[2], p[0]]));
+const ROUTE = Object.assign(Object.fromEntries(PAGES.map(p => [p[2], p[0]])), {'/revenue/settlement':'settlement', '/revenue/data':'settlement'});
 
 const LINK_ST = {active:['ok','Active'], invalid:['err','Invalid'], unknown:['warn','Status unknown']};
 const AP_ST = {none:['muted','No action needed'], pausing:['info spin','Auto-pausing'], complete:['ok','Auto-pause complete'], partial:['warn','Partially paused'], failed:['err','Auto-pause failed'], unknown:['warn','Result unknown']};
@@ -451,8 +447,8 @@ function freshUI(){
     mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop'},
     lv:{q:'', status:'all', ap:'all', market:'all', sel:new Set()},
     bd:{q:'', open:new Set(['CTR-902184'])},
-    dd:{range:30, ctr:'all'},
     st:{period:'all', bc:'all', status:'all'},
+    pl:{q:'', type:'all'},
     dismissed:new Set()
   };
 }
@@ -487,7 +483,7 @@ function buildData(st){
       {t:'Oct 15, 2026 09:12 UTC', stm:'STM-202609-S', e:'Payout sent · paid', k:'ok', d:'Reference PAY-88125 · bank account ending 0938'},
       {t:'Sep 15, 2026 09:05 UTC', stm:'STM-202608-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-80410 · bank account ending 4471'}
     ],
-    lastClaim:null, lastGen:null, stmPartial:false, dataNote:null
+    lastClaim:null, lastGen:null, stmPartial:false
   };
   const L = id => d.links.find(l => l.col === id);
   const C = id => d.cols.find(c => c.id === id);
@@ -517,7 +513,6 @@ function buildData(st){
     d.lastClaim = {ctr:'CTR-781230', items:[{col:'COL-BR-77310', r:'claimed'}, {col:'COL-MX-77311', r:'failed', why:'Terms changed while you were confirming (revenue share 42% to 40%, version 3 to 4). Review the new terms and claim again.'}]};
     d.lastGen = [{col:'COL-JP-55002', r:'generated'}, {col:'COL-ID-34002', r:'failed', why:'Collection version is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.'}, {col:'COL-US-55001', r:'existed'}];
     d.stmPartial = true;
-    d.dataNote = 'partial';
   }
   if (st === 'pending'){
     const m = d.statements[0]; m.version = 2; m.revised = true; m.adj = -1180.00; m.updated = 'Nov 2, 2026 18:30 UTC';
@@ -634,13 +629,13 @@ function renderSidebar(){
   const p = S.page, s = S.state;
   const row = (icon, name) => `<button class="nav-row" data-act="outside" data-name="${name}">${ic(icon, 20)}<span>${name}</span></button>`;
   const sub = (page, label, on) => `<a class="nav-sub ${on ? 'on' : ''}" href="#${PATH[page]}?state=${s}" ${on ? 'aria-current="page"' : ''}>${label}</a>`;
-  const inDc = ['marketplace','links','dramas','data','settlement'].includes(p);
+  const inDc = ['marketplace','links','dramas','settlement'].includes(p);
   $('#sidebar').innerHTML =
     row('agent', 'Business agent') +
     '<div class="nav-label">Platforms</div>' + row('ads', 'Ads Manager') + row('suite', 'Business Suite') +
     '<div class="nav-label">Creatives</div>' + row('one', 'TikTok One') + row('library', 'Creative Library') +
     `<button class="nav-row ${NAV_OPEN.dc ? 'open' : ''} ${inDc ? 'parent-on' : ''}" data-act="nav-toggle" aria-expanded="${NAV_OPEN.dc}">${ic('share', 20)}<span>Distribution Center</span>${ic('chev-down', 16, 'chev')}</button>` +
-    (NAV_OPEN.dc ? sub('marketplace', 'Drama Marketplace', p === 'marketplace') + sub('links', 'Distribution Management', p === 'links' || p === 'dramas') + sub('data', 'Revenue & Settlement', p === 'data' || p === 'settlement') : '') +
+    (NAV_OPEN.dc ? sub('marketplace', 'Drama Marketplace', p === 'marketplace') + sub('links', 'Distribution Management', p === 'links' || p === 'dramas') + sub('settlement', 'Settlement', p === 'settlement') : '') +
     '<div class="nav-label">Connection</div>' + row('leads', 'Leads Center') + row('events', 'Events Manager') +
     '<div class="nav-label">Planning</div>' + row('apps', 'Apps & Agents') +
     '<div class="nav-label">Settings</div>' + row('billing', 'Billing') + row('building', 'Business Settings') +
@@ -660,7 +655,7 @@ function onRoute(){
   const {path, state} = parseHash();
   const page = ROUTE[path];
   const st = STATES.some(x => x[0] === state) ? state : 'normal';
-  if (!page || state !== st){ location.replace('#' + PATH[page || 'marketplace'] + '?state=' + st); return; }
+  if (!page || state !== st || PATH[page] !== path){ location.replace('#' + PATH[page || 'marketplace'] + '?state=' + st); return; }
   if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv.sel.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); }
   if (page !== S.page){ const first = S.page === null; S.page = page; closeAll(); stopPlayer(); if (!first) window.scrollTo(0, 0); }
   render();
@@ -670,7 +665,7 @@ function onRoute(){
 function render(){
   const a = document.activeElement; const fName = a && a.name && $('#page').contains(a) ? a.name : null; const caret = fName && a.selectionStart != null ? a.selectionStart : null;
   renderSidebar();
-  const fn = {marketplace:pageMarketplace, links:pageLinks, dramas:pageDramas, data:pageData, settlement:pageSettlement}[S.page];
+  const fn = {marketplace:pageMarketplace, links:pageLinks, dramas:pageDramas, settlement:pageSettlement}[S.page];
   $('#page').innerHTML = fn();
   renderDemo();
   if (fName){ const el = $('#page [name="' + fName + '"]'); if (el){ el.focus(); if (caret != null && el.setSelectionRange) el.setSelectionRange(caret, caret); } }
@@ -708,8 +703,8 @@ function mkFiltered(){
   list.sort((a, b) => f.sort === 'new' ? b.launch.localeCompare(a.launch) : f.sort === 'eps' ? a.episodes - b.episodes : a.rank - b.rank);
   return list;
 }
-function sel(name, val, opts, label){
-  return `<select class="select" name="${name}" data-chg="filter" aria-label="${label}">` + opts.map(o => `<option value="${esc(o[0])}" ${o[0] === val ? 'selected' : ''}>${esc(o[1])}</option>`).join('') + '</select>';
+function sel(name, val, opts, label, w){
+  return `<select class="select" ${w ? 'style="width:' + w + 'px"' : ''} name="${name}" data-chg="filter" aria-label="${label}">` + opts.map(o => `<option value="${esc(o[0])}" ${o[0] === val ? 'selected' : ''}>${esc(o[1])}</option>`).join('') + '</select>';
 }
 function pageMarketplace(){
   const f = UI.mk; const st = S.state;
@@ -722,14 +717,15 @@ function pageMarketplace(){
   if (st === 'unknown' && colOf('COL-MX-77311').claim === 'confirming') out += banner('warn', '<b>A claim is still being confirmed.</b> A House by the Tide · Mexico · Spanish (COL-MX-77311). Don\u2019t submit it again; the result updates automatically.', '<button class="btn btn-sm" data-act="recheck-claim" data-col="COL-MX-77311">Check again</button>', 'clock');
   if (st === 'invalid') out += banner('err', '<b>3 collections you claimed are no longer open for distribution.</b> Their links are invalid and TTAM is auto-pausing affected ads.', '<button class="btn btn-sm" data-act="go-links-invalid">Review links</button>');
   if (st !== 'empty' && st !== 'error'){
-    out += `<div class="toolbar"><div class="filters">
-      <label class="search">${ic('search', 14)}<input class="input" name="mk-q" data-inp="mk-q" value="${esc(f.q)}" placeholder="Search title, ID or rights holder" aria-label="Search dramas"></label>
-      ${sel('mk.lang', f.lang, [['all','All languages']].concat(langs.map(l => [l, l])), 'Language')}
-      ${sel('mk.format', f.format, [['all','All formats'],['Live action','Live action'],['AI animation','AI animation']], 'Format')}
-      ${sel('mk.source', f.source, [['all','All sources'],['Local original','Local original'],['Localized','Localized']], 'Source')}
-      ${sel('mk.genre', f.genre, [['all','All genres']].concat(genres.map(g => [g, g])), 'Genre')}
-      ${sel('mk.avail', f.avail, [['all','Any availability'],['available','Has available collections'],['claimed','Claimed by me']], 'Availability')}
-    </div><div class="filters">${sel('mk.sort', f.sort, [['pop','Sort: Popularity'],['new','Sort: Newest'],['eps','Sort: Fewest episodes']], 'Sort')}</div></div>`;
+    out += `<div class="toolbar"><div class="left">
+      <label class="search">${ic('search', 14)}<input class="input" style="width:176px" name="mk-q" data-inp="mk-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label>
+      ${sel('mk.lang', f.lang, [['all','All languages']].concat(langs.map(l => [l, l])), 'Language', 124)}
+      ${sel('mk.format', f.format, [['all','All formats'],['Live action','Live action'],['AI animation','AI animation']], 'Format', 112)}
+      ${sel('mk.source', f.source, [['all','All sources'],['Local original','Local original'],['Localized','Localized']], 'Source', 116)}
+      ${sel('mk.genre', f.genre, [['all','All genres']].concat(genres.map(g => [g, g])), 'Genre', 108)}
+      ${sel('mk.avail', f.avail, [['all','Any availability'],['available','Has available collections'],['claimed','Claimed by me']], 'Availability', 136)}
+      ${sel('mk.sort', f.sort, [['pop','Sort: Popularity'],['new','Sort: Newest'],['eps','Sort: Fewest episodes']], 'Sort', 140)}
+    </div></div>`;
   }
   if (st === 'loading'){
     out += '<div class="grid">' + Array.from({length:4}, () => '<div class="card" style="cursor:default"><div class="poster-box sk" style="border-radius:0"></div><div class="card-b"><div class="sk" style="height:14px;width:70%"></div><div class="sk" style="height:10px;width:50%"></div><div class="sk" style="height:10px;width:85%"></div></div></div>').join('') + '</div>';
@@ -966,14 +962,14 @@ function pageLinks(){
   const markets = Array.from(new Set(L.map(l => colOf(l.col).market)));
   const selN = Array.from(f.sel).filter(id => linkOf(id)).length;
   out += `<div class="toolbar"><div class="left">
-      <button class="btn btn-primary" data-act="gen-open">${ic('plus', 14)}Generate links</button>
+      <label class="search">${ic('search', 14)}<input class="input" style="width:176px" name="lv-q" data-inp="lv-q" value="${esc(f.q)}" placeholder="Search title, ID or link" aria-label="Search links"></label>
+      ${sel('lv.status', f.status, [['all','All statuses'],['active','Active'],['invalid','Invalid'],['unknown','Status unknown']], 'Link status', 128)}
+      ${sel('lv.ap', f.ap, [['all','All auto-pause'],['attention','Needs attention'],['none','No action needed'],['pausing','Auto-pausing'],['complete','Auto-pause complete'],['partial','Partially paused'],['failed','Auto-pause failed'],['unknown','Result unknown']], 'Auto-pause result', 150)}
+      ${sel('lv.market', f.market, [['all','All markets']].concat(markets.map(m => [m, m])), 'Market', 128)}
+    </div><div class="right">
       <button class="btn" data-act="copy-selected">${ic('copy', 14)}Copy selected${selN ? ' (' + selN + ')' : ''}</button>
       <button class="btn" data-act="export-links">${ic('download', 14)}Export</button>
-    </div><div class="right">
-      <label class="search">${ic('search', 14)}<input class="input" style="width:250px" name="lv-q" data-inp="lv-q" value="${esc(f.q)}" placeholder="Search title, ID or link" aria-label="Search links"></label>
-      ${sel('lv.status', f.status, [['all','All link statuses'],['active','Active'],['invalid','Invalid'],['unknown','Status unknown']], 'Link status')}
-      ${sel('lv.ap', f.ap, [['all','All auto-pause results'],['attention','Needs attention'],['none','No action needed'],['pausing','Auto-pausing'],['complete','Auto-pause complete'],['partial','Partially paused'],['failed','Auto-pause failed'],['unknown','Result unknown']], 'Auto-pause result')}
-      ${sel('lv.market', f.market, [['all','All markets']].concat(markets.map(m => [m, m])), 'Market')}
+      <button class="btn btn-primary" data-act="gen-open">${ic('plus', 14)}Generate links</button>
     </div></div>`;
   const head = `<thead><tr><th style="width:40px"><input type="checkbox" class="cb" name="lv-all" data-chg="lv-all" aria-label="Select all" ${(() => { const fl = lvFiltered(); return fl.length && fl.every(l => f.sel.has(l.col)) ? 'checked' : ''; })()}></th><th>Drama · collection</th><th>Distribution link</th><th>Link status</th><th>Auto-pause result (TTAM)</th><th style="width:118px">Status updated</th><th style="width:124px">Actions</th></tr></thead>`;
   if (st === 'loading') return out + `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${skelRows(5, 7)}</tbody></table></div></div></div>`;
@@ -995,9 +991,9 @@ function pageDramas(){
   const st = S.state; const f = UI.bd;
   let out = dmHeader('dramas') + '<div class="stack">' + dmBanners();
   if (st === 'error') return out + errorBlock('dramas and links') + '</div>';
-  out += `<div class="toolbar"><div class="left"><button class="btn btn-primary" data-act="gen-open">${ic('plus', 14)}Generate links</button><button class="btn" data-act="export-links">${ic('download', 14)}Export</button></div>
-    <div class="right"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label><button class="btn" data-act="bd-expand">Expand all</button><button class="btn" data-act="bd-collapse">Collapse all</button></div></div>`;
-  const head = '<thead><tr><th style="width:44px"></th><th>Drama (Contract)</th><th style="width:110px">Claimed</th><th style="width:150px">Links</th><th>Markets</th><th style="width:220px">Actions</th></tr></thead>';
+  out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label></div>
+    <div class="right"><button class="btn" data-act="bd-expand">Expand all</button><button class="btn" data-act="bd-collapse">Collapse all</button><button class="btn" data-act="export-links">${ic('download', 14)}Export</button><button class="btn btn-primary" data-act="gen-open">${ic('plus', 14)}Generate links</button></div></div>`;
+  const head = '<thead><tr><th style="width:44px"></th><th>Drama (Contract)</th><th style="width:110px">Claimed</th><th style="width:150px">Links</th><th>Markets</th><th style="width:120px">Actions</th></tr></thead>';
   if (st === 'loading') return out + `<div class="panel"><table class="tbl">${head}<tbody>${skelRows(4, 6)}</tbody></table></div></div>`;
   if (st === 'empty') return out + '<div class="panel">' + emptyBlock('film', 'No claimed dramas yet', 'Dramas appear here once you claim at least one collection in Drama Marketplace.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const q = f.q.trim().toLowerCase();
@@ -1012,7 +1008,7 @@ function pageDramas(){
       <td>${claimed} of ${cs.length}</td>
       <td>${ls.length} link${ls.length === 1 ? '' : 's'}${inv ? ' · <span class="st err">' + inv + ' invalid</span>' : ''}${unk ? ' · <span class="st warn">' + unk + ' unknown</span>' : ''}</td>
       <td class="cell-sub">${cs.map(c => c.code + ' · ' + c.lang).join(', ')}</td>
-      <td><button class="btn btn-sm" data-act="open-drama" data-id="${k.id}">${ic('play', 12)}Preview</button> <button class="btn btn-sm" data-act="data-contract" data-id="${k.id}">${ic('chart', 12)}View data</button></td></tr>`;
+      <td><button class="btn btn-sm" data-act="open-drama" data-id="${k.id}">${ic('play', 12)}Preview</button></td></tr>`;
     if (open) r += `<tr class="sub"><td></td><td colspan="5" style="padding:4px 12px 12px"><table class="tbl" style="border:1px solid var(--border);background:#fff"><thead><tr><th>Market · language</th><th style="width:140px">Collection ID</th><th style="width:150px">Claim</th><th>Link status</th><th>Auto-pause result</th><th style="width:150px">Actions</th></tr></thead><tbody>${cs.map(c => {
       const l = linkOf(c.id);
       const claim = c.claim === 'claimed' ? '<span class="st ok">Claimed</span>' : c.claim === 'confirming' ? '<span class="st warn spin">Confirming</span>' : '<span class="st muted">Not claimed</span>';
@@ -1040,9 +1036,9 @@ function genDrawer(){
     return `<tr class="${on ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="g-${c.id}" data-chg="gen-sel" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select"></td><td><div class="cell-title ell">${k.title}</div><div class="cell-sub">${colLabel(c)}</div></td><td class="mono">${c.id}</td><td>${l ? '<span class="st muted">Link exists</span><div class="st-reason">Returns existing link</div>' : '<span class="st info">No link yet</span>'}</td></tr>`; }).join('');
   const newN = Array.from(GS.sel).filter(id => !linkOf(id)).length;
   return {title:'Generate links', width:680, sub:'Choose a Business Center and the claimed collections that need links',
-    body:`<div class="kv" style="grid-template-columns:1fr"><div><div class="k" style="margin-bottom:4px">Business Center</div><select class="select" style="width:100%" name="gen-bc" data-chg="gen-bc" aria-label="Business Center"><option value="main" ${GS.bc === 'main' ? 'selected' : ''}>${BCS.main.name} · ${BCS.main.role} · ${BCS.main.id}</option><option value="sub" ${GS.bc === 'sub' ? 'selected' : ''}>${BCS.sub.name} · ${BCS.sub.role} · ${BCS.sub.id}</option></select></div></div>
-      <div style="height:12px"></div>${banner('info', 'Generation is idempotent: one link per Collection × Business Center. Re-submitting, retrying, or selecting a collection that already has a link returns the existing link instead of creating a duplicate.')}
-      <div class="sec"><div class="sec-h"><h4>Claimed collections</h4><span class="filters"><button class="btn btn-xs" data-act="gen-pick" data-m="new">Select without links</button><button class="btn btn-xs" data-act="gen-pick" data-m="all">Select all</button><button class="btn btn-xs" data-act="gen-pick" data-m="none">Clear</button></span></div>
+    body:`${banner('info', 'Generation is idempotent: one link per Collection × Business Center. Re-submitting, retrying, or selecting a collection that already has a link returns the existing link instead of creating a duplicate.')}
+      <div class="sec"><div class="sec-h"><h4>Claimed collections</h4><span class="faint" style="font-size:12px">BC ${BCS[GS.bc].id}</span></div>
+      <div class="toolbar" style="margin-bottom:8px"><div class="left"><select class="select" style="width:250px" name="gen-bc" data-chg="gen-bc" aria-label="Business Center"><option value="main" ${GS.bc === 'main' ? 'selected' : ''}>${BCS.main.name} (${BCS.main.role})</option><option value="sub" ${GS.bc === 'sub' ? 'selected' : ''}>Studio B (${BCS.sub.role})</option></select></div><div class="right"><button class="btn" data-act="gen-pick" data-m="new">Select without links</button><button class="btn" data-act="gen-pick" data-m="all">Select all</button><button class="btn" data-act="gen-pick" data-m="none">Clear</button></div></div>
       ${cands.length ? `<div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Drama · collection</th><th style="width:150px">Collection ID</th><th style="width:170px">Current link</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="panel">' + emptyBlock('inbox', 'No claimed collections in this Business Center', 'Studio B hasn\u2019t claimed any collections. Claims belong to the Business Center that made them.', '<button class="btn" data-act="gen-bc-main">Switch to ' + BCS.main.name + '</button>') + '</div>'}</div>`,
     footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected · ' + newN + ' new' : 'Nothing selected'}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="gen-submit">Generate links${n ? ' (' + n + ')' : ''}</button>`};
 }
@@ -1103,7 +1099,7 @@ function linkDrawer(colId){
         <div><div class="k">Closing a link</div><div class="v">Only the rights holder, in TTDC</div></div></div></div>
       <div class="sec"><div class="sec-h"><h4>Ads using this link <span class="faint" style="font-weight:400">· ${plural(l.ads.length, 'ad')}</span></h4></div>${ads}</div>
       <div class="sec"><div class="sec-h"><h4>Status history</h4></div><ul class="timeline">${l.history.slice().reverse().map(h => `<li class="${h.k}"><div class="tl-t">${h.t}</div><div class="tl-e">${h.e}</div><div class="tl-d">${h.d}</div></li>`).join('')}</ul></div>`,
-    footer:`<button class="btn" data-act="data-contract" data-id="${k.id}">${ic('chart', 14)}View distribution data</button>${recheck ? '<button class="btn" data-act="link-recheck" data-col="' + l.col + '">' + ic('refresh', 14) + 'Refresh status</button>' : ''}<button class="btn btn-primary" data-act="ttam" data-col="${l.col}">${ic('external', 14)}Open TTAM</button>`};
+    footer:`${recheck ? '<button class="btn" data-act="link-recheck" data-col="' + l.col + '">' + ic('refresh', 14) + 'Refresh status</button>' : ''}<button class="btn btn-primary" data-act="ttam" data-col="${l.col}">${ic('external', 14)}Open TTAM</button>`};
 }
 
 /* TTAM handoff */
@@ -1143,158 +1139,50 @@ function backFromTtam(){
 }
 
 /* Export drawer */
-const EX = {kind:'links', scope:'all', fmt:'csv', fields:null, dataset:'daily', range:30};
+const EX = {scope:'all', fmt:'csv', fields:null};
 const LINK_FIELDS = [['drama','Drama'],['contract','Contract ID'],['collection','Collection ID'],['market','Market'],['lang','Language'],['link','Distribution link'],['status','Link status'],['reason','Status reason'],['ap','Auto-pause result'],['updated','Status updated']];
-function openExport(kind){
-  EX.kind = kind; EX.scope = UI.lv.sel.size && kind === 'links' ? 'selected' : 'all'; EX.fmt = 'csv'; EX.dataset = 'daily'; EX.range = UI.dd.range;
+function openExport(){
+  EX.scope = UI.lv.sel.size ? 'selected' : 'all'; EX.fmt = 'csv';
   EX.fields = new Set(LINK_FIELDS.map(f => f[0]));
   openDrawer(exportDrawer);
 }
 function exportDrawer(){
-  if (EX.kind === 'links'){
-    const all = D().links.length, filt = lvFiltered().length, seln = Array.from(UI.lv.sel).filter(id => linkOf(id)).length;
-    const radio = (v, l, n) => `<label class="check-row" style="margin-top:8px"><input type="radio" class="cb" name="ex-scope" data-chg="ex-scope" value="${v}" ${EX.scope === v ? 'checked' : ''}><span><b>${l}</b><div class="cell-sub">${plural(n, 'link')}</div></span></label>`;
-    return {title:'Export links', width:560, sub:'Complete export of your distribution links',
-      body:`<div class="sec"><div class="sec-h"><h4>Scope</h4></div>${radio('all', 'All links', all)}${radio('filtered', 'Links matching current filters', filt)}${radio('selected', 'Selected links', seln)}</div>
-        <div class="sec"><div class="sec-h"><h4>Columns</h4><span class="faint" style="font-size:12px">${EX.fields.size} of ${LINK_FIELDS.length}</span></div><div class="kv">${LINK_FIELDS.map(f => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" class="cb" name="ex-f-${f[0]}" data-chg="ex-field" data-f="${f[0]}" ${EX.fields.has(f[0]) ? 'checked' : ''}>${f[1]}</label>`).join('')}</div></div>
-        <div class="sec"><div class="sec-h"><h4>Format</h4></div><div class="seg"><button class="${EX.fmt === 'csv' ? 'on' : ''}" data-act="ex-fmt" data-v="csv">CSV</button><button class="${EX.fmt === 'tsv' ? 'on' : ''}" data-act="ex-fmt" data-v="tsv">TSV (paste into sheets)</button></div></div>`,
-      footer:`<span class="grow">File: distribution-links-2026-11-03.${EX.fmt}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
-  }
-  const ds = (v, l, d) => `<label class="check-row" style="margin-top:8px"><input type="radio" class="cb" name="ex-ds" data-chg="ex-ds" value="${v}" ${EX.dataset === v ? 'checked' : ''}><span><b>${l}</b><div class="cell-sub">${d}</div></span></label>`;
-  return {title:'Export distribution data', width:560, sub:BCS.main.name + ' · data as of ' + SYNC,
-    body:`${banner('warn', 'Distribution data is for reconciliation only and may be delayed. It isn\u2019t a final settlement amount. Final receivables follow your settlement statements.')}
-      <div class="sec"><div class="sec-h"><h4>Dataset</h4></div>${ds('daily', 'Daily detail · date × link', 'Finest grain. One row per day per distribution link.')}${ds('link', 'By collection / link', 'One row per link for the selected period.')}${ds('contract', 'By drama (Contract)', 'One row per Contract for the selected period.')}</div>
-      <div class="sec"><div class="sec-h"><h4>Period</h4></div><select class="select" name="ex-range" data-chg="ex-range" aria-label="Period"><option value="7" ${EX.range == 7 ? 'selected' : ''}>Last 7 days</option><option value="14" ${EX.range == 14 ? 'selected' : ''}>Last 14 days</option><option value="30" ${EX.range == 30 ? 'selected' : ''}>Last 30 days</option></select></div>
-      <div class="sec"><div class="sec-h"><h4>Included fields</h4></div><div class="cell-sub">Date, Drama, Contract ID, Collection ID, Market, Language, Link, Estimated distribution revenue (USD), Attributed GMV (USD), Data status. Ad performance metrics stay in TTAM.</div></div>`,
-    footer:`<span class="grow">File: distribution-data-${EX.dataset}-last-${EX.range}-days.csv</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
+  const all = D().links.length, filt = lvFiltered().length, seln = Array.from(UI.lv.sel).filter(id => linkOf(id)).length;
+  const radio = (v, l, n) => `<label class="check-row" style="margin-top:8px"><input type="radio" class="cb" name="ex-scope" data-chg="ex-scope" value="${v}" ${EX.scope === v ? 'checked' : ''}><span><b>${l}</b><div class="cell-sub">${plural(n, 'link')}</div></span></label>`;
+  return {title:'Export links', width:560, sub:'Complete export of your distribution links',
+    body:`<div class="sec"><div class="sec-h"><h4>Scope</h4></div>${radio('all', 'All links', all)}${radio('filtered', 'Links matching current filters', filt)}${radio('selected', 'Selected links', seln)}</div>
+      <div class="sec"><div class="sec-h"><h4>Columns</h4><span class="faint" style="font-size:12px">${EX.fields.size} of ${LINK_FIELDS.length}</span></div><div class="kv">${LINK_FIELDS.map(f => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" class="cb" name="ex-f-${f[0]}" data-chg="ex-field" data-f="${f[0]}" ${EX.fields.has(f[0]) ? 'checked' : ''}>${f[1]}</label>`).join('')}</div></div>
+      <div class="sec"><div class="sec-h"><h4>Format</h4></div><div class="seg"><button class="${EX.fmt === 'csv' ? 'on' : ''}" data-act="ex-fmt" data-v="csv">CSV</button><button class="${EX.fmt === 'tsv' ? 'on' : ''}" data-act="ex-fmt" data-v="tsv">TSV (paste into sheets)</button></div></div>`,
+    footer:`<span class="grow">File: distribution-links-2026-11-03.${EX.fmt}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
 }
 function runExport(){
-  if (EX.kind === 'links'){
-    let list = EX.scope === 'all' ? D().links : EX.scope === 'filtered' ? lvFiltered() : D().links.filter(l => UI.lv.sel.has(l.col));
-    if (!list.length){ toast('No links in this scope. Choose another scope.', 'warn'); return; }
-    if (!EX.fields.size){ toast('Choose at least one column.', 'warn'); return; }
-    const flds = LINK_FIELDS.filter(f => EX.fields.has(f[0]));
-    const val = (l, f) => { const c = colOf(l.col), k = ctrOf(c.ctr); return {drama:k.title, contract:k.id, collection:c.id, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, ap:AP_ST[l.ap][1], updated:l.updated}[f]; };
-    const rows = [flds.map(f => f[1])].concat(list.map(l => flds.map(f => val(l, f[0]))));
-    const text = EX.fmt === 'tsv' ? rows.map(r => r.join('\t')).join('\n') : csv(rows);
-    download('distribution-links-2026-11-03.' + EX.fmt, text);
-    closeDrawer(); toast('Exported ' + plural(list.length, 'link') + ' to distribution-links-2026-11-03.' + EX.fmt);
-  } else {
-    const rows = dataRows(EX.dataset, +EX.range);
-    if (rows.length < 2){ toast('No data for this period.', 'warn'); return; }
-    download(`distribution-data-${EX.dataset}-last-${EX.range}-days.csv`, csv(rows));
-    closeDrawer(); toast('Exported ' + plural(rows.length - 1, 'row') + '. Reminder: this isn\u2019t a final settlement amount.');
-  }
+  let list = EX.scope === 'all' ? D().links : EX.scope === 'filtered' ? lvFiltered() : D().links.filter(l => UI.lv.sel.has(l.col));
+  if (!list.length){ toast('No links in this scope. Choose another scope.', 'warn'); return; }
+  if (!EX.fields.size){ toast('Choose at least one column.', 'warn'); return; }
+  const flds = LINK_FIELDS.filter(f => EX.fields.has(f[0]));
+  const val = (l, f) => { const c = colOf(l.col), k = ctrOf(c.ctr); return {drama:k.title, contract:k.id, collection:c.id, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, ap:AP_ST[l.ap][1], updated:l.updated}[f]; };
+  const rows = [flds.map(f => f[1])].concat(list.map(l => flds.map(f => val(l, f[0]))));
+  const text = EX.fmt === 'tsv' ? rows.map(r => r.join('\t')).join('\n') : csv(rows);
+  download('distribution-links-2026-11-03.' + EX.fmt, text);
+  closeDrawer(); toast('Exported ' + plural(list.length, 'link') + ' to distribution-links-2026-11-03.' + EX.fmt);
 }
 
-/* ---------- Revenue & Settlement ---------- */
-function rsHeader(tab){
-  return `<div class="ph"><div><h1>Revenue & Settlement</h1><p>Reconcile distribution data, then review and confirm formal settlement statements before payout.</p></div></div>
-  <div class="tabs"><a class="tab ${tab === 'data' ? 'on' : ''}" href="#${PATH.data}?state=${S.state}">Distribution data</a><a class="tab ${tab === 'settlement' ? 'on' : ''}" href="#${PATH.settlement}?state=${S.state}">Settlement management</a></div>`;
+/* ---------- Settlement ---------- */
+function stHeader(){
+  return `<div class="ph"><div><h1>Settlement</h1><p>Review and confirm formal settlement statements, then track payouts and resolve exceptions.</p></div></div>`;
 }
-function dataLinks(){ return D().links.filter(l => colOf(l.col).base > 0); }
-function dayList(n){ const out = []; for (let i = 0; i < n; i++){ const d = new Date(Date.UTC(2026, 10, 2 - i)); out.push({i, label:MONTHS[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear(), iso:d.toISOString().slice(0, 10)}); } return out; }
-function daily(colId, i){
-  const c = colOf(colId); const h = hashStr(colId);
-  const rev = c.base * (0.72 + 0.56 * sr(h + i)) * (1 + 0.012 * (30 - i)) / 1.2;
-  const gmv = rev / (c.share / 100) * (0.94 + 0.12 * sr(h * 3 + i));
-  let status = 'Ready';
-  if (i <= 1) status = 'Preliminary';
-  if ((h + i) % 11 === 0 && i > 1) status = 'Adjusted';
-  if (S.data.dataNote === 'partial' && c.ctr === 'CTR-340918' && i <= 1) status = 'Delayed';
-  return {rev:Math.round(rev * 100) / 100, gmv:Math.round(gmv * 100) / 100, status};
+function logsFiltered(){
+  const f = UI.pl; const q = f.q.trim().toLowerCase();
+  const type = l => /fail/i.test(l.e) ? 'exception' : /^Confirm/.test(l.e) ? 'confirm' : /payout/i.test(l.e) ? 'payout' : 'statement';
+  return D().logs.filter(l => !(D().stmPartial && l.stm.endsWith('-S')) && (f.type === 'all' || type(l) === f.type) && (!q || (l.stm + ' ' + l.e + ' ' + l.d).toLowerCase().includes(q)));
 }
-function sumLink(colId, n){ let r = 0, g = 0; for (let i = 0; i < n; i++){ const d = daily(colId, i); r += d.rev; g += d.gmv; } return {rev:r, gmv:g}; }
-const DST = {Ready:'ok', Preliminary:'info', Adjusted:'warn', Delayed:'warn', 'Sync unknown':'warn'};
-function ctrDataStatus(ctrId){
-  if (S.state === 'unknown' && ctrId === 'CTR-550361') return 'Sync unknown';
-  if (S.data.dataNote === 'partial' && ctrId === 'CTR-340918') return 'Delayed';
-  if (ctrId === 'CTR-340918') return 'Adjusted';
-  return 'Ready';
-}
-function dataRows(kind, n){
-  const ls = dataLinks().filter(l => UI.dd.ctr === 'all' || colOf(l.col).ctr === UI.dd.ctr);
-  if (kind === 'daily'){
-    const rows = [['Date','Drama','Contract ID','Collection ID','Market','Language','Link','Estimated distribution revenue (USD)','Attributed GMV (USD)','Data status']];
-    dayList(n).forEach(d => ls.forEach(l => { const c = colOf(l.col), k = ctrOf(c.ctr), v = daily(l.col, d.i); rows.push([d.iso, k.title, k.id, c.id, c.market, c.lang, l.url, v.rev.toFixed(2), v.gmv.toFixed(2), v.status]); }));
-    return rows;
-  }
-  if (kind === 'link'){
-    const rows = [['Drama','Contract ID','Collection ID','Market','Language','Link','Link status','Estimated distribution revenue (USD)','Attributed GMV (USD)']];
-    ls.forEach(l => { const c = colOf(l.col), k = ctrOf(c.ctr), s = sumLink(l.col, n); rows.push([k.title, k.id, c.id, c.market, c.lang, l.url, LINK_ST[l.status][1], s.rev.toFixed(2), s.gmv.toFixed(2)]); });
-    return rows;
-  }
-  const rows = [['Drama','Contract ID','Collections','Estimated distribution revenue (USD)','Attributed GMV (USD)','Data status']];
-  CONTRACTS.forEach(k => { const kl = ls.filter(l => colOf(l.col).ctr === k.id); if (!kl.length) return; let r = 0, g = 0; kl.forEach(l => { const s = sumLink(l.col, n); r += s.rev; g += s.gmv; }); rows.push([k.title, k.id, kl.length, r.toFixed(2), g.toFixed(2), ctrDataStatus(k.id)]); });
-  return rows;
-}
-function pageData(){
-  const st = S.state; const f = UI.dd;
-  let out = rsHeader('data') + '<div class="stack">';
-  const gn = globalNotice(); if (gn) out += gn;
-  out += banner('warn', '<b>Distribution data isn\u2019t a final settlement amount.</b> It updates continuously and may be delayed or adjusted. Final receivables follow your monthly settlement statements.', '<button class="btn btn-sm" data-act="go" data-to="settlement">View settlement statements</button>');
-  if (st === 'partial') out += banner('warn', '<b>Some data is delayed.</b> 2 of 3 dramas are up to date. The Physician at Midnight is missing Nov 1–2 data; it will backfill automatically.', '', 'clock');
-  if (st === 'unknown') out += banner('warn', '<b>Latest data sync status is unknown.</b> Showing data as of Nov 2, 2026 02:00 UTC. Moonblade Oath may change once the sync is confirmed.', '<button class="btn btn-sm" data-act="toast" data-msg="Still confirming the latest sync. Data shown is as of Nov 2, 02:00 UTC." data-type="warn">Check again</button>', 'clock');
-  if (st === 'invalid') out += banner('err', '<b>3 links became invalid on Nov 2–3.</b> Revenue from these links stops accruing after they became invalid. Earlier revenue still counts toward settlement.', '<button class="btn btn-sm" data-act="go-links-invalid">Review links</button>');
-  if (st === 'error') return out + errorBlock('distribution data') + '</div>';
-  const ctrs = CONTRACTS.filter(k => dataLinks().some(l => colOf(l.col).ctr === k.id));
-  out += `<div class="toolbar"><div class="left">
-      ${sel('dd.range', String(f.range), [['7','Last 7 days'],['14','Last 14 days'],['30','Last 30 days']], 'Period')}
-      ${sel('dd.ctr', f.ctr, [['all','All dramas']].concat(ctrs.map(k => [k.id, k.title])), 'Drama')}
-      <span class="tag">${BCS.main.name} · BC ${BCS.main.id}</span><span class="faint" style="font-size:12px">USD · through Nov 2, 2026</span>
-    </div><div class="right"><button class="btn" data-act="export-data">${ic('download', 14)}Export full data</button></div></div>`;
-  if (st === 'loading') return out + skelKpis(5) + `<div class="panel"><table class="tbl"><tbody>${skelRows(4, 7)}</tbody></table></div></div>`;
-  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('chart', 'No distribution data for this period', 'Data appears about 24 hours after your links start getting attributed orders.', '<button class="btn" data-act="go" data-to="links">Go to Distribution Management</button>') + '</div></div>';
-  const n = +f.range;
-  const ls = dataLinks().filter(l => f.ctr === 'all' || colOf(l.col).ctr === f.ctr);
-  let R = 0, G = 0; const per = {};
-  ls.forEach(l => { const s = sumLink(l.col, n); R += s.rev; G += s.gmv; const k = colOf(l.col).ctr; per[k] = per[k] || {rev:0, gmv:0, links:[]}; per[k].rev += s.rev; per[k].gmv += s.gmv; per[k].links.push(l); });
-  const shown = Object.keys(per);
-  out += `<div class="kpis" style="--n:5">
-    <div class="kpi"><div class="kpi-l">Estimated distribution revenue</div><div class="kpi-v">${money(R)}</div><div class="kpi-s">Last ${n} days · not final</div></div>
-    <div class="kpi"><div class="kpi-l">Attributed GMV</div><div class="kpi-v">${money(G)}</div><div class="kpi-s">Orders attributed to your links</div></div>
-    <div class="kpi"><div class="kpi-l">Dramas (Contracts)</div><div class="kpi-v">${shown.length}</div><div class="kpi-s">With attributed data</div></div>
-    <div class="kpi"><div class="kpi-l">Collections / links</div><div class="kpi-v">${ls.length}</div><div class="kpi-s">${ls.filter(l => l.status === 'invalid').length} invalid now</div></div>
-    <div class="kpi"><div class="kpi-l">Data updated</div><div class="kpi-v ${st === 'unknown' ? 'warn' : ''}" style="font-size:15px">${st === 'unknown' ? 'Sync unknown' : 'Nov 3, 02:00 UTC'}</div><div class="kpi-s">Typical delay about 24 hours</div></div></div>`;
-  const rows = CONTRACTS.filter(k => per[k.id]).map(k => { const p = per[k.id]; const ds = ctrDataStatus(k.id);
-    return `<tr class="clickable" data-act="data-contract" data-id="${k.id}"><td><div style="display:flex;gap:10px;align-items:center"><div class="poster-box" style="width:28px;flex:none;border-radius:2px">${poster(k.id)}</div><div style="min-width:0"><div class="cell-title ell">${k.title}</div><div class="cell-sub mono">${k.id}</div></div></div></td>
-      <td class="num">${p.links.length}</td><td class="num">${money(p.rev)}</td><td class="num">${money(p.gmv)}</td><td><span class="st ${DST[ds]}">${ds}</span>${ds === 'Adjusted' ? '<div class="st-reason">Refunds deducted Oct 30</div>' : ds === 'Delayed' ? '<div class="st-reason">Nov 1–2 pending</div>' : ''}</td>
-      <td><button class="btn btn-sm" data-act="data-contract" data-id="${k.id}">View collections ${ic('chev-right', 12)}</button></td></tr>`; }).join('');
-  out += `<div class="panel"><div class="panel-h"><h3>By drama</h3><span class="faint" style="font-size:12px">Select a drama to see collections and links, then daily detail</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Drama (Contract)</th><th class="num" style="width:110px">Links</th><th class="num" style="width:190px">Est. distribution revenue</th><th class="num" style="width:160px">Attributed GMV</th><th style="width:170px">Data status</th><th style="width:150px"></th></tr></thead><tbody>${rows || `<tr><td colspan="6">${emptyBlock('search', 'No data for this drama', 'Choose another drama.', '')}</td></tr>`}</tbody></table></div>
-    <div class="panel-f"><span>Totals: ${money(R)} estimated revenue · ${money(G)} attributed GMV</span><span>Ad metrics such as CTR, CPC, CPA and ROI are in TTAM.</span></div></div>`;
-  return out + '</div>';
-}
-function contractDataDrawer(ctrId){
-  const k = ctrOf(ctrId), n = +UI.dd.range;
-  const ls = dataLinks().filter(l => colOf(l.col).ctr === ctrId);
-  let R = 0, G = 0;
-  const rows = ls.map(l => { const c = colOf(l.col), s = sumLink(l.col, n); R += s.rev; G += s.gmv;
-    return `<tr><td><div class="cell-title">${colLabel(c)}</div><div class="cell-sub mono">${c.id}</div></td><td><div class="mono ell">${l.url.replace('https://dist.ttbc.example', '')}</div>${stChip(LINK_ST, l.status)}</td><td class="num">${money(s.rev)}</td><td class="num">${money(s.gmv)}</td><td><button class="btn btn-sm" data-act="daily" data-col="${l.col}">Daily detail</button></td></tr>`; }).join('');
-  const other = colsOf(ctrId).filter(c => !ls.some(l => l.col === c.id));
-  return {title:k.title + ' · distribution data', width:760, sub:`<span class="mono">${k.id}</span><span class="faint">·</span><span>Last ${n} days</span><span class="faint">·</span><span>${BCS.main.name}</span>`,
-    body:`${banner('warn', 'Estimated, not final. Final amounts are in your settlement statement.')}
-      <div style="height:12px"></div><div class="kpis" style="--n:3"><div class="kpi"><div class="kpi-l">Est. distribution revenue</div><div class="kpi-v">${money(R)}</div></div><div class="kpi"><div class="kpi-l">Attributed GMV</div><div class="kpi-v">${money(G)}</div></div><div class="kpi"><div class="kpi-l">Data status</div><div class="kpi-v" style="font-size:15px"><span class="st ${DST[ctrDataStatus(ctrId)]}" style="font-size:15px">${ctrDataStatus(ctrId)}</span></div></div></div>
-      <div class="sec"><div class="sec-h"><h4>By collection / link</h4></div>${ls.length ? `<div class="panel"><table class="tbl"><thead><tr><th>Collection</th><th style="width:190px">Link</th><th class="num" style="width:140px">Est. revenue</th><th class="num" style="width:130px">Attributed GMV</th><th style="width:120px"></th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="panel">' + emptyBlock('chart', 'No data yet', 'This drama has no links with attributed data in this period.', '') + '</div>'}
-      ${other.length ? `<div class="faint" style="font-size:12px;margin-top:8px">No data: ${other.map(c => colLabel(c) + ' (' + (linkOf(c.id) ? 'link has no attributed orders yet' : 'no link') + ')').join(', ')}</div>` : ''}</div>`,
-    footer:`<button class="btn" data-act="export-ctr" data-id="${ctrId}">${ic('download', 14)}Export this drama</button><button class="btn btn-primary" data-act="close-drawer">Close</button>`};
-}
-function dailyModal(colId){
-  const l = linkOf(colId), c = colOf(colId), k = ctrOf(c.ctr), n = +UI.dd.range;
-  const days = dayList(n);
-  let R = 0, G = 0;
-  const rows = days.map(d => { const v = daily(colId, d.i); R += v.rev; G += v.gmv; return `<tr><td>${d.label}</td><td class="num">${money(v.rev)}</td><td class="num">${money(v.gmv)}</td><td><span class="st ${DST[v.status]}">${v.status}</span></td><td class="cell-sub">${v.status === 'Preliminary' ? 'May still change' : v.status === 'Adjusted' ? 'Refund deducted' : v.status === 'Delayed' ? 'Backfilling' : ''}</td></tr>`; }).join('');
-  return {title:'Daily detail', width:720, sub:`${k.title} · ${colLabel(c)} · <span class="mono">${l.url.replace('https://', '')}</span>`,
-    body:`<div class="faint" style="font-size:12px;margin-bottom:8px">Date × link · last ${n} days · USD · estimated, not final settlement</div><div class="panel" style="max-height:52vh;overflow:auto"><table class="tbl"><thead><tr><th>Date (UTC)</th><th class="num">Est. distribution revenue</th><th class="num">Attributed GMV</th><th style="width:120px">Data status</th><th style="width:130px">Note</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><td style="font-weight:600;border-top:1px solid var(--border)">Total</td><td class="num" style="font-weight:600;border-top:1px solid var(--border)">${money(R)}</td><td class="num" style="font-weight:600;border-top:1px solid var(--border)">${money(G)}</td><td colspan="2" style="border-top:1px solid var(--border)"></td></tr></tfoot></table></div>`,
-    footer:`<button class="btn" data-act="close-modal">Close</button><button class="btn btn-primary" data-act="export-daily" data-col="${colId}">${ic('download', 14)}Export CSV</button>`};
-}
-
 function stmFiltered(){
   const f = UI.st;
   return D().statements.filter(s => (f.period === 'all' || s.period === f.period) && (f.bc === 'all' || s.bc === f.bc) && (f.status === 'all' || s.status === f.status) && !(D().stmPartial && s.bc === 'sub'));
 }
 function pageSettlement(){
   const st = S.state; const f = UI.st;
-  let out = rsHeader('settlement') + '<div class="stack">';
+  let out = stHeader() + '<div class="stack">';
   out += banner('info', 'Settlement statements are the formal receivable amounts, split by Business Center and drama. You must confirm each statement before payout. Viewing or downloading doesn\u2019t confirm it.');
   if (st === 'error') return out + errorBlock('settlement statements') + '</div>';
   const S2 = D().statements.filter(s => !(D().stmPartial && s.bc === 'sub'));
@@ -1303,9 +1191,9 @@ function pageSettlement(){
   if (failed.length) out += banner('err', `<b>Payout failed for ${failed.map(s => s.id).join(', ')}: beneficiary name mismatch.</b> Update the beneficiary name in Billing to match your bank account, then request a payout retry.`, `<button class="btn btn-sm" data-act="open-stm" data-id="${failed[0].id}">View log and fix</button>`);
   if (conf.length) out += banner('warn', `<b>Confirmation result unknown for ${conf[0].id}.</b> Your confirmation was submitted but not yet acknowledged. Don\u2019t confirm again.`, `<button class="btn btn-sm" data-act="stm-check" data-id="${conf[0].id}">${ic('refresh', 14)}Check status</button>`, 'clock');
   if (D().stmPartial && !UI.dismissed.has('st-partial')) out += banner('warn', '<b>Some statements couldn\u2019t load.</b> Statements for Shike Interactive · Studio B (Sub BC) are temporarily unavailable. Main BC statements are complete.', '<button class="btn btn-sm" data-act="st-partial-retry">' + ic('refresh', 14) + 'Retry Studio B</button>');
-  if (st === 'invalid') out += banner('plain', 'Some links became invalid on Nov 2–3. Revenue earned before that is still included in statements; nothing changes for already issued statements.');
+  if (st === 'invalid') out += banner('plain', 'Some links became invalid on Nov 2–3. Earnings before that are still included in statements; nothing changes for already issued statements.');
   if (st === 'loading') return out + skelKpis(4) + `<div class="panel"><table class="tbl"><tbody>${skelRows(5, 8)}</tbody></table></div></div>`;
-  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('file', 'No settlement statements yet', 'Monthly statements are generated after each period closes, usually by the 2nd of the following month.', '<button class="btn" data-act="go" data-to="data">View distribution data</button>') + '</div></div>';
+  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('file', 'No settlement statements yet', 'Monthly statements are generated after each period closes, usually by the 2nd of the following month.', '<button class="btn" data-act="go" data-to="links">Go to Distribution Management</button>') + '</div></div>';
   const sum = arr => arr.reduce((a, s) => a + stmFinal(s), 0);
   const proc = S2.filter(s => s.status === 'processing');
   const paid = S2.filter(s => s.status === 'paid');
@@ -1314,14 +1202,16 @@ function pageSettlement(){
     <button class="kpi ${f.status === 'processing' ? 'on' : ''}" data-act="st-kpi" data-s="processing"><div class="kpi-l">Processing</div><div class="kpi-v">${money(sum(proc))}</div><div class="kpi-s">${plural(proc.length, 'statement')} queued for payout</div></button>
     <button class="kpi ${f.status === 'paid' ? 'on' : ''}" data-act="st-kpi" data-s="paid"><div class="kpi-l">Paid · last 90 days</div><div class="kpi-v">${money(sum(paid))}</div><div class="kpi-s">${plural(paid.length, 'statement')}</div></button>
     <button class="kpi ${f.status === 'failed' ? 'on' : ''}" data-act="st-kpi" data-s="failed"><div class="kpi-l">Payout exceptions</div><div class="kpi-v ${failed.length ? 'err' : ''}">${failed.length}</div><div class="kpi-s">${failed.length ? 'Action needed' : 'None'}</div></button></div>`;
-  out += `<div class="toolbar"><div class="left">${sel('st.period', f.period, [['all','All periods'],['Oct 2026','Oct 2026'],['Sep 2026','Sep 2026'],['Aug 2026','Aug 2026']], 'Period')}${sel('st.bc', f.bc, [['all','All Business Centers'],['main', BCS.main.name + ' (Main)'],['sub', 'Studio B (Sub)']], 'Business Center')}${sel('st.status', f.status, [['all','All statuses'],['pending','Pending confirmation'],['confirming','Confirming'],['processing','Processing'],['paid','Paid'],['failed','Payout failed']], 'Status')}</div><div class="right"><span class="faint" style="font-size:12px">Monthly · USD</span></div></div>`;
+  out += `<div class="toolbar"><div class="left">${sel('st.period', f.period, [['all','All periods'],['Oct 2026','Oct 2026'],['Sep 2026','Sep 2026'],['Aug 2026','Aug 2026']], 'Period')}${sel('st.bc', f.bc, [['all','All Business Centers'],['main', BCS.main.name + ' (Main)'],['sub', 'Studio B (Sub)']], 'Business Center')}${sel('st.status', f.status, [['all','All statuses'],['pending','Pending confirmation'],['confirming','Confirming'],['processing','Processing'],['paid','Paid'],['failed','Payout failed']], 'Status')}</div><div class="right"><button class="btn" data-act="st-export">${ic('download', 14)}Export statements</button></div></div>`;
   const list = stmFiltered();
   const rows = list.map(s => { const b = BCS[s.bc];
     const act = s.status === 'pending' ? `<button class="btn btn-sm btn-primary" data-act="open-stm" data-id="${s.id}">Review and confirm</button>` : s.status === 'failed' ? `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">Fix payout</button>` : s.status === 'confirming' ? `<button class="btn btn-sm" data-act="stm-check" data-id="${s.id}">Check status</button>` : `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">View</button>`;
     return `<tr class="clickable" data-act="open-stm" data-id="${s.id}"><td><div class="cell-title mono" style="font-size:13px">${s.id}</div><div class="cell-sub">${s.generated}</div></td><td>${s.period}</td><td><div class="ell">${b.name}</div><div class="cell-sub">${b.role}</div></td><td class="num">${s.split.length}</td><td class="num"><b>${money(stmFinal(s))}</b>${s.adj ? '<div class="cell-sub">' + money(s.adj) + ' adj.</div>' : ''}</td><td>v${s.version}${s.revised ? ' <span class="tag warn">Revised</span>' : ''}</td><td>${stChip(STM_ST, s.status)}${s.failReason ? '<div class="st-reason">' + s.failReason + '</div>' : ''}</td><td>${act}</td></tr>`; }).join('');
   out += `<div class="panel"><div class="panel-h"><h3>Statements</h3><span class="faint" style="font-size:12px">${plural(list.length, 'statement')}</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:150px">Statement</th><th style="width:90px">Period</th><th>Business Center</th><th class="num" style="width:70px">Dramas</th><th class="num" style="width:130px">Final amount</th><th style="width:100px">Version</th><th style="width:190px">Status</th><th style="width:150px">Action</th></tr></thead><tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No statements match your filters', '', '<button class="btn" data-act="st-clear">Clear filters</button>')}</td></tr>`}</tbody></table></div></div>`;
-  const logs = D().logs.filter(l => !(D().stmPartial && l.stm.endsWith('-S')));
-  out += `<div class="panel"><div class="panel-h"><h3>Payout logs</h3><span class="faint" style="font-size:12px">Confirmation, payout and exception events</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:170px">Time (UTC)</th><th style="width:140px">Statement</th><th style="width:280px">Event</th><th>Details</th></tr></thead><tbody>${logs.map(l => `<tr><td class="cell-sub">${l.t.replace(' UTC', '')}</td><td><button class="btn-link mono" data-act="open-stm" data-id="${l.stm}">${l.stm}</button></td><td><span class="st ${l.k || 'muted'}" style="white-space:normal;line-height:16px">${l.e}</span></td><td class="cell-sub" style="white-space:normal">${l.d}</td></tr>`).join('')}</tbody></table></div></div>`;
+  const logs = logsFiltered();
+  const pl = UI.pl;
+  out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="pl-q" data-inp="pl-q" value="${esc(pl.q)}" placeholder="Search statement or event" aria-label="Search payout logs"></label>${sel('pl.type', pl.type, [['all','All events'],['confirm','Confirmations'],['payout','Payouts'],['exception','Exceptions'],['statement','Statement updates']], 'Event type')}</div><div class="right"><button class="btn" data-act="pl-export">${ic('download', 14)}Export logs</button></div></div>`;
+  out += `<div class="panel"><div class="panel-h"><h3>Payout logs</h3><span class="faint" style="font-size:12px">Confirmation, payout and exception events</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:170px">Time (UTC)</th><th style="width:140px">Statement</th><th style="width:280px">Event</th><th>Details</th></tr></thead><tbody>${logs.length ? '' : `<tr><td colspan="4">${emptyBlock('search', 'No log events match your filters', '', '<button class="btn" data-act="pl-clear">Clear filters</button>')}</td></tr>`}${logs.map(l => `<tr><td class="cell-sub">${l.t.replace(' UTC', '')}</td><td><button class="btn-link mono" data-act="open-stm" data-id="${l.stm}">${l.stm}</button></td><td><span class="st ${l.k || 'muted'}" style="white-space:normal;line-height:16px">${l.e}</span></td><td class="cell-sub" style="white-space:normal">${l.d}</td></tr>`).join('')}</tbody></table></div></div>`;
   return out + '</div>';
 }
 function stmDrawer(id){
@@ -1410,8 +1300,7 @@ const ACT = {
     if (!ok.length){ toast('None of the selected links are active. Invalid or unknown links weren\u2019t copied.', 'warn'); return; }
     copyText(ok.map(l => l.url).join('\n'), 'Copied ' + plural(ok.length, 'link') + (ls.length > ok.length ? '. Skipped ' + (ls.length - ok.length) + ' not active' : ''));
   },
-  'export-links': () => openExport('links'),
-  'export-data': () => openExport('data'),
+  'export-links': () => openExport(),
   'ex-fmt': el => { EX.fmt = el.dataset.v; refreshDrawer(); },
   'ex-run': () => runExport(),
   'gen-open': (el, e) => { if (e) e.stopPropagation(); openGenerate(el.dataset.col); },
@@ -1440,15 +1329,15 @@ const ACT = {
   'bd-expand': () => { CONTRACTS.forEach(k => UI.bd.open.add(k.id)); render(); },
   'bd-collapse': () => { UI.bd.open.clear(); render(); },
   'bd-clear': () => { UI.bd.q = ''; render(); },
-  'data-contract': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; if (S.page !== 'data'){ UI.dd.ctr = 'all'; go('data', () => openDrawer(() => contractDataDrawer(id))); } else openDrawer(() => contractDataDrawer(id)); },
-  'daily': el => { const c = el.dataset.col; openModal(() => dailyModal(c)); },
-  'export-daily': el => { const c = el.dataset.col, n = +UI.dd.range; const l = linkOf(c), cc = colOf(c), k = ctrOf(cc.ctr);
-    const rows = [['Date','Drama','Collection ID','Link','Estimated distribution revenue (USD)','Attributed GMV (USD)','Data status']].concat(dayList(n).map(d => { const v = daily(c, d.i); return [d.iso, k.title, c, l.url, v.rev.toFixed(2), v.gmv.toFixed(2), v.status]; }));
-    download(`daily-${c}-last-${n}-days.csv`, csv(rows)); toast('Exported ' + n + ' days for ' + c + '. Estimated, not final settlement.'); },
-  'export-ctr': el => { const id = el.dataset.id; const prev = UI.dd.ctr; UI.dd.ctr = id; const rows = dataRows('daily', +UI.dd.range); UI.dd.ctr = prev; download(`distribution-data-${id}.csv`, csv(rows)); toast('Exported ' + plural(rows.length - 1, 'row') + ' for ' + ctrOf(id).title + '.'); },
   'open-stm': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; if (S.page !== 'settlement') go('settlement', () => openDrawer(() => stmDrawer(id))); else openDrawer(() => stmDrawer(id)); },
   'st-kpi': el => { UI.st.status = UI.st.status === el.dataset.s ? 'all' : el.dataset.s; render(); },
   'st-clear': () => { UI.st = freshUI().st; render(); },
+  'pl-clear': () => { UI.pl = freshUI().pl; render(); },
+  'st-export': () => { const list = stmFiltered(); if (!list.length){ toast('No statements match your filters.', 'warn'); return; }
+    download('settlement-statements.csv', csv([['Statement','Period','Business Center','BC ID','Version','Gross (USD)','Adjustments (USD)','Final amount (USD)','Status']].concat(list.map(s => [s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, s.gross.toFixed(2), s.adj.toFixed(2), stmFinal(s).toFixed(2), STM_ST[s.status][1]]))));
+    toast('Exported ' + plural(list.length, 'statement') + '. Exporting doesn\u2019t confirm any statement.'); },
+  'pl-export': () => { const list = logsFiltered(); if (!list.length){ toast('No log events match your filters.', 'warn'); return; }
+    download('payout-logs.csv', csv([['Time (UTC)','Statement','Event','Details']].concat(list.map(l => [l.t, l.stm, l.e, l.d])))); toast('Exported ' + plural(list.length, 'log event') + '.'); },
   'st-partial-retry': el => busy(el, 800, () => { D().stmPartial = false; render(); toast('Studio B statements loaded.'); }),
   'stm-download': el => { const s = stmOf(el.dataset.id); const rows = [['Statement','Period','Business Center','BC ID','Version','Contract ID','Drama','Collection ID','Amount (USD)']];
     s.split.forEach(([k, cols]) => cols.forEach(c => rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, k, ctrOf(k).title, c[0], c[1].toFixed(2)])));
@@ -1474,7 +1363,7 @@ const ACT = {
 function setState(st){ location.hash = '#' + PATH[S.page] + '?state=' + st; }
 
 const CHG = {
-  'filter': el => { const [grp, key] = el.name.split('.'); UI[grp][key] = grp === 'dd' && key === 'range' ? +el.value : el.value; render(); },
+  'filter': el => { const [grp, key] = el.name.split('.'); UI[grp][key] = el.value; render(); },
   'dr-sel': el => { el.checked ? DS.sel.add(el.dataset.id) : DS.sel.delete(el.dataset.id); refreshDrawer(); },
   'lv-sel': el => { el.checked ? UI.lv.sel.add(el.dataset.id) : UI.lv.sel.delete(el.dataset.id); render(); },
   'lv-all': el => { lvFiltered().forEach(l => el.checked ? UI.lv.sel.add(l.col) : UI.lv.sel.delete(l.col)); render(); },
@@ -1482,14 +1371,13 @@ const CHG = {
   'gen-bc': el => { GS.bc = el.value; GS.sel = new Set(genCandidates().filter(c => !linkOf(c.id)).map(c => c.id)); refreshDrawer(); },
   'ex-scope': el => { EX.scope = el.value; },
   'ex-field': el => { el.checked ? EX.fields.add(el.dataset.f) : EX.fields.delete(el.dataset.f); refreshDrawer(); },
-  'ex-ds': el => { EX.dataset = el.value; refreshDrawer(); },
-  'ex-range': el => { EX.range = +el.value; refreshDrawer(); },
   'stm-ack': el => { CS.ack = el.checked; const b = $('[data-act="stm-confirm-submit"]'); if (b) b.disabled = !CS.ack; }
 };
 const INP = {
   'mk-q': el => { UI.mk.q = el.value; render(); },
   'lv-q': el => { UI.lv.q = el.value; render(); },
-  'bd-q': el => { UI.bd.q = el.value; render(); }
+  'bd-q': el => { UI.bd.q = el.value; render(); },
+  'pl-q': el => { UI.pl.q = el.value; render(); }
 };
 
 document.addEventListener('click', e => {
