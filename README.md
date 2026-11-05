@@ -10,7 +10,7 @@ Three business modules, all under **Creatives → Distribution Center** in the l
 
 - **Drama Marketplace** — browse distributable dramas on cards with 9:16 portrait covers and claim collections, one drama at a time or in bulk: tick the checkbox on several drama cards, then **Claim collections** to claim across multiple contracts at once. Claiming is a two-step flow: **Confirm selection** (pick the collections to claim) → **Generate links** (distribution links are generated, with **Copy all** / **Export all** for use in TTAM).
 - **Distribution Management** — link view (drama, publisher account, revenue, status) and by-drama view. Export links, open TTAM from row actions, and monitor validity. Claiming in Marketplace auto-generates links.
-- **Settlement** — settlement statements, confirmation, and payout logs.
+- **Settlement** — settlement statements and confirmation.
 
 A **floating demo controller** (bottom-left, dashed yellow outline — not part of the product UI) switches between **4 views × 9 states**:
 

@@ -616,7 +616,6 @@ function freshUI(){
     pick:new Set(),
     bd:{q:'', open:new Set(['CTR-902184'])},
     st:{period:'all', bc:'all', status:'all'},
-    pl:{q:'', type:'all'},
     dismissed:new Set()
   };
 }
@@ -1832,11 +1831,6 @@ function runExport(){
 function stHeader(){
   return `<div class="ph"><div><h1>Settlement</h1><p>Review and confirm formal settlement statements, then track payouts and resolve exceptions.</p></div></div>`;
 }
-function logsFiltered(){
-  const f = UI.pl; const q = f.q.trim().toLowerCase();
-  const type = l => /fail/i.test(l.e) ? 'exception' : /^Confirm/.test(l.e) ? 'confirm' : /payout/i.test(l.e) ? 'payout' : 'statement';
-  return D().logs.filter(l => !(D().stmPartial && l.stm.endsWith('-S')) && (f.type === 'all' || type(l) === f.type) && (!q || (l.stm + ' ' + l.e + ' ' + l.d).toLowerCase().includes(q)));
-}
 function stmFiltered(){
   const f = UI.st;
   return D().statements.filter(s => (f.period === 'all' || s.period === f.period) && (f.bc === 'all' || s.bc === f.bc) && (f.status === 'all' || s.status === f.status) && !(D().stmPartial && s.bc === 'sub'));
@@ -1844,12 +1838,9 @@ function stmFiltered(){
 function pageSettlement(){
   const st = S.state; const f = UI.st;
   let out = stHeader() + '<div class="stack">';
-  out += banner('info', 'Settlement statements are the formal receivable amounts, split by Business Center and drama. You must confirm each statement before payout. Viewing or downloading doesn\u2019t confirm it.');
   if (st === 'error') return out + errorBlock('settlement statements') + '</div>';
   const S2 = D().statements.filter(s => !(D().stmPartial && s.bc === 'sub'));
   const pend = S2.filter(s => s.status === 'pending'), failed = S2.filter(s => s.status === 'failed'), conf = S2.filter(s => s.status === 'confirming');
-  if (pend.length){ const rv = pend.find(s => s.revised) || pend[0]; out += banner('warn', `<b>${plural(pend.length, 'statement')} need${pend.length === 1 ? 's' : ''} your confirmation by Nov 10, 2026.</b> ${rv.revised ? rv.id + ' was revised from v1 to v2 (adjustment ' + money(rv.adj) + '), so it needs re-confirmation.' : 'Payout starts only after you confirm.'}`, `<button class="btn btn-sm btn-primary" data-act="open-stm" data-id="${rv.id}">Review ${rv.id}</button>`); }
-  if (failed.length) out += banner('err', `<b>Payout failed for ${failed.map(s => s.id).join(', ')}: beneficiary name mismatch.</b> Update the beneficiary name in Billing to match your bank account, then request a payout retry.`, `<button class="btn btn-sm" data-act="open-stm" data-id="${failed[0].id}">View log and fix</button>`);
   if (conf.length) out += banner('warn', `<b>Confirmation result unknown for ${conf[0].id}.</b> Your confirmation was submitted but not yet acknowledged. Don\u2019t confirm again.`, `<button class="btn btn-sm" data-act="stm-check" data-id="${conf[0].id}">${ic('refresh', 14)}Check status</button>`, 'clock');
   if (D().stmPartial && !UI.dismissed.has('st-partial')) out += banner('warn', '<b>Some statements couldn\u2019t load.</b> Statements for Shike Interactive · Studio B (Sub BC) are temporarily unavailable. Main BC statements are complete.', '<button class="btn btn-sm" data-act="st-partial-retry">' + ic('refresh', 14) + 'Retry Studio B</button>');
   if (st === 'invalid') out += banner('plain', 'Some links became invalid on Nov 2–3. Earnings before that are still included in statements; nothing changes for already issued statements.');
@@ -1869,10 +1860,6 @@ function pageSettlement(){
     const act = s.status === 'pending' ? `<button class="btn btn-sm btn-primary" data-act="open-stm" data-id="${s.id}">Review and confirm</button>` : s.status === 'failed' ? `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">Fix payout</button>` : s.status === 'confirming' ? `<button class="btn btn-sm" data-act="stm-check" data-id="${s.id}">Check status</button>` : `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">View</button>`;
     return `<tr class="clickable" data-act="open-stm" data-id="${s.id}"><td><div class="cell-title mono" style="font-size:13px">${s.id}</div><div class="cell-sub">${s.generated}</div></td><td>${s.period}</td><td><div class="ell">${b.name}</div><div class="cell-sub">${b.role}</div></td><td class="num">${s.split.length}</td><td class="num"><b>${money(stmFinal(s))}</b>${s.adj ? '<div class="cell-sub">' + money(s.adj) + ' adj.</div>' : ''}</td><td>v${s.version}${s.revised ? ' <span class="tag warn">Revised</span>' : ''}</td><td>${stChip(STM_ST, s.status)}${s.failReason ? '<div class="st-reason">' + s.failReason + '</div>' : ''}</td><td>${act}</td></tr>`; }).join('');
   out += `<div class="panel"><div class="panel-h"><h3>Statements</h3><span class="faint" style="font-size:12px">${plural(list.length, 'statement')}</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:150px">Statement</th><th style="width:90px">Period</th><th>Business Center</th><th class="num" style="width:70px">Dramas</th><th class="num" style="width:130px">Final amount</th><th style="width:100px">Version</th><th style="width:190px">Status</th><th style="width:150px">Action</th></tr></thead><tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No statements match your filters', '', '<button class="btn" data-act="st-clear">Clear filters</button>')}</td></tr>`}</tbody></table></div></div>`;
-  const logs = logsFiltered();
-  const pl = UI.pl;
-  out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="pl-q" data-inp="pl-q" value="${esc(pl.q)}" placeholder="Search statement or event" aria-label="Search payout logs"></label>${sel('pl.type', pl.type, [['all','All events'],['confirm','Confirmations'],['payout','Payouts'],['exception','Exceptions'],['statement','Statement updates']], 'Event type')}</div><div class="right"><button class="btn" data-act="pl-export">${ic('download', 14)}Export logs</button></div></div>`;
-  out += `<div class="panel"><div class="panel-h"><h3>Payout logs</h3><span class="faint" style="font-size:12px">Confirmation, payout and exception events</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:170px">Time (UTC)</th><th style="width:140px">Statement</th><th style="width:280px">Event</th><th>Details</th></tr></thead><tbody>${logs.length ? '' : `<tr><td colspan="4">${emptyBlock('search', 'No log events match your filters', '', '<button class="btn" data-act="pl-clear">Clear filters</button>')}</td></tr>`}${logs.map(l => `<tr><td class="cell-sub">${l.t.replace(' UTC', '')}</td><td><button class="btn-link mono" data-act="open-stm" data-id="${l.stm}">${l.stm}</button></td><td><span class="st ${l.k || 'muted'}" style="white-space:normal;line-height:16px">${l.e}</span></td><td class="cell-sub" style="white-space:normal">${l.d}</td></tr>`).join('')}</tbody></table></div></div>`;
   return out + '</div>';
 }
 function stmDrawer(id){
@@ -2022,12 +2009,9 @@ const ACT = {
   'open-stm': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; if (S.page !== 'settlement') go('settlement', () => openDrawer(() => stmDrawer(id))); else openDrawer(() => stmDrawer(id)); },
   'st-kpi': el => { UI.st.status = UI.st.status === el.dataset.s ? 'all' : el.dataset.s; render(); },
   'st-clear': () => { UI.st = freshUI().st; render(); },
-  'pl-clear': () => { UI.pl = freshUI().pl; render(); },
   'st-export': () => { const list = stmFiltered(); if (!list.length){ toast('No statements match your filters.', 'warn'); return; }
     download('settlement-statements.csv', csv([['Statement','Period','Business Center','BC ID','Version','Gross (USD)','Adjustments (USD)','Final amount (USD)','Status']].concat(list.map(s => [s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, s.gross.toFixed(2), s.adj.toFixed(2), stmFinal(s).toFixed(2), STM_ST[s.status][1]]))));
     toast('Exported ' + plural(list.length, 'statement') + '. Exporting doesn\u2019t confirm any statement.'); },
-  'pl-export': () => { const list = logsFiltered(); if (!list.length){ toast('No log events match your filters.', 'warn'); return; }
-    download('payout-logs.csv', csv([['Time (UTC)','Statement','Event','Details']].concat(list.map(l => [l.t, l.stm, l.e, l.d])))); toast('Exported ' + plural(list.length, 'log event') + '.'); },
   'st-partial-retry': el => busy(el, 800, () => { D().stmPartial = false; render(); toast('Studio B statements loaded.'); }),
   'stm-download': el => { const s = stmOf(el.dataset.id); const rows = [['Statement','Period','Business Center','BC ID','Version','Contract ID','Drama','Collection ID','Amount (USD)']];
     s.split.forEach(([k, cols]) => cols.forEach(c => rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, k, ctrOf(k).title, c[0], c[1].toFixed(2)])));
@@ -2095,8 +2079,7 @@ const CHG = {
 const INP = {
   'mk-q': el => { UI.mk.q = el.value; render(); },
   'lv-q': el => { UI.lv.q = el.value; UI.lv.page = 1; render(); },
-  'bd-q': el => { UI.bd.q = el.value; render(); },
-  'pl-q': el => { UI.pl.q = el.value; render(); }
+  'bd-q': el => { UI.bd.q = el.value; render(); }
 };
 
 document.addEventListener('click', e => {
