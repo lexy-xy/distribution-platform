@@ -158,7 +158,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .kpi-v.err{color:var(--err)}.kpi-v.warn{color:var(--warn)}
 
 /* Marketplace */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .card{background:#fff;border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
 .card:hover{border-color:#B9C0C7}
 .card:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
@@ -194,19 +194,19 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .cv-prog i{flex:1;height:2px;background:rgba(255,255,255,.38);border-radius:1px;overflow:hidden}
 .cv-prog b{display:block;height:100%;width:0;background:#fff}
 .cv-prog i.done b{width:100%}
-.cv-prog i.run b{animation:cvfill 1600ms linear forwards}
+.cv-prog i.run b{animation:cvfill 800ms linear forwards}
 @keyframes cvfill{from{width:0}to{width:100%}}
 .poster-box svg.poster{position:absolute;inset:0;width:100%;height:100%;display:block}
 .poster-box .ov-tl{position:absolute;top:8px;left:8px;display:flex;gap:4px}
 .poster-box .ov-tr{position:absolute;top:8px;right:8px}
 .poster-box .ov-b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:12px;display:flex;justify-content:space-between}
-.card-b{padding:8px 10px;display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.card-b{padding:10px 12px;display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
 .card-t{font-size:14px;font-weight:600;line-height:20px;color:var(--text)}
 .card-m{font-size:12px;color:var(--text2);line-height:18px}
 .card .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .card .tags{max-height:20px;overflow:hidden;margin:5px 0 3px}
 .card-meta{font-size:12px;color:var(--text3);line-height:18px}
-.card-f{padding:6px 10px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:31px;font-size:12px}
+.card-f{padding:7px 12px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:31px;font-size:12px}
 .mk-count{font-size:12px;color:var(--text2)}
 
 /* Drawer & modal */
@@ -826,7 +826,7 @@ function cover(id){
 function card(c){
   const on = UI.pick.has(c.id);
   const markets = Array.from(new Set(colsOf(c.id).map(x => x.code))).join(', ');
-  const meta = `${c.episodes} eps · ${c.launchL}`;
+  const meta = `${c.episodes} eps · ${c.launchL} · ${markets}`;
   return `<div class="card ${on ? 'picked' : ''}" role="button" tabindex="0" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
     ${cover(c.id)}
       <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label></div>
@@ -835,8 +835,7 @@ function card(c){
       <div class="card-t ell" title="${esc(c.title)}">${c.title}</div>
       <div class="card-m ell" title="${esc(c.holder + ' · ' + c.source)}">${c.holder} · ${c.source}</div>
       <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
-      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL)}">${meta}</div>
-      <div class="card-meta ell" title="${esc('Markets: ' + markets)}">${markets.split(', ').join(' · ')}</div>
+      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
     </div>
     <div class="card-f">${claimSummary(c.id)}</div></div>`;
 }
@@ -854,7 +853,7 @@ function coverEnter(box){
       $$('.cv-f', box).forEach((im, j) => im.classList.toggle('on', j === k));
       $$('.cv-prog i', box).forEach((sg, j) => { sg.className = j < k ? 'done' : ''; if (j === k){ void sg.offsetWidth; sg.className = 'run'; } });
     };
-    step(); HOV.timer = setInterval(() => { k = (k + 1) % $$('.cv-f', box).length; step(); }, 1600);
+    step(); HOV.timer = setInterval(() => { k = (k + 1) % $$('.cv-f', box).length; step(); }, 800);
   } else if (m === 'clip'){
     let v = box.querySelector('video');
     if (!v){

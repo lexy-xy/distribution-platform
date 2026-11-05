@@ -19,7 +19,7 @@ A **floating demo controller** (bottom-left, dashed yellow outline — not part 
 
 The controller also has a **Cover style** option for the Marketplace, which sets what a drama cover does on hover:
 
-- **Clip** — plays a short muted video preview
+- **Clip** — plays a short (3–5 s) muted, looping video preview
 - **Keyframes** — cycles through key stills with a progress bar
 - **Static** — keeps the poster still
 - **Mixed** (default) — cards rotate through all three styles
