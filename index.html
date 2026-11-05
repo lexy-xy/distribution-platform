@@ -902,7 +902,7 @@ function playToggle(){
   updatePlayer();
 }
 
-/* Claim flow: Confirm selection -> Links ready (single drama or bulk) */
+/* Claim flow: Confirm selection -> Generate links (single drama or bulk) */
 const CF = {ctrs:[], keys:new Set(), results:null};
 const mkKey = c => c.market + ' · ' + c.lang;
 function openClaimFlow(ctrs, keys){ CF.ctrs = ctrs.slice(); CF.keys = new Set(keys || []); CF.results = null; openModal(claimFlowModal); }
@@ -927,7 +927,7 @@ function claimPlan(){
     return {ctr:id, items, missing};
   });
 }
-function stepper(n){ return `<div class="steps"><span class="${n === 1 ? 'on' : 'done'}"><i>${n === 1 ? '1' : ic('check', 10)}</i>Confirm selection</span><span class="sep"></span><span class="${n === 2 ? 'on' : ''}"><i>2</i>Links ready</span></div>`; }
+function stepper(n){ return `<div class="steps"><span class="${n === 1 ? 'on' : 'done'}"><i>${n === 1 ? '1' : ic('check', 10)}</i>Confirm selection</span><span class="sep"></span><span class="${n === 2 ? 'on' : ''}"><i>2</i>Generate links</span></div>`; }
 function claimFlowModal(){ return CF.results ? linksReadyModal() : confirmSelModal(); }
 function confirmSelModal(){
   const M = CF.ctrs.length; const opts = flowOptions(); const plan = claimPlan();
@@ -971,18 +971,16 @@ const FLOW_R = {ready:['ok','Link ready'], existed:['muted','Already existed'], 
 const flowLinks = () => CF.results.filter(x => (x.r === 'ready' || x.r === 'existed') && linkOf(x.col)).map(x => linkOf(x.col));
 function linksReadyModal(){
   const R = CF.results; const n = k => R.filter(x => x.r === k).length;
-  const unknown = n('unknown'), failed = n('failed'), usable = flowLinks().length;
+  const unknown = n('unknown'), failed = n('failed');
   const rows = R.map(x => { const c = colOf(x.col); const l = linkOf(x.col);
     const linkCell = l && (x.r === 'ready' || x.r === 'existed') ? `<div class="linkbox"><span class="mono">${l.url}</span>${copyBtn(l.url, 'Link copied')}</div>${x.why ? '<div class="cell-sub" style="white-space:normal">' + x.why + '</div>' : ''}`
       : `<span class="cell-sub" style="white-space:normal">${x.why || (x.r === 'unknown' ? 'Waiting for confirmation. The link is generated automatically once confirmed.' : '')}</span>`;
     return `<tr><td><div class="cell-title">${ctrOf(c.ctr).title}</div><div class="cell-sub">${colLabel(c)} · <span class="mono">${c.id}</span></div></td><td>${stChip(FLOW_R, x.r)}</td><td>${linkCell}</td></tr>`; }).join('');
   return {title:'Claim collections', width:780, sub:`<span>${plural(new Set(R.map(x => colOf(x.col).ctr)).size, 'drama')}</span><span class="faint">·</span><span>${BCS.main.name} (BC ${BCS.main.id})</span>`,
     body:`${stepper(2)}
-      <div class="res-sum"><div><b>${n('ready')}</b>Link ready</div><div><b>${n('existed')}</b>Already existed</div><div><b>${failed}</b>Failed</div><div><b>${unknown}</b>Confirming</div></div>
       ${unknown ? banner('warn', 'We\u2019re still confirming with the rights holder system. <b>Don\u2019t submit again</b>; a repeat request won\u2019t create a duplicate claim or link.', '', 'clock') + '<div style="height:12px"></div>' : ''}
-      <div class="panel"><table class="tbl"><thead><tr><th>Drama · collection</th><th style="width:124px">Result</th><th style="width:340px">Distribution link</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <div class="faint" style="font-size:12px;margin-top:8px">Paste these links into TTAM when you create ads. Find them anytime in My distribution links.</div>`,
-    footer:`<span class="grow">${usable ? plural(usable, 'link') + ' ready to use' : 'No links ready yet'}</span>${unknown ? '<button class="btn" data-act="cf-recheck">' + ic('refresh', 14) + 'Check again</button>' : ''}${failed ? '<button class="btn" data-act="cf-retry">Retry failed</button>' : ''}<button class="btn" data-act="cf-copy">${ic('copy', 14)}Copy all</button><button class="btn" data-act="cf-export">${ic('download', 14)}Export all</button><button class="btn btn-primary" data-act="close-modal">Done</button>`};
+      <div class="panel"><table class="tbl"><thead><tr><th>Drama · collection</th><th style="width:124px">Result</th><th style="width:340px">Distribution link</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+    footer:`<span class="grow"></span>${unknown ? '<button class="btn" data-act="cf-recheck">' + ic('refresh', 14) + 'Check again</button>' : ''}${failed ? '<button class="btn" data-act="cf-retry">Retry failed</button>' : ''}<button class="btn" data-act="cf-copy">${ic('copy', 14)}Copy all</button><button class="btn" data-act="cf-export">${ic('download', 14)}Export all</button><button class="btn btn-primary" data-act="close-modal">Done</button>`};
 }
 
 /* ---------- Distribution Management ---------- */
