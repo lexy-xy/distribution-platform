@@ -323,7 +323,6 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .ep:hover{border-color:var(--primary)}
 .ep.hook{background:#F0FAF9}
 .ep.paid{color:var(--text2)}
-.ep.mid{background:#F4F5FB}
 .ep.pw{border-color:#E7B567;background:var(--warn-bg);color:var(--warn);font-weight:600}
 .ep.cur{background:var(--primary);border-color:var(--primary);color:#fff}
 .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--text2);margin-top:8px}
@@ -986,9 +985,9 @@ function colStatus(c){
 }
 function dramaDrawer(ctrId){
   const c = ctrOf(ctrId); const cs = colsOf(ctrId);
-  const pw = c.paywall, N = c.episodes, midA = Math.round(N * 0.55), midB = Math.round(N * 0.75);
+  const pw = c.paywall, N = c.episodes;
   const eps = Array.from({length:N}, (_, i) => i + 1).map(e => {
-    const cls = ['ep', e <= 10 ? 'hook' : '', e >= midA && e <= midB ? 'mid' : '', e > pw ? 'paid' : '', e === pw ? 'pw' : '', e === PL.ep ? 'cur' : ''].join(' ');
+    const cls = ['ep', e <= 10 ? 'hook' : '', e > pw ? 'paid' : '', e === pw ? 'pw' : '', e === PL.ep ? 'cur' : ''].join(' ');
     return `<button class="${cls}" data-act="pl-ep" data-ep="${e}" aria-label="Episode ${e}">${e === pw ? ic('lock', 10) : ''}${e}</button>`;
   }).join('');
   const availCount = cs.filter(x => x.claim === 'available' && x.dist === 'open').length;
@@ -1035,9 +1034,9 @@ function dramaDrawer(ctrId){
       </div>
       <p class="det-syn">${c.synopsis}</p>
       <div class="sec"><div class="sec-h"><h4>Episodes</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
-        <div class="filters" style="margin-bottom:8px"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div>
+        <div class="filters" style="margin-bottom:8px"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
         <div class="ep-grid" id="ep-grid">${eps}</div>
-        <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:#F4F5FB"></i>Mid-late sample</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
+        <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
       </div>
     </div>
   </div>
