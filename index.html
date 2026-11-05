@@ -212,7 +212,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 /* Drawer & modal */
 .mask{position:fixed;inset:0;background:rgba(22,24,35,.45);z-index:100;opacity:0;transition:opacity .15s}
 .mask.show{opacity:1}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(1125px,calc(100vw - 48px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(944px,calc(100vw - 48px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
 .drawer.show{transform:none}
 .dr-h{min-height:56px;padding:12px 20px 12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
 .dr-h .t{flex:1;min-width:0}
@@ -231,11 +231,11 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .sec:first-child{margin-top:0}
 .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:8px}
 .sec-h h4{margin:0;font-size:14px;font-weight:600}
-.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 24px}
+.kv{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 20px}
 .kv.three{grid-template-columns:repeat(3,minmax(0,1fr))}
 .kv.four{grid-template-columns:repeat(4,minmax(0,1fr))}
 .kv.one{grid-template-columns:minmax(0,1fr);gap:10px}
-.dr-cols{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:24px;align-items:start}
+.dr-cols{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}
 .dr-aside{display:flex;flex-direction:column;gap:20px;min-width:0}
 .dr-aside .sec{margin-top:0}
 .kv .k{font-size:12px;color:var(--text2)}
@@ -260,8 +260,12 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* Player */
-.det{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;align-items:start}
-.det-l{position:sticky;top:0}
+.det{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start}
+.det-l{position:sticky;top:0;min-width:0}
+.det-r{min-width:0;display:flex;flex-direction:column;gap:16px}
+.det-r .sec{margin-top:0}
+.det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
+.det + .sec{margin-top:22px}
 .player{position:relative;width:100%;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
 .player svg.poster{position:absolute;inset:0;width:100%;height:100%}
 .player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -442,21 +446,21 @@ const BCS = {
 };
 const CONTRACTS = [
   {id:'CTR-902184', title:'The Last Clause', holder:'Northline Pictures', genres:['Legal','Revenge','Romance'], episodes:72, paywall:12, format:'Live action', source:'Local original', launch:'2026-09-18', launchL:'Sep 18, 2026', rank:2, rankL:'#2 Trending · Legal', plays:'18.4M',
-   synopsis:'A junior contract lawyer discovers her late mentor buried a clause that could topple the firm that betrayed him, and she has 30 days to enforce it.'},
+   synopsis:'A junior contract lawyer discovers her late mentor buried a clause that could topple the firm that betrayed him, and she has 30 days to enforce it. Every partner she trusted has a reason to bury the file, and the only witness is a client who should not still be alive. As the clock runs down she has to choose between the career she built and the case that would end it. The firm is watching. So is someone who already paid for this secret once.'},
   {id:'CTR-781230', title:'A House by the Tide', holder:'Bluefin Studio', genres:['Family','Mystery'], episodes:60, paywall:10, format:'Live action', source:'Localized', launch:'2026-08-02', launchL:'Aug 2, 2026', rank:7, rankL:'#7 Trending · Family', plays:'9.1M',
-   synopsis:'Three estranged siblings return to their mother\u2019s seaside house and uncover the debt she hid from them for twenty years.'},
+   synopsis:'Three estranged siblings return to their mother\u2019s seaside house and uncover the debt she hid from them for twenty years. The ledgers point to a neighbor they grew up calling uncle, and to a night none of them remember the same way. Storm season closes the only road off the peninsula, trapping them with the people who still want the house. What they find in the attic is not a will. It is a list of names, and one of them is still living next door.'},
   {id:'CTR-550361', title:'Moonblade Oath', holder:'Lumen Animation Works', genres:['Fantasy','Action'], episodes:80, paywall:15, format:'AI animation', source:'Local original', launch:'2026-10-05', launchL:'Oct 5, 2026', rank:1, rankL:'#1 Trending · Fantasy', plays:'24.7M',
-   synopsis:'A disgraced blade-bearer swears to protect the heir of a fallen moon clan, only to learn she is the one being hunted.'},
+   synopsis:'A disgraced blade-bearer swears to protect the heir of a fallen moon clan, only to learn she is the one being hunted. The oath that bound her sword now points at her own blood, and the clan\u2019s last relic answers to a name she buried. Rival houses close in before the next lunar tide. If she keeps the heir alive, the moon will rise for someone else. If she doesn\u2019t, the clan ends with her.'},
   {id:'CTR-340918', title:'The Physician at Midnight', holder:'Harbor Lane Media', genres:['Medical','Romance','Suspense'], episodes:66, paywall:11, format:'Live action', source:'Localized', launch:'2026-07-21', launchL:'Jul 21, 2026', rank:12, rankL:'#12 Trending · Suspense', plays:'6.3M',
-   synopsis:'A night-shift doctor treats a mysterious patient whose injuries seem to predict crimes that haven\u2019t happened yet.'},
+   synopsis:'A night-shift doctor treats a mysterious patient whose injuries seem to predict crimes that haven\u2019t happened yet. Charts fill with wounds that match tomorrow\u2019s headlines, and the hospital\u2019s quietest wing is suddenly full of people who should not know her name. She starts treating the injuries before they occur, and that is when the patient smiles. The city thinks it has a prophet. She is not sure she still has a patient.'},
   {id:'CTR-615502', title:'Second Bloom', holder:'Rosewater Films', genres:['Romance','Workplace'], episodes:54, paywall:9, format:'Live action', source:'Local original', launch:'2026-10-12', launchL:'Oct 12, 2026', rank:3, rankL:'#3 Trending · Romance', plays:'15.2M',
-   synopsis:'A florist who lost her shop to a developer ends up arranging flowers for his company, and for once he can\u2019t buy what he wants.'},
+   synopsis:'A florist who lost her shop to a developer ends up arranging flowers for his company, and for once he can\u2019t buy what he wants. The rooftop garden she builds for the launch becomes the one place in the tower that still belongs to her. Colleagues take sides. The developer\u2019s mother sends a bouquet with a note that is not a compliment. When the gala date arrives, the flowers are perfect, and so is her exit.'},
   {id:'CTR-447120', title:'Iron Lantern', holder:'Kitefire Studios', genres:['Action','Crime'], episodes:70, paywall:12, format:'Live action', source:'Localized', launch:'2026-09-02', launchL:'Sep 2, 2026', rank:5, rankL:'#5 Trending · Action', plays:'11.8M',
-   synopsis:'A night courier who crosses the city\u2019s rooftops with an old lantern becomes the only witness a corrupt precinct wants silenced.'},
+   synopsis:'A night courier who crosses the city\u2019s rooftops with an old lantern becomes the only witness a corrupt precinct wants silenced. The lantern shows him routes the maps do not, and a package he was never meant to open. Every drop after that is a test: keep running, or turn the light on the people who own the night. He still has one delivery left, and it is addressed to himself.'},
   {id:'CTR-829044', title:'Starfall Academy', holder:'Lumen Animation Works', genres:['Fantasy','Youth'], episodes:64, paywall:10, format:'AI animation', source:'Local original', launch:'2026-10-20', launchL:'Oct 20, 2026', rank:4, rankL:'#4 Trending · Fantasy', plays:'13.5M',
-   synopsis:'A scholarship student at a floating academy discovers that every falling star is a spell someone stole.'},
+   synopsis:'A scholarship student at a floating academy discovers that every falling star is a spell someone stole. The faculty call it weather. The stolen names in the observatory log say otherwise. She has until the next meteor shower to return what was taken, or become the next star the school lets fall. Friends she trusted start speaking in other people\u2019s voices. The academy does not lose students. It spends them.'},
   {id:'CTR-503318', title:'The Heiress Returns', holder:'Northline Pictures', genres:['Revenge','Romance'], episodes:78, paywall:14, format:'Live action', source:'Local original', launch:'2026-08-28', launchL:'Aug 28, 2026', rank:9, rankL:'#9 Trending · Revenge', plays:'7.4M',
-   synopsis:'Ten years after being written out of her family\u2019s will, a daughter returns to the gala that ruined her with a plan and a new name.'}
+   synopsis:'Ten years after being written out of her family\u2019s will, a daughter returns to the gala that ruined her with a plan and a new name. The estate still uses her mother\u2019s silver, and the guests still toast the brother who took everything. She did not come back for the house. She came back for the clause no lawyer was meant to find, and for the one person who kept her seat empty. By midnight the inheritance will have a different owner, and the family will finally know her name.'}
 ];
 const COLLECTIONS = [
   {id:'COL-US-18421', ctr:'CTR-902184', market:'United States', code:'US', lang:'English', share:45},
@@ -941,7 +945,7 @@ function dramaDrawer(ctrId){
         <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
     </div>
     <div class="det-r">
-      <div class="kv four">
+      <div class="kv">
         <div><div class="k">Rights holder</div><div class="v">${c.holder}</div></div>
         <div><div class="k">Format</div><div class="v">${c.format}</div></div>
         <div><div class="k">Source</div><div class="v">${c.source}</div></div>
@@ -951,15 +955,15 @@ function dramaDrawer(ctrId){
         <div><div class="k">Languages</div><div class="v">${Array.from(new Set(cs.map(x => x.lang))).join(', ')}</div></div>
         <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
       </div>
-      <p style="margin:14px 0 0">${c.synopsis}</p>
-  <div class="sec"><div class="sec-h"><h4>Episodes</h4><div class="filters"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div></div>
-    <div class="ep-grid" id="ep-grid">${eps}</div>
-    <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:#F4F5FB"></i>Mid-late sample</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
+      <p class="det-syn">${c.synopsis}</p>
+      <div class="sec"><div class="sec-h"><h4>Episodes</h4><div class="filters"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${midA}">Mid-late · Ep ${midA}</button></div></div>
+        <div class="ep-grid" id="ep-grid">${eps}</div>
+        <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:#F4F5FB"></i>Mid-late sample</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
+      </div>
+    </div>
   </div>
   <div class="sec"><div class="sec-h"><h4>Collections</h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
-    <div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Market</th><th>Language</th><th style="width:170px">Collection ID</th><th style="width:90px" class="num">Rev. share</th><th style="width:170px">Status</th></tr></thead><tbody>${rows}</tbody></table></div>
-  </div>
-    </div>
+    <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
   </div>`;
   const n = DS.sel.size;
   const order = mkFiltered().map(k => k.id); const at = order.indexOf(ctrId); const next = at >= 0 ? order[at + 1] : null;
@@ -1204,7 +1208,7 @@ function genDrawer(){
     body:`${banner('info', 'Generation is idempotent: one link per Collection × Business Center. Re-submitting, retrying, or selecting a collection that already has a link returns the existing link instead of creating a duplicate.')}
       <div class="sec"><div class="sec-h"><h4>Claimed collections</h4><span class="faint" style="font-size:12px">BC ${BCS[GS.bc].id}</span></div>
       <div class="toolbar" style="margin-bottom:8px"><div class="left"><select class="select" style="width:250px" name="gen-bc" data-chg="gen-bc" aria-label="Business Center"><option value="main" ${GS.bc === 'main' ? 'selected' : ''}>${BCS.main.name} (${BCS.main.role})</option><option value="sub" ${GS.bc === 'sub' ? 'selected' : ''}>Studio B (${BCS.sub.role})</option></select></div><div class="right"><button class="btn" data-act="gen-pick" data-m="new">Select without links</button><button class="btn" data-act="gen-pick" data-m="all">Select all</button><button class="btn" data-act="gen-pick" data-m="none">Clear</button></div></div>
-      ${cands.length ? `<div class="panel"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Drama (Contract)</th><th style="width:240px">Market · language</th><th style="width:160px">Collection ID</th><th style="width:100px" class="num">Rev. share</th><th style="width:190px">Current link</th></tr></thead><tbody>${rows}</tbody></table></div>` : '<div class="panel">' + emptyBlock('inbox', 'No claimed collections in this Business Center', 'Studio B hasn\u2019t claimed any collections. Claims belong to the Business Center that made them.', '<button class="btn" data-act="gen-bc-main">Switch to ' + BCS.main.name + '</button>') + '</div>'}</div>`,
+      ${cands.length ? `<div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th>Drama (Contract)</th><th style="width:170px">Market · language</th><th style="width:150px">Collection ID</th><th style="width:88px" class="num">Rev. share</th><th style="width:140px">Current link</th></tr></thead><tbody>${rows}</tbody></table></div></div>` : '<div class="panel">' + emptyBlock('inbox', 'No claimed collections in this Business Center', 'Studio B hasn\u2019t claimed any collections. Claims belong to the Business Center that made them.', '<button class="btn" data-act="gen-bc-main">Switch to ' + BCS.main.name + '</button>') + '</div>'}</div>`,
     footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected · ' + newN + ' new' : 'Nothing selected'}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="gen-submit">Generate links${n ? ' (' + n + ')' : ''}</button>`};
 }
 let CODE_N = 0;
@@ -1240,9 +1244,9 @@ function genResultModal(){
 /* Link details drawer */
 function linkDrawer(colId){
   const l = linkOf(colId); const c = colOf(colId), k = ctrOf(c.ctr);
-  const ads = l.ads.length ? `<div class="panel"><table class="tbl"><thead><tr><th style="width:120px">Ad ID</th><th>Ad name</th><th>Campaign</th><th style="width:200px">Delivery (from TTAM)</th></tr></thead><tbody>${l.ads.map(a => {
+  const ads = l.ads.length ? `<div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:100px">Ad ID</th><th>Ad name</th><th>Campaign</th><th style="width:160px">Delivery (from TTAM)</th></tr></thead><tbody>${l.ads.map(a => {
       const cls = /failed/i.test(a.st) ? 'err' : a.st === 'Paused' ? 'ok' : a.st === 'Pausing' ? 'info spin' : a.st === 'Unknown' ? 'warn' : 'muted';
-      return `<tr><td class="mono">${a.id}</td><td class="ell">${a.name}</td><td class="ell cell-sub">${a.campaign}</td><td><span class="st ${cls}">${a.st}</span></td></tr>`; }).join('')}</tbody></table></div>`
+      return `<tr><td class="mono">${a.id}</td><td class="ell">${a.name}</td><td class="ell cell-sub">${a.campaign}</td><td><span class="st ${cls}">${a.st}</span></td></tr>`; }).join('')}</tbody></table></div></div>`
     : '<div class="panel">' + emptyBlock('ads', 'No ads use this link yet', 'Ads you create in TTAM with this link will appear here.', '') + '</div>';
   const recheck = l.status === 'unknown' || l.ap === 'pausing' || l.ap === 'unknown';
   return {title:k.title + ' · ' + c.market,
@@ -1320,7 +1324,7 @@ function exportDrawer(){
     : `<div class="panel" style="overflow-x:auto"><table class="tbl" style="min-width:${flds.length * 140}px"><thead><tr>${flds.map(f => '<th>' + f[1] + '</th>').join('')}</tr></thead><tbody>${scoped.slice(0, 5).map(l => '<tr>' + flds.map(f => `<td class="ell ${f[0] === 'link' || f[0] === 'contract' || f[0] === 'collection' ? 'mono' : ''}" title="${esc(String(exVal(l, f[0])))}">${esc(String(exVal(l, f[0])))}</td>`).join('') + '</tr>').join('')}</tbody></table></div>${scoped.length > 5 ? '<div class="faint" style="font-size:12px;margin-top:8px">Showing 5 of ' + plural(scoped.length, 'row') + '.</div>' : ''}`;
   return {title:'Export links', sub:'Complete export of your distribution links',
     body:`<div class="dr-cols"><div class="dr-main">
-      <div class="sec"><div class="sec-h"><h4>Columns</h4><span class="faint" style="font-size:12px">${EX.fields.size} of ${LINK_FIELDS.length}</span></div><div class="kv four">${LINK_FIELDS.map(f => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" class="cb" name="ex-f-${f[0]}" data-chg="ex-field" data-f="${f[0]}" ${EX.fields.has(f[0]) ? 'checked' : ''}>${f[1]}</label>`).join('')}</div></div>
+      <div class="sec"><div class="sec-h"><h4>Columns</h4><span class="faint" style="font-size:12px">${EX.fields.size} of ${LINK_FIELDS.length}</span></div><div class="kv">${LINK_FIELDS.map(f => `<label style="display:flex;gap:8px;align-items:center;cursor:pointer"><input type="checkbox" class="cb" name="ex-f-${f[0]}" data-chg="ex-field" data-f="${f[0]}" ${EX.fields.has(f[0]) ? 'checked' : ''}>${f[1]}</label>`).join('')}</div></div>
       <div class="sec"><div class="sec-h"><h4>Preview</h4><span class="faint" style="font-size:12px">${plural(scoped.length, 'row')}</span></div>${preview}</div></div>
       <div class="dr-aside"><div class="sec"><div class="sec-h"><h4>Scope</h4></div>${radio('all', 'All links', all)}${radio('filtered', 'Links matching current filters', filt)}${radio('selected', 'Selected links', seln)}</div>
       <div class="sec"><div class="sec-h"><h4>Format</h4></div><div class="seg"><button class="${EX.fmt === 'csv' ? 'on' : ''}" data-act="ex-fmt" data-v="csv">CSV</button><button class="${EX.fmt === 'tsv' ? 'on' : ''}" data-act="ex-fmt" data-v="tsv">TSV (paste into sheets)</button></div></div></div></div>`,
@@ -1400,9 +1404,9 @@ function stmDrawer(id){
     body:`${s.revised ? banner('warn', '<b>Amount revised: v1 to v2.</b> An adjustment of ' + money(s.adj) + ' was added on Nov 2 (' + s.adjNote + '). Please review and confirm again; your earlier review doesn\u2019t apply to the new version.') + '<div style="height:12px"></div>' : ''}
       ${s.status === 'failed' ? banner('err', '<b>Payout failed · ' + s.failReason + '.</b> The bank rejected the transfer because the account holder name doesn\u2019t match the beneficiary on file. Update the beneficiary name in Billing, then request a payout retry.') + '<div style="height:12px"></div>' : ''}
       <div class="dr-cols"><div class="dr-main">
-      <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4><span class="faint" style="font-size:12px">${plural(s.split.length, 'Contract')}</span></div><div class="panel"><table class="tbl"><thead><tr><th style="width:220px">Drama (Contract)</th><th>Collections</th><th class="num" style="width:130px">Amount</th></tr></thead><tbody>${split}
+        <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4><span class="faint" style="font-size:12px">${plural(s.split.length, 'Contract')}</span></div><div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:180px">Drama (Contract)</th><th>Collections</th><th class="num" style="width:110px">Amount</th></tr></thead><tbody>${split}
         ${s.adj ? `<tr><td><div class="cell-title">Adjustments</div></td><td class="cell-sub">${s.adjNote}</td><td class="num">${money(s.adj)}</td></tr>` : ''}
-        <tr><td style="font-weight:600">Final amount</td><td></td><td class="num" style="font-weight:600">${money(stmFinal(s))}</td></tr></tbody></table></div></div>
+        <tr><td style="font-weight:600">Final amount</td><td></td><td class="num" style="font-weight:600">${money(stmFinal(s))}</td></tr></tbody></table></div></div></div>
       <div class="sec"><div class="sec-h"><h4>Payout and activity log</h4></div>${logs.length ? '<ul class="timeline">' + logs.map(l => `<li class="${l.k}"><div class="tl-t">${l.t}</div><div class="tl-e">${l.e}</div><div class="tl-d">${l.d}</div></li>`).join('') + '</ul>' : '<div class="faint">No activity yet.</div>'}</div></div>
       <div class="dr-aside"><div class="box"><div class="box-l">Final amount · ${s.status === 'pending' ? 'requires your confirmation' : 'formal receivable'}</div><div class="amount-xl">${money(stmFinal(s))}</div><div class="cell-sub">USD · gross ${money(s.gross)} · adjustments ${money(s.adj)}</div></div>
       <div class="box"><div class="kv one"><div><div class="k">Business Center</div><div class="v">${b.name} (${b.role})</div></div><div><div class="k">BC ID</div><div class="v mono">${b.id}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div><div><div class="k">Version</div><div class="v">${s.version}</div></div><div><div class="k">Confirm by</div><div class="v">${s.due}</div></div></div></div></div></div>`,
