@@ -162,6 +162,26 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .card{background:#fff;border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
 .card:hover{border-color:#B9C0C7}
 .card:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
+.card.picked{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
+.card-pick{width:24px;height:24px;border-radius:3px;background:rgba(255,255,255,.94);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.selbar{position:fixed;left:264px;right:24px;bottom:16px;z-index:60;background:#fff;border:1px solid var(--border2);border-left:3px solid var(--primary);border-radius:4px;box-shadow:0 4px 16px rgba(22,24,35,.14);display:flex;align-items:center;gap:8px;padding:8px 12px 8px 16px}
+.selbar .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
+.selbar .grow b{color:var(--text)}
+.page-pad-sel{padding-bottom:72px}
+.steps{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text3);margin-bottom:14px}
+.steps span{display:inline-flex;align-items:center;gap:6px}
+.steps i{font-style:normal;width:18px;height:18px;border-radius:50%;border:1px solid var(--border2);display:inline-flex;align-items:center;justify-content:center;font-size:11px}
+.steps .on{color:var(--text);font-weight:600}
+.steps .on i{background:var(--primary);border-color:var(--primary);color:#fff}
+.steps .done{color:var(--primary-t)}
+.steps .done i{background:var(--primary-bg);border-color:var(--primary);color:var(--primary-t)}
+.steps .sep{width:32px;height:1px;background:var(--border2)}
+.mk-chips{display:flex;flex-wrap:wrap;gap:8px}
+.mk-chip{display:inline-flex;align-items:center;gap:8px;height:32px;padding:0 10px;border:1px solid var(--border2);border-radius:4px;cursor:pointer;background:#fff;font-weight:500}
+.mk-chip.on{border-color:var(--primary);background:var(--primary-bg)}
+.mk-chip .faint{font-weight:400;font-size:12px}
+.flow-h{font-size:12px;font-weight:600;color:var(--text2);margin:0 0 8px}
+.tbl td.grp{border-right:1px solid var(--row);vertical-align:top}
 .poster-box{position:relative;aspect-ratio:3/4;background:#1d2329;overflow:hidden}
 .poster-box svg.poster{position:absolute;inset:0;width:100%;height:100%;display:block}
 .poster-box .ov-tl{position:absolute;top:8px;left:8px;display:flex;gap:4px}
@@ -406,10 +426,12 @@ const COLLECTIONS = [
   {id:'COL-GB-18422', ctr:'CTR-902184', market:'United Kingdom', code:'GB', lang:'English', share:40},
   {id:'COL-BR-77310', ctr:'CTR-781230', market:'Brazil', code:'BR', lang:'Portuguese', share:42},
   {id:'COL-MX-77311', ctr:'CTR-781230', market:'Mexico', code:'MX', lang:'Spanish', share:42},
+  {id:'COL-US-77312', ctr:'CTR-781230', market:'United States', code:'US', lang:'English', share:40},
   {id:'COL-US-55001', ctr:'CTR-550361', market:'United States', code:'US', lang:'English', share:50},
   {id:'COL-JP-55002', ctr:'CTR-550361', market:'Japan', code:'JP', lang:'Japanese', share:45},
   {id:'COL-TH-34001', ctr:'CTR-340918', market:'Thailand', code:'TH', lang:'Thai', share:38},
-  {id:'COL-ID-34002', ctr:'CTR-340918', market:'Indonesia', code:'ID', lang:'Indonesian', share:38}
+  {id:'COL-ID-34002', ctr:'CTR-340918', market:'Indonesia', code:'ID', lang:'Indonesian', share:38},
+  {id:'COL-US-34003', ctr:'CTR-340918', market:'United States', code:'US', lang:'English', share:36}
 ];
 const ADS = {
   'COL-US-18421': [['1812004417','LC_US_hook_courtroom_v3','LC US · Broad · Oct'],['1812004418','LC_US_reveal_clause_v1','LC US · Broad · Oct'],['1812004431','LC_US_romance_cut_v2','LC US · Lookalike'],['1812004432','LC_US_ep12_tease','LC US · Lookalike'],['1812004450','LC_US_trailer_15s','LC US · Retarget']],
@@ -446,6 +468,7 @@ function freshUI(){
   return {
     mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop'},
     lv:{q:'', status:'all', ap:'all', market:'all', sel:new Set()},
+    pick:new Set(),
     bd:{q:'', open:new Set(['CTR-902184'])},
     st:{period:'all', bc:'all', status:'all'},
     pl:{q:'', type:'all'},
@@ -459,7 +482,7 @@ function mkLink(col, code, created){
     history:[{t:created, e:'Link generated', d:'Key ' + col + ' × BC ' + BCS.main.id, k:'ok'}, {t:created, e:'Link active', d:'Distribution enabled by the rights holder in TTDC', k:'ok'}]};
 }
 function buildData(st){
-  const claim = {'COL-US-18421':'claimed','COL-GB-18422':'claimed','COL-BR-77310':'available','COL-MX-77311':'available','COL-US-55001':'claimed','COL-JP-55002':'claimed','COL-TH-34001':'claimed','COL-ID-34002':'claimed'};
+  const claim = {'COL-US-18421':'claimed','COL-GB-18422':'claimed','COL-BR-77310':'available','COL-MX-77311':'available','COL-US-55001':'claimed','COL-JP-55002':'claimed','COL-TH-34001':'claimed','COL-ID-34002':'claimed','COL-US-77312':'available','COL-US-34003':'available'};
   const d = {
     cols: COLLECTIONS.map(c => Object.assign({}, c, {claim:claim[c.id], dist:'open'})),
     links: [mkLink('COL-US-18421','k7Qm2x','Sep 20, 2026 10:14 UTC'), mkLink('COL-GB-18422','p3Lw9a','Sep 21, 2026 08:02 UTC'), mkLink('COL-US-55001','v8Rt4c','Oct 7, 2026 15:40 UTC'), mkLink('COL-TH-34001','d2Hn6s','Aug 2, 2026 11:25 UTC')],
@@ -510,7 +533,8 @@ function buildData(st){
   if (st === 'partial'){
     const j = mkLink('COL-JP-55002','m5Yz8e','Nov 3, 2026 02:55 UTC'); j.isNew = true; d.links.push(j);
     C('COL-BR-77310').claim = 'claimed';
-    d.lastClaim = {ctr:'CTR-781230', items:[{col:'COL-BR-77310', r:'claimed'}, {col:'COL-MX-77311', r:'failed', why:'Terms changed while you were confirming (revenue share 42% to 40%, version 3 to 4). Review the new terms and claim again.'}]};
+    const b = mkLink('COL-BR-77310','b3Rv6k','Nov 3, 2026 02:52 UTC'); b.isNew = true; d.links.push(b);
+    d.lastClaim = {ctrs:['CTR-781230'], items:[{col:'COL-BR-77310', r:'ready'}, {col:'COL-MX-77311', r:'failed', why:'Terms changed while you were confirming (revenue share 42% to 40%, version 3 to 4). Review the new terms and try again.'}]};
     d.lastGen = [{col:'COL-JP-55002', r:'generated'}, {col:'COL-ID-34002', r:'failed', why:'Collection version is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.'}, {col:'COL-US-55001', r:'existed'}];
     d.stmPartial = true;
   }
@@ -656,7 +680,7 @@ function onRoute(){
   const page = ROUTE[path];
   const st = STATES.some(x => x[0] === state) ? state : 'normal';
   if (!page || state !== st || PATH[page] !== path){ location.replace('#' + PATH[page || 'marketplace'] + '?state=' + st); return; }
-  if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv.sel.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); }
+  if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv.sel.clear(); UI.pick.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); }
   if (page !== S.page){ const first = S.page === null; S.page = page; closeAll(); stopPlayer(); if (!first) window.scrollTo(0, 0); }
   render();
   if (S.after){ const f = S.after; S.after = null; f(); }
@@ -710,11 +734,11 @@ function pageMarketplace(){
   const f = UI.mk; const st = S.state;
   const langs = Array.from(new Set(COLLECTIONS.map(c => c.lang)));
   const genres = Array.from(new Set([].concat(...CONTRACTS.map(c => c.genres)))).sort();
-  let out = `<div class="ph"><div><h1>Drama Marketplace</h1><p>Browse dramas rights holders have opened for distribution, preview episodes, and claim the collections you want to test.</p></div><div><button class="btn" data-act="go" data-to="links">${ic('link', 14)}My distribution links</button></div></div>`;
+  let out = `<div class="ph"><div><h1>Drama Marketplace</h1><p>Browse dramas rights holders have opened for distribution, preview episodes, and claim collections. Select several dramas to claim the same markets for all of them at once.</p></div><div><button class="btn" data-act="go" data-to="links">${ic('link', 14)}My distribution links</button></div></div>`;
   out += '<div class="stack">';
   const gn = globalNotice(); if (gn) out += gn;
-  if (st === 'partial' && D().lastClaim && !UI.dismissed.has('mk-partial')) out += banner('warn', '<b>Your last claim partially succeeded.</b> A House by the Tide: 1 collection claimed, 1 failed because the terms changed during confirmation.', '<button class="btn btn-sm" data-act="last-claim">View results</button><button class="btn btn-icon" data-act="dismiss" data-k="mk-partial" aria-label="Dismiss">' + ic('close', 14) + '</button>');
-  if (st === 'unknown' && colOf('COL-MX-77311').claim === 'confirming') out += banner('warn', '<b>A claim is still being confirmed.</b> A House by the Tide · Mexico · Spanish (COL-MX-77311). Don\u2019t submit it again; the result updates automatically.', '<button class="btn btn-sm" data-act="recheck-claim" data-col="COL-MX-77311">Check again</button>', 'clock');
+  if (st === 'partial' && D().lastClaim && !UI.dismissed.has('mk-partial')) out += banner('warn', '<b>Your last claim partially succeeded.</b> A House by the Tide: 1 collection claimed with its link ready, 1 failed because the terms changed during confirmation.', '<button class="btn btn-sm" data-act="last-claim">View results</button><button class="btn btn-icon" data-act="dismiss" data-k="mk-partial" aria-label="Dismiss">' + ic('close', 14) + '</button>');
+  if (st === 'unknown' && colOf('COL-MX-77311').claim === 'confirming') out += banner('warn', '<b>A claim is still being confirmed.</b> A House by the Tide · Mexico · Spanish (COL-MX-77311). Don\u2019t submit it again; its link is generated automatically once the claim is confirmed.', '<button class="btn btn-sm" data-act="recheck-claim" data-col="COL-MX-77311">Check again</button>', 'clock');
   if (st === 'invalid') out += banner('err', '<b>3 collections you claimed are no longer open for distribution.</b> Their links are invalid and TTAM is auto-pausing affected ads.', '<button class="btn btn-sm" data-act="go-links-invalid">Review links</button>');
   if (st !== 'empty' && st !== 'error'){
     out += `<div class="toolbar"><div class="left">
@@ -735,17 +759,23 @@ function pageMarketplace(){
     out += '<div class="panel">' + emptyBlock('film', 'No dramas are open for distribution yet', 'Rights holders open dramas for distribution in TTDC. New dramas appear here automatically.', '<button class="btn" data-act="toast" data-msg="Checked for updates. No new dramas yet." data-type="info">' + ic('refresh', 14) + 'Check for updates</button>') + '</div>';
   } else {
     const list = mkFiltered();
-    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract</div>`;
+    const pk = UI.pick.size;
+    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract${pk ? '' : ' · tick the box on a poster to claim several dramas at once'}</div>`;
     if (!list.length) out += '<div class="panel">' + emptyBlock('search', 'No dramas match your filters', 'Try a different keyword or clear filters.', '<button class="btn" data-act="mk-clear">Clear filters</button>') + '</div>';
     else out += '<div class="grid">' + list.map(card).join('') + '</div>';
+    if (pk){
+      const names = Array.from(UI.pick).map(id => ctrOf(id).title);
+      out += `<div class="page-pad-sel"></div><div class="selbar" role="region" aria-label="Selected dramas"><span class="grow"><b>${plural(pk, 'drama')} selected</b> · ${esc(names.join(', '))}</span><button class="btn" data-act="pick-all">Select all shown</button><button class="btn" data-act="pick-clear">Clear</button><button class="btn btn-primary" data-act="bulk-claim">Claim collections</button></div>`;
+    }
   }
   return out + '</div>';
 }
 function card(c){
   const cs = colsOf(c.id); const shares = cs.map(x => x.share); const mn = Math.min.apply(null, shares), mx = Math.max.apply(null, shares);
-  return `<button class="card" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
+  const on = UI.pick.has(c.id);
+  return `<div class="card ${on ? 'picked' : ''}" role="button" tabindex="0" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
     <div class="poster-box">${poster(c.id)}
-      <div class="ov-tl"><span class="tag dark">${c.format}</span></div>
+      <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label><span class="tag dark">${c.format}</span></div>
       <div class="ov-tr"><span class="tag dark">#${c.rank} Trending</span></div>
       <div class="ov-b"><span>${c.episodes} episodes</span><span>${c.plays} plays · 30d</span></div>
     </div>
@@ -756,7 +786,7 @@ function card(c){
       <div class="card-m">Paywall from Ep ${c.paywall} · Launched ${c.launchL}</div>
       <div class="card-m">${cs.map(x => x.code + ' · ' + x.lang).join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>
       <div class="card-f"><span class="muted">Rev. share ${mn === mx ? mn + '%' : mn + '–' + mx + '%'}</span>${claimSummary(c.id)}</div>
-    </div></button>`;
+    </div></div>`;
 }
 
 /* Drama detail drawer + player */
@@ -843,7 +873,7 @@ function dramaDrawer(ctrId){
   return {title:c.title, width:780,
     sub:`<span>${c.holder}</span><span class="faint">·</span><span class="mono">${c.id}</span><span class="tag">${c.format}</span><span class="tag">${c.source}</span>`,
     body,
-    footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected' : 'Select collections to claim. Claiming doesn\u2019t create ads.'}</span><button class="btn" data-act="close-drawer">Close</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
+    footer:`<span class="grow">${n ? plural(n, 'collection') + ' selected · links are generated automatically' : 'Select collections to claim. Links are generated automatically; no ads are created.'}</span><button class="btn" data-act="close-drawer">Close</button><button class="btn btn-primary" data-act="claim-open">Claim selected${n ? ' (' + n + ')' : ''}</button>`};
 }
 function updatePlayer(){
   const c = ctrOf(PL.ctr); if (!c || !$('#player')){ stopPlayer(); return; }
@@ -872,41 +902,88 @@ function playToggle(){
   updatePlayer();
 }
 
-/* Claim flow */
-function claimConfirmModal(ctrId){
-  const c = ctrOf(ctrId); const items = Array.from(DS.sel).map(colOf);
-  return {title:'Confirm claim', width:600,
-    body:`<p style="margin:0 0 12px">You\u2019re claiming ${plural(items.length, 'collection')} of <b>${c.title}</b> for <b>${BCS.main.name}</b> (BC ${BCS.main.id}).</p>
-      <div class="panel"><table class="tbl"><thead><tr><th>Market · language</th><th style="width:160px">Collection ID</th><th class="num" style="width:100px">Rev. share</th></tr></thead><tbody>${items.map(x => `<tr><td>${colLabel(x)}</td><td class="mono">${x.id}</td><td class="num">${x.share}%</td></tr>`).join('')}</tbody></table></div>
-      <ul class="muted" style="margin:12px 0 0;padding-left:18px">
-        <li>Each claim is keyed by Collection ID × your Business Center. Submitting twice won\u2019t create a duplicate claim.</li>
-        <li>Claiming doesn\u2019t create ads. After claiming, generate distribution links and use them in TTAM.</li>
-        <li>If the rights holder changes terms while you confirm, that collection won\u2019t be claimed and you\u2019ll see why.</li></ul>`,
-    footer:`<button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="claim-submit" data-ctr="${ctrId}">Confirm claim</button>`};
+/* Claim flow: Confirm selection -> Links ready (single drama or bulk) */
+const CF = {ctrs:[], keys:new Set(), results:null};
+const mkKey = c => c.market + ' · ' + c.lang;
+function openClaimFlow(ctrs, keys){ CF.ctrs = ctrs.slice(); CF.keys = new Set(keys || []); CF.results = null; openModal(claimFlowModal); }
+function flowOptions(){
+  const m = new Map();
+  CF.ctrs.forEach(id => colsOf(id).forEach(c => { const k = mkKey(c); const e = m.get(k) || {k, has:0}; e.has++; m.set(k, e); }));
+  return Array.from(m.values()).sort((a, b) => b.has - a.has || a.k.localeCompare(b.k));
 }
-function claimOutcome(ids){
-  return ids.map((id, i) => {
-    const c = colOf(id);
-    if (c.claim === 'claimed') return {col:id, r:'existed'};
-    if (S.state === 'unknown'){ c.claim = 'confirming'; return {col:id, r:'unknown'}; }
-    if (S.state === 'partial' && ids.length > 1 && i === ids.length - 1) return {col:id, r:'failed', why:'Terms changed while you were confirming (revenue share ' + c.share + '% to ' + (c.share - 2) + '%). Review the new terms and claim again.'};
-    c.claim = 'claimed'; return {col:id, r:'claimed'};
+function claimPlan(){
+  return CF.ctrs.map(id => {
+    const cs = colsOf(id); const items = [], missing = [];
+    flowOptions().map(o => o.k).filter(k => CF.keys.has(k)).forEach(k => {
+      const c = cs.find(x => mkKey(x) === k);
+      if (!c){ missing.push(k); return; }
+      let act = 'claim', note = 'Claim and generate link';
+      if (c.dist !== 'open'){ act = 'na'; note = 'No longer open for distribution'; }
+      else if (c.claim === 'confirming'){ act = 'skip'; note = 'An earlier claim is still confirming'; }
+      else if (c.claim === 'claimed' && linkOf(c.id)){ act = 'skip'; note = 'Already claimed by you; link exists'; }
+      else if (c.claim === 'claimed'){ act = 'link'; note = 'Already claimed · generate link'; }
+      items.push({col:c.id, act, note});
+    });
+    return {ctr:id, items, missing};
   });
 }
-const CLAIM_R = {claimed:['ok','Claimed'], existed:['muted','Already claimed'], failed:['err','Failed'], unknown:['warn spin','Confirming']};
-function claimResultModal(res){
-  const ctr = ctrOf(colOf(res.items[0].col).ctr);
-  const n = k => res.items.filter(x => x.r === k).length;
-  const ok = n('claimed') + n('existed');
-  const unknown = n('unknown'), failed = n('failed');
-  const title = unknown ? 'Claim result pending' : failed && ok ? 'Claim partially succeeded' : failed ? 'Claim failed' : 'Collections claimed';
-  return {title, width:640, sub:ctr.title + ' · ' + BCS.main.name,
-    body:`<div class="res-sum"><div><b>${n('claimed')}</b>Claimed</div><div><b>${n('existed')}</b>Already claimed</div><div><b>${failed}</b>Failed</div><div><b>${unknown}</b>Confirming</div></div>
-      ${unknown ? banner('warn', 'We\u2019re still confirming with the rights holder system. <b>Don\u2019t submit again</b>; a repeat request won\u2019t create a duplicate, and the result updates automatically.', '', 'clock') + '<div style="height:12px"></div>' : ''}
-      <div class="panel"><table class="tbl"><thead><tr><th>Collection</th><th style="width:150px">Result</th><th>Details</th></tr></thead><tbody>${res.items.map(x => { const c = colOf(x.col); return `<tr><td><div class="cell-title">${colLabel(c)}</div><div class="cell-sub mono">${c.id}</div></td><td>${stChip(CLAIM_R, x.r)}</td><td class="cell-sub" style="white-space:normal">${x.why || (x.r === 'claimed' ? 'Ready for link generation' : x.r === 'existed' ? 'No duplicate created' : x.r === 'unknown' ? 'Waiting for confirmation' : '')}</td></tr>`; }).join('')}</tbody></table></div>`,
-    footer:`${unknown ? '<button class="btn" data-act="claim-recheck">' + ic('refresh', 14) + 'Check again</button>' : ''}${failed ? '<button class="btn" data-act="claim-retry">Review and retry failed</button>' : ''}<button class="btn" data-act="close-modal">Done</button>${ok ? '<button class="btn btn-primary" data-act="claim-to-gen">Generate links</button>' : ''}`};
+function stepper(n){ return `<div class="steps"><span class="${n === 1 ? 'on' : 'done'}"><i>${n === 1 ? '1' : ic('check', 10)}</i>Confirm selection</span><span class="sep"></span><span class="${n === 2 ? 'on' : ''}"><i>2</i>Links ready</span></div>`; }
+function claimFlowModal(){ return CF.results ? linksReadyModal() : confirmSelModal(); }
+function confirmSelModal(){
+  const M = CF.ctrs.length; const opts = flowOptions(); const plan = claimPlan();
+  const todo = [].concat(...plan.map(p => p.items.filter(i => i.act === 'claim' || i.act === 'link')));
+  const skipN = plan.reduce((a, p) => a + p.items.filter(i => i.act === 'skip' || i.act === 'na').length + (p.missing.length ? 1 : 0), 0);
+  const chips = opts.map((o, i) => `<label class="mk-chip ${CF.keys.has(o.k) ? 'on' : ''}"><input type="checkbox" class="cb" name="cf-k${i}" data-chg="cf-key" value="${esc(o.k)}" ${CF.keys.has(o.k) ? 'checked' : ''}>${esc(o.k)}${M > 1 ? `<span class="faint">in ${o.has} of ${M}</span>` : ''}</label>`).join('');
+  const OUT = {claim:['info','Will claim'], link:['info','Will get link'], skip:['muted','Skipped'], na:['muted','Unavailable']};
+  let rows = '';
+  plan.forEach(p => {
+    const c = ctrOf(p.ctr); const span = p.items.length + (p.missing.length ? 1 : 0);
+    if (!span){ rows += `<tr><td class="grp"><div class="cell-title">${c.title}</div><div class="cell-sub mono">${c.id}</div></td><td colspan="3" class="faint">Pick a market above</td></tr>`; return; }
+    const head = `<td class="grp" rowspan="${span}"><div class="cell-title">${c.title}</div><div class="cell-sub mono">${c.id}</div></td>`;
+    p.items.forEach((it, i) => { const x = colOf(it.col);
+      rows += `<tr>${i === 0 ? head : ''}<td><div class="cell-title">${colLabel(x)}</div><div class="cell-sub mono">${x.id} · ${x.share}%</div></td><td>${stChip(OUT, it.act)}</td><td class="cell-sub" style="white-space:normal">${it.note}</td></tr>`; });
+    if (p.missing.length) rows += `<tr>${p.items.length ? '' : head}<td class="faint">${p.missing.map(esc).join(', ')}</td><td>${stChip(OUT, 'na')}</td><td class="cell-sub" style="white-space:normal">This drama has no ${p.missing.length > 1 ? 'versions' : 'version'} for ${p.missing.length > 1 ? 'these markets' : 'this market'}</td></tr>`;
+  });
+  return {title:'Claim collections', width:780, sub:`<span>${plural(M, 'drama')}</span><span class="faint">·</span><span>${BCS.main.name} (BC ${BCS.main.id})</span>`,
+    body:`${stepper(1)}
+      <div class="flow-h">Markets · applied to every selected drama</div>
+      <div class="mk-chips">${chips}</div>
+      <div class="flow-h" style="margin-top:16px">What will be claimed</div>
+      <div class="panel"><table class="tbl"><thead><tr><th style="width:200px">Drama</th><th style="width:210px">Collection</th><th style="width:120px">Outcome</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <ul class="muted" style="margin:12px 0 0;padding-left:18px">
+        <li>Confirming claims each collection and generates its distribution link in one go. Each is keyed by Collection ID × your Business Center, so repeating it never creates duplicates.</li>
+        <li>Claiming doesn\u2019t create ads. If a rights holder changes terms while you confirm, that collection isn\u2019t claimed and you\u2019ll see why.</li></ul>`,
+    footer:`<span class="grow">${CF.keys.size ? plural(todo.length, 'collection') + ' to claim' + (skipN ? ' · ' + skipN + ' skipped or unavailable' : '') : 'Pick at least one market'}</span><button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="cf-submit">Confirm selection${todo.length ? ' (' + todo.length + ')' : ''}</button>`};
 }
-let LAST_CLAIM = null;
+function runClaim(items){
+  const N = items.length;
+  return items.map((it, i) => {
+    const c = colOf(it.col);
+    if (S.state === 'unknown'){ if (c.claim === 'available') c.claim = 'confirming'; return {col:c.id, r:'unknown'}; }
+    if (S.state === 'partial' && N > 1 && i === N - 1) return {col:c.id, r:'failed', why: c.claim === 'claimed' ? 'Collection version is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.' : 'Terms changed while you were confirming (revenue share ' + c.share + '% to ' + (c.share - 2) + '%). Review the new terms and try again.'};
+    c.claim = 'claimed';
+    if (S.state === 'partial' && N > 2 && i === 1){ if (!linkOf(c.id)) createLink(c.id).isNew = false; return {col:c.id, r:'existed', why:'Already claimed for this BC a moment ago. Existing link returned; no duplicate created.'}; }
+    if (!linkOf(c.id)) createLink(c.id);
+    return {col:c.id, r:'ready'};
+  });
+}
+const FLOW_R = {ready:['ok','Link ready'], existed:['muted','Already existed'], failed:['err','Failed'], unknown:['warn spin','Confirming']};
+const flowLinks = () => CF.results.filter(x => (x.r === 'ready' || x.r === 'existed') && linkOf(x.col)).map(x => linkOf(x.col));
+function linksReadyModal(){
+  const R = CF.results; const n = k => R.filter(x => x.r === k).length;
+  const unknown = n('unknown'), failed = n('failed'), usable = flowLinks().length;
+  const rows = R.map(x => { const c = colOf(x.col); const l = linkOf(x.col);
+    const linkCell = l && (x.r === 'ready' || x.r === 'existed') ? `<div class="linkbox"><span class="mono">${l.url}</span>${copyBtn(l.url, 'Link copied')}</div>${x.why ? '<div class="cell-sub" style="white-space:normal">' + x.why + '</div>' : ''}`
+      : `<span class="cell-sub" style="white-space:normal">${x.why || (x.r === 'unknown' ? 'Waiting for confirmation. The link is generated automatically once confirmed.' : '')}</span>`;
+    return `<tr><td><div class="cell-title">${ctrOf(c.ctr).title}</div><div class="cell-sub">${colLabel(c)} · <span class="mono">${c.id}</span></div></td><td>${stChip(FLOW_R, x.r)}</td><td>${linkCell}</td></tr>`; }).join('');
+  return {title:'Claim collections', width:780, sub:`<span>${plural(new Set(R.map(x => colOf(x.col).ctr)).size, 'drama')}</span><span class="faint">·</span><span>${BCS.main.name} (BC ${BCS.main.id})</span>`,
+    body:`${stepper(2)}
+      <div class="res-sum"><div><b>${n('ready')}</b>Link ready</div><div><b>${n('existed')}</b>Already existed</div><div><b>${failed}</b>Failed</div><div><b>${unknown}</b>Confirming</div></div>
+      ${unknown ? banner('warn', 'We\u2019re still confirming with the rights holder system. <b>Don\u2019t submit again</b>; a repeat request won\u2019t create a duplicate claim or link.', '', 'clock') + '<div style="height:12px"></div>' : ''}
+      <div class="panel"><table class="tbl"><thead><tr><th>Drama · collection</th><th style="width:124px">Result</th><th style="width:340px">Distribution link</th></tr></thead><tbody>${rows}</tbody></table></div>
+      <div class="faint" style="font-size:12px;margin-top:8px">Paste these links into TTAM when you create ads. Find them anytime in My distribution links.</div>`,
+    footer:`<span class="grow">${usable ? plural(usable, 'link') + ' ready to use' : 'No links ready yet'}</span>${unknown ? '<button class="btn" data-act="cf-recheck">' + ic('refresh', 14) + 'Check again</button>' : ''}${failed ? '<button class="btn" data-act="cf-retry">Retry failed</button>' : ''}<button class="btn" data-act="cf-copy">${ic('copy', 14)}Copy all</button><button class="btn" data-act="cf-export">${ic('download', 14)}Export all</button><button class="btn btn-primary" data-act="close-modal">Done</button>`};
+}
 
 /* ---------- Distribution Management ---------- */
 function dmHeader(tab){
@@ -1275,20 +1352,24 @@ const ACT = {
   'pl-ep': el => setEp(+el.dataset.ep),
   'pl-speed': el => { PL.speed = +el.dataset.v; $$('.pl-speed button').forEach(b => b.classList.toggle('on', +b.dataset.v === PL.speed)); toast('Playback speed ' + PL.speed + 'x', 'info'); },
   'pl-seek': (el, e) => { const r = el.getBoundingClientRect(); PL.t = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width)) * epDur(PL.ep); updatePlayer(); },
-  'claim-open': () => { if (!DS.sel.size){ toast('Select at least one available collection to claim.', 'warn'); return; } openModal(() => claimConfirmModal(PL.ctr)); },
-  'claim-submit': el => busy(el, 800, () => {
-    const ids = Array.from(DS.sel); const items = claimOutcome(ids);
-    LAST_CLAIM = {items}; DS.sel = new Set(items.filter(x => x.r === 'failed').map(x => x.col));
-    refreshDrawer(); render(); openModal(() => claimResultModal(LAST_CLAIM));
-  }),
-  'claim-recheck': el => busy(el, 700, () => {
-    LAST_CLAIM.items.forEach(x => { if (x.r === 'unknown'){ colOf(x.col).claim = 'claimed'; x.r = 'claimed'; x.why = 'Confirmed on recheck'; } });
-    refreshModal(); refreshDrawer(); render(); toast('Claim confirmed.');
-  }),
-  'claim-retry': () => { closeModal(); toast('Review the updated terms, then claim again. Failed collections are still selected.', 'info'); },
-  'claim-to-gen': () => { const ids = LAST_CLAIM.items.filter(x => x.r === 'claimed' || x.r === 'existed').map(x => x.col).filter(id => !linkOf(id)); closeAll(); stopPlayer(); go('links', () => { openGenerate(); if (ids.length){ GS.sel = new Set(ids); refreshDrawer(); } }); },
-  'last-claim': () => { LAST_CLAIM = D().lastClaim; openModal(() => claimResultModal(LAST_CLAIM)); },
-  'recheck-claim': el => busy(el, 700, () => { colOf(el.dataset.col).claim = 'claimed'; S.state === 'unknown' && UI.dismissed.add('mk-unknown'); toast('Claim confirmed: A House by the Tide · Mexico · Spanish.'); render(); }),
+  'claim-open': () => { if (!DS.sel.size){ toast('Select at least one available collection to claim.', 'warn'); return; } openClaimFlow([PL.ctr], Array.from(DS.sel).map(id => mkKey(colOf(id)))); },
+  'bulk-claim': () => { if (!UI.pick.size){ toast('Select at least one drama.', 'warn'); return; } openClaimFlow(CONTRACTS.map(c => c.id).filter(id => UI.pick.has(id)), []); },
+  'pick-clear': () => { UI.pick.clear(); render(); },
+  'pick-all': () => { mkFiltered().forEach(c => UI.pick.add(c.id)); render(); },
+  'cf-submit': el => {
+    if (!CF.keys.size){ toast('Pick at least one market.', 'warn'); return; }
+    const items = [].concat(...claimPlan().map(p => p.items.filter(i => i.act === 'claim' || i.act === 'link')));
+    if (!items.length){ toast('Nothing to claim. The selected dramas have no open, unclaimed versions for these markets.', 'warn'); return; }
+    busy(el, 900, () => { CF.results = runClaim(items); UI.pick.clear(); DS.sel = new Set(); refreshModal(); refreshDrawer(); render(); });
+  },
+  'cf-recheck': el => busy(el, 700, () => { CF.results.forEach(x => { if (x.r === 'unknown'){ colOf(x.col).claim = 'claimed'; if (!linkOf(x.col)) createLink(x.col); x.r = 'ready'; x.why = ''; } }); refreshModal(); refreshDrawer(); render(); toast('Claims confirmed and links ready.'); }),
+  'cf-retry': el => busy(el, 800, () => { CF.results.forEach(x => { if (x.r === 'failed'){ colOf(x.col).claim = 'claimed'; if (!linkOf(x.col)) createLink(x.col); x.r = 'ready'; x.why = 'Claimed on retry with the updated terms.'; } }); refreshModal(); refreshDrawer(); render(); toast('Retry succeeded. Same key, no duplicates.'); }),
+  'cf-copy': () => { const ls = flowLinks(); if (!ls.length){ toast('No links are ready to copy yet.', 'warn'); return; } copyText(ls.map(l => l.url).join('\n'), 'Copied ' + plural(ls.length, 'link')); },
+  'cf-export': () => { const R = CF.results.filter(x => (x.r === 'ready' || x.r === 'existed') && linkOf(x.col)); if (!R.length){ toast('No links are ready to export yet.', 'warn'); return; }
+    download('distribution-links.csv', csv([['Drama','Contract ID','Collection ID','Market','Language','Business Center ID','Distribution link','Result']].concat(R.map(x => { const c = colOf(x.col); return [ctrOf(c.ctr).title, c.ctr, c.id, c.market, c.lang, BCS.main.id, linkOf(c.id).url, FLOW_R[x.r][1]]; }))));
+    toast('Exported ' + plural(R.length, 'link') + '.'); },
+  'last-claim': () => { const lc = D().lastClaim; CF.ctrs = lc.ctrs.slice(); CF.keys = new Set(); CF.results = lc.items; openModal(claimFlowModal); },
+  'recheck-claim': el => busy(el, 700, () => { const id = el.dataset.col; colOf(id).claim = 'claimed'; if (!linkOf(id)) createLink(id); toast('Claim confirmed and link ready: A House by the Tide · Mexico · Spanish.'); render(); }),
   'go-links-invalid': () => { UI.lv.status = 'invalid'; UI.lv.ap = 'all'; go('links'); },
   'lv-only-invalid': () => { UI.lv.status = 'invalid'; UI.lv.ap = 'all'; render(); },
   'lv-kpi': el => { const s = el.dataset.s; if (s === 'attention'){ UI.lv.status = 'all'; UI.lv.ap = 'attention'; } else { UI.lv.status = s; UI.lv.ap = 'all'; } render(); },
@@ -1364,6 +1445,8 @@ function setState(st){ location.hash = '#' + PATH[S.page] + '?state=' + st; }
 
 const CHG = {
   'filter': el => { const [grp, key] = el.name.split('.'); UI[grp][key] = el.value; render(); },
+  'mk-pick': el => { el.checked ? UI.pick.add(el.dataset.id) : UI.pick.delete(el.dataset.id); render(); },
+  'cf-key': el => { el.checked ? CF.keys.add(el.value) : CF.keys.delete(el.value); refreshModal(); },
   'dr-sel': el => { el.checked ? DS.sel.add(el.dataset.id) : DS.sel.delete(el.dataset.id); refreshDrawer(); },
   'lv-sel': el => { el.checked ? UI.lv.sel.add(el.dataset.id) : UI.lv.sel.delete(el.dataset.id); render(); },
   'lv-all': el => { lvFiltered().forEach(l => el.checked ? UI.lv.sel.add(l.col) : UI.lv.sel.delete(l.col)); render(); },
@@ -1383,13 +1466,16 @@ const INP = {
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]');
   if (!el || el.disabled) return;
-  if (el.tagName === 'TR' && e.target.closest('button, a, input, select, label')) return;
+  const inner = e.target.closest('button, a, input, select, label');
+  if (inner && inner !== el && el.contains(inner)) return;
   const fn = ACT[el.dataset.act];
   if (fn){ e.preventDefault(); fn(el, e); }
 });
 document.addEventListener('change', e => { const el = e.target.closest('[data-chg]'); if (el && CHG[el.dataset.chg]) CHG[el.dataset.chg](el); });
 document.addEventListener('input', e => { const el = e.target.closest('[data-inp]'); if (el && INP[el.dataset.inp]) INP[el.dataset.inp](el); });
 document.addEventListener('keydown', e => {
+  const rb = e.target.closest && e.target.closest('[role="button"][data-act]');
+  if (rb && rb === e.target && (e.key === 'Enter' || e.key === ' ')){ e.preventDefault(); rb.click(); return; }
   if (e.key !== 'Escape') return;
   if ($('#ttam').classList.contains('show')) backFromTtam();
   else if (modalFn) closeModal();

@@ -8,7 +8,9 @@ An interactive, single-file HTML prototype of a **short-drama distributor workbe
 
 Three business modules, all under **Creatives → Distribution Center** in the left nav:
 
-- **Drama Marketplace** — browse distributable dramas and claim collections.
+- **Drama Marketplace** — browse distributable dramas and claim collections, one drama at a time or in bulk: tick the checkbox on several drama cards, then **Claim collections** to claim across multiple contracts at once.
+
+Claiming is a two-step flow: **Confirm selection** (pick the collections to claim) → **Links ready** (distribution links are generated, with **Copy all** / **Export all** for use in TTAM).
 - **Distribution Management** — link view and by-drama view; copy/export links, monitor link validity and auto-pause results.
 - **Settlement** — settlement statements, confirmation, and payout logs.
 
@@ -22,6 +24,8 @@ Each view/state combination is deep-linkable, e.g. `#/distribution/links?state=i
 ## Screenshots
 
 ![Drama Marketplace](screenshots/marketplace.png)
+
+![Bulk claim — Confirm selection](screenshots/bulk-claim.png)
 
 ![Distribution Management — link invalid, auto-pausing](screenshots/link-invalid-autopause.png)
 
