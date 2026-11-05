@@ -8,7 +8,7 @@ An interactive HTML prototype (one `index.html` plus a folder of cover media) of
 
 Three business modules, all under **Creatives → Distribution Center** in the left nav:
 
-- **Drama Marketplace** — browse distributable dramas on 16:9 cover cards and claim collections, one drama at a time or in bulk: tick the checkbox on several drama cards, then **Claim collections** to claim across multiple contracts at once. Claiming is a two-step flow: **Confirm selection** (pick the collections to claim) → **Generate links** (distribution links are generated, with **Copy all** / **Export all** for use in TTAM).
+- **Drama Marketplace** — browse distributable dramas on cards with 9:16 portrait covers and claim collections, one drama at a time or in bulk: tick the checkbox on several drama cards, then **Claim collections** to claim across multiple contracts at once. Claiming is a two-step flow: **Confirm selection** (pick the collections to claim) → **Generate links** (distribution links are generated, with **Copy all** / **Export all** for use in TTAM).
 - **Distribution Management** — link view and by-drama view; copy/export links, monitor link validity and auto-pause results.
 - **Settlement** — settlement statements, confirmation, and payout logs.
 

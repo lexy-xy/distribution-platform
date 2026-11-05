@@ -158,7 +158,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .kpi-v.err{color:var(--err)}.kpi-v.warn{color:var(--warn)}
 
 /* Marketplace */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
 .card{background:#fff;border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
 .card:hover{border-color:#B9C0C7}
 .card:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
@@ -182,7 +182,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .mk-chip .faint{font-weight:400;font-size:12px}
 .flow-h{font-size:12px;font-weight:600;color:var(--text2);margin:0 0 8px}
 .tbl td.grp{border-right:1px solid var(--row);vertical-align:top}
-.poster-box{position:relative;aspect-ratio:16/9;background:#1d2329;overflow:hidden}
+.poster-box{position:relative;aspect-ratio:9/16;background:#1d2329;overflow:hidden}
 .cover .cv-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
 .cover .cv-f{opacity:0;transition:opacity .5s}
 .cover .cv-f.on{opacity:1}
@@ -200,13 +200,13 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .poster-box .ov-tl{position:absolute;top:8px;left:8px;display:flex;gap:4px}
 .poster-box .ov-tr{position:absolute;top:8px;right:8px}
 .poster-box .ov-b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:12px;display:flex;justify-content:space-between}
-.card-b{padding:10px 12px 10px;display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.card-b{padding:8px 10px;display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
 .card-t{font-size:14px;font-weight:600;line-height:20px;color:var(--text)}
 .card-m{font-size:12px;color:var(--text2);line-height:18px}
 .card .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .tags{flex-wrap:nowrap;overflow:hidden;margin:6px 0 4px}
+.card .tags{max-height:20px;overflow:hidden;margin:5px 0 3px}
 .card-meta{font-size:12px;color:var(--text3);line-height:18px}
-.card-f{padding:7px 12px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:34px;font-size:12px}
+.card-f{padding:6px 10px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:31px;font-size:12px}
 .mk-count{font-size:12px;color:var(--text2)}
 
 /* Drawer & modal */
@@ -255,8 +255,8 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* Player */
-.det-top{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px}
-.player{position:relative;width:340px;aspect-ratio:16/9;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
+.det-top{display:grid;grid-template-columns:232px minmax(0,1fr);gap:20px}
+.player{position:relative;width:232px;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
 .player svg.poster{position:absolute;inset:0;width:100%;height:100%}
 .player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .player .pl-dim{position:absolute;inset:0;background:rgba(0,0,0,.18)}
@@ -275,7 +275,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .pl-speed{display:flex;border:1px solid rgba(255,255,255,.35);border-radius:3px;overflow:hidden}
 .pl-speed button{border:0;background:transparent;color:#fff;font-size:11px;height:20px;padding:0 5px;cursor:pointer;font-weight:600}
 .pl-speed button.on{background:#fff;color:#111}
-.series{margin-top:10px;width:340px}
+.series{margin-top:10px;width:232px}
 .series .trk{position:relative;height:6px;background:#E9EBEE;border-radius:3px}
 .series .free{position:absolute;left:0;top:0;bottom:0;background:#C7E9E6;border-radius:3px 0 0 3px}
 .series .mark{position:absolute;top:-4px;width:2px;height:14px;background:var(--warn)}
@@ -826,7 +826,7 @@ function cover(id){
 function card(c){
   const on = UI.pick.has(c.id);
   const markets = Array.from(new Set(colsOf(c.id).map(x => x.code))).join(', ');
-  const meta = `${c.episodes} eps · ${c.launchL} · ${markets}`;
+  const meta = `${c.episodes} eps · ${c.launchL}`;
   return `<div class="card ${on ? 'picked' : ''}" role="button" tabindex="0" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
     ${cover(c.id)}
       <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label></div>
@@ -835,7 +835,8 @@ function card(c){
       <div class="card-t ell" title="${esc(c.title)}">${c.title}</div>
       <div class="card-m ell" title="${esc(c.holder + ' · ' + c.source)}">${c.holder} · ${c.source}</div>
       <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
-      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
+      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL)}">${meta}</div>
+      <div class="card-meta ell" title="${esc('Markets: ' + markets)}">${markets.split(', ').join(' · ')}</div>
     </div>
     <div class="card-f">${claimSummary(c.id)}</div></div>`;
 }
