@@ -932,7 +932,6 @@ function claimFlowModal(){ return CF.results ? linksReadyModal() : confirmSelMod
 function confirmSelModal(){
   const M = CF.ctrs.length; const opts = flowOptions(); const plan = claimPlan();
   const todo = [].concat(...plan.map(p => p.items.filter(i => i.act === 'claim' || i.act === 'link')));
-  const skipN = plan.reduce((a, p) => a + p.items.filter(i => i.act === 'skip' || i.act === 'na').length + (p.missing.length ? 1 : 0), 0);
   const chips = opts.map((o, i) => `<label class="mk-chip ${CF.keys.has(o.k) ? 'on' : ''}"><input type="checkbox" class="cb" name="cf-k${i}" data-chg="cf-key" value="${esc(o.k)}" ${CF.keys.has(o.k) ? 'checked' : ''}>${esc(o.k)}${M > 1 ? `<span class="faint">in ${o.has} of ${M}</span>` : ''}</label>`).join('');
   const OUT = {claim:['info','Will claim'], link:['info','Will get link'], skip:['muted','Skipped'], na:['muted','Unavailable']};
   let rows = '';
@@ -949,11 +948,8 @@ function confirmSelModal(){
       <div class="flow-h">Markets · applied to every selected drama</div>
       <div class="mk-chips">${chips}</div>
       <div class="flow-h" style="margin-top:16px">What will be claimed</div>
-      <div class="panel"><table class="tbl"><thead><tr><th style="width:200px">Drama</th><th style="width:210px">Collection</th><th style="width:120px">Outcome</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div>
-      <ul class="muted" style="margin:12px 0 0;padding-left:18px">
-        <li>Confirming claims each collection and generates its distribution link in one go. Each is keyed by Collection ID × your Business Center, so repeating it never creates duplicates.</li>
-        <li>Claiming doesn\u2019t create ads. If a rights holder changes terms while you confirm, that collection isn\u2019t claimed and you\u2019ll see why.</li></ul>`,
-    footer:`<span class="grow">${CF.keys.size ? plural(todo.length, 'collection') + ' to claim' + (skipN ? ' · ' + skipN + ' skipped or unavailable' : '') : 'Pick at least one market'}</span><button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="cf-submit">Confirm selection${todo.length ? ' (' + todo.length + ')' : ''}</button>`};
+      <div class="panel"><table class="tbl"><thead><tr><th style="width:200px">Drama</th><th style="width:210px">Collection</th><th style="width:120px">Outcome</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+    footer:`<span class="grow"></span><button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="cf-submit" ${todo.length ? '' : 'disabled'}>Confirm selection${todo.length ? ' (' + todo.length + ')' : ''}</button>`};
 }
 function runClaim(items){
   const N = items.length;
@@ -1137,7 +1133,7 @@ let LAST_GEN = null;
 function genResultModal(){
   const items = LAST_GEN; const n = k => items.filter(x => x.r === k).length;
   const usable = items.filter(x => (x.r === 'generated' || x.r === 'existed') && linkOf(x.col));
-  const title = n('unknown') ? 'Link generation result pending' : n('failed') ? 'Link generation partially succeeded' : 'Links ready';
+  const title = n('unknown') ? 'Link generation result pending' : n('failed') ? 'Link generation partially succeeded' : 'Generate links';
   return {title, width:720, sub:BCS.main.name + ' · BC ' + BCS.main.id,
     body:`<div class="res-sum"><div><b>${n('generated')}</b>Generated</div><div><b>${n('existed')}</b>Already existed</div><div><b>${n('failed')}</b>Failed</div><div><b>${n('unknown')}</b>Confirming</div></div>
     ${n('unknown') ? banner('warn', 'The link service hasn\u2019t confirmed these yet. <b>Don\u2019t submit again.</b> Retrying is safe (no duplicates), but it\u2019s not needed; use Check again.', '', 'clock') + '<div style="height:12px"></div>' : ''}
@@ -1360,7 +1356,7 @@ const ACT = {
     if (!items.length){ toast('Nothing to claim. The selected dramas have no open, unclaimed versions for these markets.', 'warn'); return; }
     busy(el, 900, () => { CF.results = runClaim(items); UI.pick.clear(); DS.sel = new Set(); refreshModal(); refreshDrawer(); render(); });
   },
-  'cf-recheck': el => busy(el, 700, () => { CF.results.forEach(x => { if (x.r === 'unknown'){ colOf(x.col).claim = 'claimed'; if (!linkOf(x.col)) createLink(x.col); x.r = 'ready'; x.why = ''; } }); refreshModal(); refreshDrawer(); render(); toast('Claims confirmed and links ready.'); }),
+  'cf-recheck': el => busy(el, 700, () => { CF.results.forEach(x => { if (x.r === 'unknown'){ colOf(x.col).claim = 'claimed'; if (!linkOf(x.col)) createLink(x.col); x.r = 'ready'; x.why = ''; } }); refreshModal(); refreshDrawer(); render(); toast('Claims confirmed and links generated.'); }),
   'cf-retry': el => busy(el, 800, () => { CF.results.forEach(x => { if (x.r === 'failed'){ colOf(x.col).claim = 'claimed'; if (!linkOf(x.col)) createLink(x.col); x.r = 'ready'; x.why = 'Claimed on retry with the updated terms.'; } }); refreshModal(); refreshDrawer(); render(); toast('Retry succeeded. Same key, no duplicates.'); }),
   'cf-copy': () => { const ls = flowLinks(); if (!ls.length){ toast('No links are ready to copy yet.', 'warn'); return; } copyText(ls.map(l => l.url).join('\n'), 'Copied ' + plural(ls.length, 'link')); },
   'cf-export': () => { const R = CF.results.filter(x => (x.r === 'ready' || x.r === 'existed') && linkOf(x.col)); if (!R.length){ toast('No links are ready to export yet.', 'warn'); return; }
