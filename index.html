@@ -158,7 +158,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .kpi-v.err{color:var(--err)}.kpi-v.warn{color:var(--warn)}
 
 /* Marketplace */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(196px,1fr));gap:12px}
 .card{background:#fff;border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
 .card:hover{border-color:#B9C0C7}
 .card:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
@@ -182,15 +182,31 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .mk-chip .faint{font-weight:400;font-size:12px}
 .flow-h{font-size:12px;font-weight:600;color:var(--text2);margin:0 0 8px}
 .tbl td.grp{border-right:1px solid var(--row);vertical-align:top}
-.poster-box{position:relative;aspect-ratio:3/4;background:#1d2329;overflow:hidden}
+.poster-box{position:relative;aspect-ratio:16/9;background:#1d2329;overflow:hidden}
+.cover .cv-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.cover .cv-f{opacity:0;transition:opacity .5s}
+.cover .cv-f.on{opacity:1}
+.cover .cv-v{opacity:0;transition:opacity .25s}
+.cover .cv-v.on{opacity:1}
+.cv-prog{position:absolute;left:8px;right:8px;bottom:6px;display:flex;gap:3px;opacity:0;transition:opacity .2s;pointer-events:none}
+.cover.hov .cv-prog{opacity:1}
+.cover.nomedia .cv-prog{display:none}
+.cv-prog i{flex:1;height:2px;background:rgba(255,255,255,.38);border-radius:1px;overflow:hidden}
+.cv-prog b{display:block;height:100%;width:0;background:#fff}
+.cv-prog i.done b{width:100%}
+.cv-prog i.run b{animation:cvfill 1600ms linear forwards}
+@keyframes cvfill{from{width:0}to{width:100%}}
 .poster-box svg.poster{position:absolute;inset:0;width:100%;height:100%;display:block}
 .poster-box .ov-tl{position:absolute;top:8px;left:8px;display:flex;gap:4px}
 .poster-box .ov-tr{position:absolute;top:8px;right:8px}
 .poster-box .ov-b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:12px;display:flex;justify-content:space-between}
-.card-b{padding:10px 12px 12px;display:flex;flex-direction:column;gap:6px;flex:1}
-.card-t{font-size:14px;font-weight:600;line-height:20px}
+.card-b{padding:10px 12px 10px;display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.card-t{font-size:14px;font-weight:600;line-height:20px;color:var(--text)}
 .card-m{font-size:12px;color:var(--text2);line-height:18px}
-.card-f{margin-top:auto;padding-top:8px;border-top:1px solid var(--row);display:flex;justify-content:space-between;align-items:center;font-size:12px}
+.card .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .tags{flex-wrap:nowrap;overflow:hidden;margin:6px 0 4px}
+.card-meta{font-size:12px;color:var(--text3);line-height:18px}
+.card-f{padding:7px 12px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:34px;font-size:12px}
 .mk-count{font-size:12px;color:var(--text2)}
 
 /* Drawer & modal */
@@ -239,9 +255,10 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* Player */
-.det-top{display:grid;grid-template-columns:232px minmax(0,1fr);gap:20px}
-.player{position:relative;width:232px;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
+.det-top{display:grid;grid-template-columns:340px minmax(0,1fr);gap:20px}
+.player{position:relative;width:340px;aspect-ratio:16/9;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
 .player svg.poster{position:absolute;inset:0;width:100%;height:100%}
+.player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .player .pl-dim{position:absolute;inset:0;background:rgba(0,0,0,.18)}
 .player .pl-top{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;align-items:center;gap:6px}
 .player .pl-center{position:absolute;left:50%;top:45%;transform:translate(-50%,-50%);width:52px;height:52px;border-radius:50%;background:rgba(0,0,0,.5);border:0;color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer}
@@ -258,7 +275,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .pl-speed{display:flex;border:1px solid rgba(255,255,255,.35);border-radius:3px;overflow:hidden}
 .pl-speed button{border:0;background:transparent;color:#fff;font-size:11px;height:20px;padding:0 5px;cursor:pointer;font-weight:600}
 .pl-speed button.on{background:#fff;color:#111}
-.series{margin-top:10px;width:232px}
+.series{margin-top:10px;width:340px}
 .series .trk{position:relative;height:6px;background:#E9EBEE;border-radius:3px}
 .series .free{position:absolute;left:0;top:0;bottom:0;background:#C7E9E6;border-radius:3px 0 0 3px}
 .series .mark{position:absolute;top:-4px;width:2px;height:14px;background:var(--warn)}
@@ -315,6 +332,11 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .demo-opt i{width:12px;height:12px;border-radius:50%;border:1.5px solid #5B616B;flex:none}
 .demo-opt.on{background:#2A2418;color:#fff}
 .demo-opt.on i{border-color:#F5B83D;background:radial-gradient(#F5B83D 40%,transparent 45%)}
+.demo-seg{display:flex;border:1px solid #3A3F47;border-radius:4px;overflow:hidden;margin-bottom:6px}
+.demo-seg button{flex:1;height:28px;border:0;border-right:1px solid #3A3F47;background:transparent;color:#D9DCE0;font-size:12px;cursor:pointer;padding:0}
+.demo-seg button:last-child{border-right:0}
+.demo-seg button:hover{background:#22262C}
+.demo-seg button.on{background:#2A2418;color:#F5B83D;font-weight:600}
 .demo-f{display:flex;gap:8px;padding:10px 14px 12px;border-top:1px solid #2C3036;margin-top:6px}
 .demo-f button{flex:1;height:30px;border-radius:4px;border:1px solid #3A3F47;background:#1E2126;color:#E6E8EB;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px}
 .demo-f button:hover{background:#272B31}
@@ -419,7 +441,15 @@ const CONTRACTS = [
   {id:'CTR-550361', title:'Moonblade Oath', holder:'Lumen Animation Works', genres:['Fantasy','Action'], episodes:80, paywall:15, format:'AI animation', source:'Local original', launch:'2026-10-05', launchL:'Oct 5, 2026', rank:1, rankL:'#1 Trending · Fantasy', plays:'24.7M',
    synopsis:'A disgraced blade-bearer swears to protect the heir of a fallen moon clan, only to learn she is the one being hunted.'},
   {id:'CTR-340918', title:'The Physician at Midnight', holder:'Harbor Lane Media', genres:['Medical','Romance','Suspense'], episodes:66, paywall:11, format:'Live action', source:'Localized', launch:'2026-07-21', launchL:'Jul 21, 2026', rank:12, rankL:'#12 Trending · Suspense', plays:'6.3M',
-   synopsis:'A night-shift doctor treats a mysterious patient whose injuries seem to predict crimes that haven\u2019t happened yet.'}
+   synopsis:'A night-shift doctor treats a mysterious patient whose injuries seem to predict crimes that haven\u2019t happened yet.'},
+  {id:'CTR-615502', title:'Second Bloom', holder:'Rosewater Films', genres:['Romance','Workplace'], episodes:54, paywall:9, format:'Live action', source:'Local original', launch:'2026-10-12', launchL:'Oct 12, 2026', rank:3, rankL:'#3 Trending · Romance', plays:'15.2M',
+   synopsis:'A florist who lost her shop to a developer ends up arranging flowers for his company, and for once he can\u2019t buy what he wants.'},
+  {id:'CTR-447120', title:'Iron Lantern', holder:'Kitefire Studios', genres:['Action','Crime'], episodes:70, paywall:12, format:'Live action', source:'Localized', launch:'2026-09-02', launchL:'Sep 2, 2026', rank:5, rankL:'#5 Trending · Action', plays:'11.8M',
+   synopsis:'A night courier who crosses the city\u2019s rooftops with an old lantern becomes the only witness a corrupt precinct wants silenced.'},
+  {id:'CTR-829044', title:'Starfall Academy', holder:'Lumen Animation Works', genres:['Fantasy','Youth'], episodes:64, paywall:10, format:'AI animation', source:'Local original', launch:'2026-10-20', launchL:'Oct 20, 2026', rank:4, rankL:'#4 Trending · Fantasy', plays:'13.5M',
+   synopsis:'A scholarship student at a floating academy discovers that every falling star is a spell someone stole.'},
+  {id:'CTR-503318', title:'The Heiress Returns', holder:'Northline Pictures', genres:['Revenge','Romance'], episodes:78, paywall:14, format:'Live action', source:'Local original', launch:'2026-08-28', launchL:'Aug 28, 2026', rank:9, rankL:'#9 Trending · Revenge', plays:'7.4M',
+   synopsis:'Ten years after being written out of her family\u2019s will, a daughter returns to the gala that ruined her with a plan and a new name.'}
 ];
 const COLLECTIONS = [
   {id:'COL-US-18421', ctr:'CTR-902184', market:'United States', code:'US', lang:'English', share:45},
@@ -431,7 +461,15 @@ const COLLECTIONS = [
   {id:'COL-JP-55002', ctr:'CTR-550361', market:'Japan', code:'JP', lang:'Japanese', share:45},
   {id:'COL-TH-34001', ctr:'CTR-340918', market:'Thailand', code:'TH', lang:'Thai', share:38},
   {id:'COL-ID-34002', ctr:'CTR-340918', market:'Indonesia', code:'ID', lang:'Indonesian', share:38},
-  {id:'COL-US-34003', ctr:'CTR-340918', market:'United States', code:'US', lang:'English', share:36}
+  {id:'COL-US-34003', ctr:'CTR-340918', market:'United States', code:'US', lang:'English', share:36},
+  {id:'COL-US-61501', ctr:'CTR-615502', market:'United States', code:'US', lang:'English', share:44},
+  {id:'COL-PH-61502', ctr:'CTR-615502', market:'Philippines', code:'PH', lang:'English', share:44},
+  {id:'COL-MX-44701', ctr:'CTR-447120', market:'Mexico', code:'MX', lang:'Spanish', share:40},
+  {id:'COL-BR-44702', ctr:'CTR-447120', market:'Brazil', code:'BR', lang:'Portuguese', share:40},
+  {id:'COL-US-82901', ctr:'CTR-829044', market:'United States', code:'US', lang:'English', share:46},
+  {id:'COL-JP-82902', ctr:'CTR-829044', market:'Japan', code:'JP', lang:'Japanese', share:46},
+  {id:'COL-US-50301', ctr:'CTR-503318', market:'United States', code:'US', lang:'English', share:42},
+  {id:'COL-ID-50302', ctr:'CTR-503318', market:'Indonesia', code:'ID', lang:'Indonesian', share:40}
 ];
 const ADS = {
   'COL-US-18421': [['1812004417','LC_US_hook_courtroom_v3','LC US · Broad · Oct'],['1812004418','LC_US_reveal_clause_v1','LC US · Broad · Oct'],['1812004431','LC_US_romance_cut_v2','LC US · Lookalike'],['1812004432','LC_US_ep12_tease','LC US · Lookalike'],['1812004450','LC_US_trailer_15s','LC US · Retarget']],
@@ -446,6 +484,15 @@ const ART = {
   'CTR-550361': {c1:'#2D1C50', c2:'#0C0A1B', s:'<circle cx="192" cy="118" r="70" fill="#E9E3FF" opacity=".92"/><circle cx="218" cy="102" r="62" fill="#2D1C50" opacity=".6"/><path d="M58 344 252 58" stroke="#CAD8FF" stroke-width="5" stroke-linecap="round"/><path d="M44 356l22-22" stroke="#8A6CFF" stroke-width="10" stroke-linecap="round"/><path d="M0 330l70-80 50 50 60-90 120 120v70H0z" fill="#120C27"/>'},
   'CTR-340918': {c1:'#15393F', c2:'#051214', s:'<path d="M0 400 110 172h80l110 228z" fill="#0D2B30"/><rect x="110" y="110" width="80" height="62" fill="#BFE6E0" opacity=".78"/><path d="M150 110v62M110 141h80" stroke="#15393F" stroke-width="4"/><circle cx="62" cy="70" r="26" fill="#E9F2EF" opacity=".82"/><path d="M134 400c0-52 7-82 16-82s16 30 16 82z" fill="#030A0B"/><circle cx="150" cy="304" r="11" fill="#030A0B"/>'}
 };
+Object.assign(ART, {
+  'CTR-615502': {c1:'#F3D9D4', c2:'#B9737A', s:'<circle cx="110" cy="150" r="46" fill="#E89BA6"/><circle cx="170" cy="190" r="38" fill="#D9707F"/><circle cx="130" cy="214" r="30" fill="#F2B8BF"/><path d="M150 230v170" stroke="#4E6B4B" stroke-width="6"/>'},
+  'CTR-447120': {c1:'#1B2238', c2:'#07090F', s:'<rect x="20" y="180" width="60" height="220" fill="#111827"/><rect x="200" y="140" width="80" height="260" fill="#111827"/><circle cx="150" cy="240" r="60" fill="#F59E3B" opacity=".18"/><rect x="136" y="220" width="28" height="40" rx="4" fill="#F5B35C"/>'},
+  'CTR-829044': {c1:'#3B2A6B', c2:'#E79CC2', s:'<path d="M40 60l120 90M200 40l60 50M90 30l50 40" stroke="#FFF" stroke-width="3" opacity=".7"/><path d="M60 300h180l-30 40H90z" fill="#2A1F4F"/><circle cx="150" cy="260" r="20" fill="#B9A6FF"/>'},
+  'CTR-503318': {c1:'#0E3B2E', c2:'#04140F', s:'<path d="M60 0v120M150 0v80M240 0v120" stroke="#D9B65C" stroke-width="2" opacity=".6"/><circle cx="150" cy="96" r="18" fill="#F2D27D" opacity=".8"/><path d="M110 400c0-90 18-150 40-150s40 60 40 150z" fill="#0B6B4F"/><circle cx="150" cy="226" r="20" fill="#071C15"/>'}
+});
+const MEDIA = {'CTR-902184':['lc',4], 'CTR-781230':['ht',4], 'CTR-550361':['mb',4], 'CTR-340918':['pm',4], 'CTR-615502':['sb',3], 'CTR-447120':['il',3], 'CTR-829044':['sa',3], 'CTR-503318':['hr',3]};
+const frameSrc = (id, i) => 'assets/' + MEDIA[id][0] + '-' + i + '.webp';
+const clipSrc = id => 'assets/' + MEDIA[id][0] + '-clip.mp4';
 function poster(ctrId){
   const a = ART[ctrId]; const g = 'pg' + (++uid);
   return `<svg class="poster" viewBox="0 0 300 400" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><defs><linearGradient id="${g}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a.c1}"/><stop offset="1" stop-color="${a.c2}"/></linearGradient></defs><rect width="300" height="400" fill="url(#${g})"/>${a.s}</svg>`;
@@ -484,7 +531,7 @@ function mkLink(col, code, created){
 function buildData(st){
   const claim = {'COL-US-18421':'claimed','COL-GB-18422':'claimed','COL-BR-77310':'available','COL-MX-77311':'available','COL-US-55001':'claimed','COL-JP-55002':'claimed','COL-TH-34001':'claimed','COL-ID-34002':'claimed','COL-US-77312':'available','COL-US-34003':'available'};
   const d = {
-    cols: COLLECTIONS.map(c => Object.assign({}, c, {claim:claim[c.id], dist:'open'})),
+    cols: COLLECTIONS.map(c => Object.assign({}, c, {claim:claim[c.id] || 'available', dist:'open'})),
     links: [mkLink('COL-US-18421','k7Qm2x','Sep 20, 2026 10:14 UTC'), mkLink('COL-GB-18422','p3Lw9a','Sep 21, 2026 08:02 UTC'), mkLink('COL-US-55001','v8Rt4c','Oct 7, 2026 15:40 UTC'), mkLink('COL-TH-34001','d2Hn6s','Aug 2, 2026 11:25 UTC')],
     statements: [
       {id:'STM-202610-M', period:'Oct 2026', bc:'main', gross:48210.40, adj:-1180.00, version:1, status:'pending', generated:'Nov 2, 2026', updated:'Nov 2, 2026 09:00 UTC', due:'Nov 10, 2026', revised:false,
@@ -734,7 +781,7 @@ function pageMarketplace(){
   const f = UI.mk; const st = S.state;
   const langs = Array.from(new Set(COLLECTIONS.map(c => c.lang)));
   const genres = Array.from(new Set([].concat(...CONTRACTS.map(c => c.genres)))).sort();
-  let out = `<div class="ph"><div><h1>Drama Marketplace</h1><p>Browse dramas rights holders have opened for distribution, preview episodes, and claim collections. Select several dramas to claim the same markets for all of them at once.</p></div><div><button class="btn" data-act="go" data-to="links">${ic('link', 14)}My distribution links</button></div></div>`;
+  let out = `<div class="ph"><div><h1>Drama Marketplace</h1><p>Browse dramas rights holders have opened for distribution, preview episodes, and claim collections. Select several dramas to claim the same markets for all of them at once.</p></div></div>`;
   out += '<div class="stack">';
   const gn = globalNotice(); if (gn) out += gn;
   if (st === 'partial' && D().lastClaim && !UI.dismissed.has('mk-partial')) out += banner('warn', '<b>Your last claim partially succeeded.</b> A House by the Tide: 1 collection claimed with its link ready, 1 failed because the terms changed during confirmation.', '<button class="btn btn-sm" data-act="last-claim">View results</button><button class="btn btn-icon" data-act="dismiss" data-k="mk-partial" aria-label="Dismiss">' + ic('close', 14) + '</button>');
@@ -770,23 +817,65 @@ function pageMarketplace(){
   }
   return out + '</div>';
 }
+const COVER_MODES = [['mixed','Mixed'],['clip','Clip'],['frames','Keyframes'],['static','Static']];
+function coverMode(id){ return DEMO.cover !== 'mixed' ? DEMO.cover : ['clip','frames','static'][CONTRACTS.findIndex(c => c.id === id) % 3]; }
+function cover(id){
+  const m = coverMode(id); const segs = m === 'frames' ? MEDIA[id][1] : m === 'clip' ? 1 : 0;
+  return `<div class="poster-box cover" data-cover="${m}" data-id="${id}">${poster(id)}<img class="cv-media cv-f on" data-f="1" src="${frameSrc(id, 1)}" alt="" loading="lazy" decoding="async">${segs ? '<div class="cv-prog">' + '<i><b></b></i>'.repeat(segs) + '</div>' : ''}`;
+}
 function card(c){
-  const cs = colsOf(c.id); const shares = cs.map(x => x.share); const mn = Math.min.apply(null, shares), mx = Math.max.apply(null, shares);
   const on = UI.pick.has(c.id);
+  const markets = Array.from(new Set(colsOf(c.id).map(x => x.code))).join(', ');
+  const meta = `${c.episodes} eps · ${c.launchL} · ${markets}`;
   return `<div class="card ${on ? 'picked' : ''}" role="button" tabindex="0" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
-    <div class="poster-box">${poster(c.id)}
-      <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label><span class="tag dark">${c.format}</span></div>
-      <div class="ov-tr"><span class="tag dark">#${c.rank} Trending</span></div>
-      <div class="ov-b"><span>${c.episodes} episodes</span><span>${c.plays} plays · 30d</span></div>
+    ${cover(c.id)}
+      <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label></div>
     </div>
     <div class="card-b">
-      <div class="card-t">${c.title}</div>
-      <div class="card-m">${c.holder} · ${c.source}</div>
+      <div class="card-t ell" title="${esc(c.title)}">${c.title}</div>
+      <div class="card-m ell" title="${esc(c.holder + ' · ' + c.source)}">${c.holder} · ${c.source}</div>
       <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
-      <div class="card-m">Paywall from Ep ${c.paywall} · Launched ${c.launchL}</div>
-      <div class="card-m">${cs.map(x => x.code + ' · ' + x.lang).join('&nbsp;&nbsp;|&nbsp;&nbsp;')}</div>
-      <div class="card-f"><span class="muted">Rev. share ${mn === mx ? mn + '%' : mn + '–' + mx + '%'}</span>${claimSummary(c.id)}</div>
-    </div></div>`;
+      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
+    </div>
+    <div class="card-f">${claimSummary(c.id)}</div></div>`;
+}
+
+/* Cover hover previews: clip, keyframes, static */
+const HOV = {el:null, timer:null, raf:null};
+function coverEnter(box){
+  coverLeave(); HOV.el = box; box.classList.add('hov');
+  const id = box.dataset.id, m = box.dataset.cover;
+  if (m === 'frames'){
+    const n = MEDIA[id][1]; const prog = box.querySelector('.cv-prog');
+    for (let i = 2; i <= n; i++) if (!box.querySelector('.cv-f[data-f="' + i + '"]')){ const im = document.createElement('img'); im.className = 'cv-media cv-f'; im.dataset.f = i; im.alt = ''; im.decoding = 'async'; im.src = frameSrc(id, i); box.insertBefore(im, prog); }
+    let k = 0;
+    const step = () => {
+      $$('.cv-f', box).forEach((im, j) => im.classList.toggle('on', j === k));
+      $$('.cv-prog i', box).forEach((sg, j) => { sg.className = j < k ? 'done' : ''; if (j === k){ void sg.offsetWidth; sg.className = 'run'; } });
+    };
+    step(); HOV.timer = setInterval(() => { k = (k + 1) % $$('.cv-f', box).length; step(); }, 1600);
+  } else if (m === 'clip'){
+    let v = box.querySelector('video');
+    if (!v){
+      v = document.createElement('video'); v.className = 'cv-media cv-v'; v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto'; v.setAttribute('aria-hidden', 'true');
+      v.addEventListener('playing', () => { if (HOV.el === box) v.classList.add('on'); });
+      v.src = clipSrc(id); box.insertBefore(v, box.querySelector('.cv-prog'));
+    }
+    try { v.currentTime = 0; } catch (e) {}
+    const p = v.play(); if (p && p.catch) p.catch(() => {});
+    const bar = box.querySelector('.cv-prog b');
+    const tick = () => { if (HOV.el !== box) return; if (bar && v.duration) bar.style.width = (v.currentTime / v.duration * 100) + '%'; HOV.raf = requestAnimationFrame(tick); };
+    tick();
+  }
+}
+function coverLeave(){
+  const box = HOV.el; if (!box) return;
+  HOV.el = null; clearInterval(HOV.timer); cancelAnimationFrame(HOV.raf);
+  box.classList.remove('hov');
+  $$('.cv-f', box).forEach((im, j) => im.classList.toggle('on', j === 0));
+  $$('.cv-prog i', box).forEach(sg => { sg.className = ''; });
+  $$('.cv-prog b', box).forEach(b => { b.style.width = ''; });
+  const v = box.querySelector('video'); if (v){ v.pause(); v.classList.remove('on'); try { v.currentTime = 0; } catch (e) {} }
 }
 
 /* Drama detail drawer + player */
@@ -827,7 +916,7 @@ function dramaDrawer(ctrId){
   <div class="det-top">
     <div>
       <div class="player ${PL.playing ? 'playing' : ''}" id="player">
-        ${poster(ctrId)}<div class="pl-dim"></div>
+        ${poster(ctrId)}<img class="pl-frame" id="pl-frame" src="${frameSrc(ctrId, (PL.ep - 1) % MEDIA[ctrId][1] + 1)}" alt=""><div class="pl-dim"></div>
         <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span><span class="tag warn" id="pl-lock" style="${PL.ep >= pw ? '' : 'display:none'}">${ic('lock', 10)}Paid episode</span></div>
         <button class="pl-center" data-act="pl-toggle" aria-label="Play or pause">${ic(PL.playing ? 'pause' : 'play', 22)}</button>
         <div class="pl-ctrl">
@@ -881,6 +970,7 @@ function updatePlayer(){
   $('#pl-fill').style.width = (PL.t / dur * 100) + '%';
   $('#pl-time').textContent = fmtT(PL.t) + ' / ' + fmtT(dur);
   $('#pl-ep').textContent = 'Ep ' + PL.ep + ' / ' + c.episodes;
+  const fr = $('#pl-frame'); if (fr){ const src = frameSrc(c.id, (PL.ep - 1) % MEDIA[c.id][1] + 1); if (fr.getAttribute('src') !== src) fr.setAttribute('src', src); }
   $('#pl-lock').style.display = PL.ep >= c.paywall ? '' : 'none';
   $('#pl-cur').style.left = ((PL.ep - 0.5) / c.episodes * 100) + '%';
   $('#player').classList.toggle('playing', PL.playing);
@@ -1317,13 +1407,14 @@ function stmConfirmModal(id){
 }
 
 /* ---------- Demo controller ---------- */
-const DEMO = {open:false};
+const DEMO = {open:false, cover:'mixed'};
 function renderDemo(){
   const el = $('#demo');
   if (!DEMO.open){ el.innerHTML = `<button class="demo-pill" data-act="demo-open" aria-label="Open demo controls">${ic('sliders', 14)}Demo controls <em>${STATES.find(x => x[0] === S.state)[1]}</em></button>`; return; }
   el.innerHTML = `<div class="demo-panel" role="region" aria-label="Prototype demo controls"><div class="demo-h">${ic('sliders', 14)}<div><b>Demo controls</b><small>Prototype tool · not part of the product</small></div><button class="x" data-act="demo-close" aria-label="Collapse demo controls">${ic('minimize', 16)}</button></div>
     <div class="demo-s"><div class="lbl">Page</div>${PAGES.map(p => `<button class="demo-opt ${S.page === p[0] ? 'on' : ''}" data-act="demo-page" data-p="${p[0]}"><i></i>${p[1]}</button>`).join('')}</div>
     <div class="demo-s"><div class="lbl">Global state</div>${STATES.map(s => `<button class="demo-opt ${S.state === s[0] ? 'on' : ''}" data-act="demo-state" data-s="${s[0]}"><i></i>${s[1]}</button>`).join('')}</div>
+    <div class="demo-s"><div class="lbl">Cover style · Marketplace</div><div class="demo-seg">${COVER_MODES.map(m => `<button class="${DEMO.cover === m[0] ? 'on' : ''}" data-act="demo-cover" data-v="${m[0]}">${m[1]}</button>`).join('')}</div></div>
     <div class="demo-f"><button data-act="demo-reset">${ic('refresh', 13)}Reset</button><button data-act="demo-copy">${ic('link', 13)}Copy demo link</button></div></div>`;
 }
 
@@ -1432,7 +1523,8 @@ const ACT = {
   'demo-close': () => { DEMO.open = false; renderDemo(); },
   'demo-page': el => go(el.dataset.p),
   'demo-state': el => setState(el.dataset.s),
-  'demo-reset': () => { Object.assign(UI, freshUI()); closeAll(); stopPlayer(); S.data = null; S.state = '__'; location.hash = '#' + PATH.marketplace + '?state=normal'; if (location.hash === '#/marketplace?state=normal') onRoute(); toast('Demo reset to Normal.'); },
+  'demo-cover': el => { DEMO.cover = el.dataset.v; coverLeave(); renderDemo(); if (S.page === 'marketplace') render(); },
+  'demo-reset': () => { DEMO.cover = 'mixed'; Object.assign(UI, freshUI()); closeAll(); stopPlayer(); S.data = null; S.state = '__'; location.hash = '#' + PATH.marketplace + '?state=normal'; if (location.hash === '#/marketplace?state=normal') onRoute(); toast('Demo reset to Normal.'); },
   'demo-copy': () => copyText(location.href.split('#')[0] + '#' + PATH[S.page] + '?state=' + S.state, 'Demo link copied for this page and state')
 };
 function setState(st){ location.hash = '#' + PATH[S.page] + '?state=' + st; }
@@ -1475,6 +1567,9 @@ document.addEventListener('keydown', e => {
   else if (modalFn) closeModal();
   else if (drawerFn){ closeDrawer(); }
 });
+document.addEventListener('mouseover', e => { const card = e.target.closest && e.target.closest('.card'); const box = card ? card.querySelector('.cover') : null; if (box !== HOV.el){ if (box) coverEnter(box); else coverLeave(); } });
+document.addEventListener('mouseout', e => { if (!e.relatedTarget) coverLeave(); });
+document.addEventListener('error', e => { const t = e.target; if (!t || !t.classList || !(t.classList.contains('cv-media') || t.classList.contains('pl-frame'))) return; const box = t.closest('.cover'); t.remove(); if (box && !box.querySelector('.cv-media')) box.classList.add('nomedia'); }, true);
 window.addEventListener('hashchange', onRoute);
 onRoute();
 })();
