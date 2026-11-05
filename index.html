@@ -615,7 +615,7 @@ function freshUI(){
     lv:{q:'', status:'all', market:'all', range:'30', from:'2026-10-07', to:DEMO_TODAY, page:1, size:10, menu:null},
     pick:new Set(),
     bd:{q:'', open:new Set(['CTR-902184'])},
-    st:{period:'all', bc:'all', status:'all'},
+    st:{period:'all', bc:'all', status:'all', page:1, size:10},
     dismissed:new Set()
   };
 }
@@ -657,7 +657,27 @@ function buildData(st){
       {id:'STM-202609-S', period:'Sep 2026', bc:'sub', gross:9904.20, adj:0, version:1, status:'paid', generated:'Oct 2, 2026', updated:'Oct 15, 2026 09:12 UTC', due:'Oct 10, 2026', revised:false,
         split:[['CTR-550361',[['COL-JP-55002',6120.20]]],['CTR-781230',[['COL-BR-77310',3784.00]]]], adjNote:''},
       {id:'STM-202608-M', period:'Aug 2026', bc:'main', gross:36402.75, adj:0, version:1, status:'paid', generated:'Sep 2, 2026', updated:'Sep 15, 2026 09:05 UTC', due:'Sep 10, 2026', revised:false,
-        split:[['CTR-902184',[['COL-US-18421',21002.75]]],['CTR-340918',[['COL-TH-34001',15400.00]]]], adjNote:''}
+        split:[['CTR-902184',[['COL-US-18421',21002.75]]],['CTR-340918',[['COL-TH-34001',15400.00]]]], adjNote:''},
+      {id:'STM-202608-S', period:'Aug 2026', bc:'sub', gross:8720.40, adj:0, version:1, status:'paid', generated:'Sep 2, 2026', updated:'Sep 15, 2026 09:08 UTC', due:'Sep 10, 2026', revised:false,
+        split:[['CTR-550361',[['COL-JP-55002',5210.40]]],['CTR-781230',[['COL-BR-77310',3510.00]]]], adjNote:''},
+      {id:'STM-202607-M', period:'Jul 2026', bc:'main', gross:33110.20, adj:-210.00, version:1, status:'paid', generated:'Aug 2, 2026', updated:'Aug 15, 2026 09:04 UTC', due:'Aug 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',19110.20]]],['CTR-340918',[['COL-TH-34001',14000.00]]]], adjNote:'Chargebacks on COL-US-18421'},
+      {id:'STM-202607-S', period:'Jul 2026', bc:'sub', gross:8012.55, adj:0, version:1, status:'paid', generated:'Aug 2, 2026', updated:'Aug 15, 2026 09:06 UTC', due:'Aug 10, 2026', revised:false,
+        split:[['CTR-550361',[['COL-JP-55002',4812.55]]],['CTR-781230',[['COL-BR-77310',3200.00]]]], adjNote:''},
+      {id:'STM-202606-M', period:'Jun 2026', bc:'main', gross:29840.00, adj:0, version:1, status:'paid', generated:'Jul 2, 2026', updated:'Jul 15, 2026 09:03 UTC', due:'Jul 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',16840.00]]],['CTR-340918',[['COL-TH-34001',13000.00]]]], adjNote:''},
+      {id:'STM-202606-S', period:'Jun 2026', bc:'sub', gross:7440.80, adj:0, version:1, status:'paid', generated:'Jul 2, 2026', updated:'Jul 15, 2026 09:05 UTC', due:'Jul 10, 2026', revised:false,
+        split:[['CTR-550361',[['COL-JP-55002',4440.80]]],['CTR-781230',[['COL-BR-77310',3000.00]]]], adjNote:''},
+      {id:'STM-202605-M', period:'May 2026', bc:'main', gross:27615.40, adj:0, version:1, status:'paid', generated:'Jun 2, 2026', updated:'Jun 15, 2026 09:02 UTC', due:'Jun 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',15615.40]]],['CTR-340918',[['COL-TH-34001',12000.00]]]], adjNote:''},
+      {id:'STM-202605-S', period:'May 2026', bc:'sub', gross:6910.25, adj:0, version:1, status:'paid', generated:'Jun 2, 2026', updated:'Jun 15, 2026 09:04 UTC', due:'Jun 10, 2026', revised:false,
+        split:[['CTR-550361',[['COL-JP-55002',4110.25]]],['CTR-781230',[['COL-BR-77310',2800.00]]]], adjNote:''},
+      {id:'STM-202604-M', period:'Apr 2026', bc:'main', gross:25102.10, adj:-90.00, version:1, status:'paid', generated:'May 2, 2026', updated:'May 15, 2026 09:01 UTC', due:'May 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',14102.10]]],['CTR-340918',[['COL-TH-34001',11000.00]]]], adjNote:'Refunded orders on COL-US-18421'},
+      {id:'STM-202603-M', period:'Mar 2026', bc:'main', gross:22880.00, adj:0, version:1, status:'paid', generated:'Apr 2, 2026', updated:'Apr 15, 2026 09:00 UTC', due:'Apr 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',12880.00]]],['CTR-340918',[['COL-TH-34001',10000.00]]]], adjNote:''},
+      {id:'STM-202602-M', period:'Feb 2026', bc:'main', gross:20110.65, adj:0, version:1, status:'paid', generated:'Mar 2, 2026', updated:'Mar 15, 2026 09:00 UTC', due:'Mar 10, 2026', revised:false,
+        split:[['CTR-902184',[['COL-US-18421',11110.65]]],['CTR-340918',[['COL-TH-34001',9000.00]]]], adjNote:''}
     ],
     logs: [
       {t:'Nov 2, 2026 14:22 UTC', stm:'STM-202610-S', e:'Confirmed by you · queued for payout', k:'info', d:'Payout batch PB-1102-07 · expected by Nov 15, 2026'},
@@ -665,7 +685,17 @@ function buildData(st){
       {t:'Nov 2, 2026 09:00 UTC', stm:'STM-202610-S', e:'Statement generated', k:'', d:'Version 1'},
       {t:'Oct 15, 2026 09:12 UTC', stm:'STM-202609-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-88124 · bank account ending 4471'},
       {t:'Oct 15, 2026 09:12 UTC', stm:'STM-202609-S', e:'Payout sent · paid', k:'ok', d:'Reference PAY-88125 · bank account ending 0938'},
-      {t:'Sep 15, 2026 09:05 UTC', stm:'STM-202608-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-80410 · bank account ending 4471'}
+      {t:'Sep 15, 2026 09:05 UTC', stm:'STM-202608-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-80410 · bank account ending 4471'},
+      {t:'Sep 15, 2026 09:08 UTC', stm:'STM-202608-S', e:'Payout sent · paid', k:'ok', d:'Reference PAY-80411 · bank account ending 0938'},
+      {t:'Aug 15, 2026 09:04 UTC', stm:'STM-202607-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-79220 · bank account ending 4471'},
+      {t:'Aug 15, 2026 09:06 UTC', stm:'STM-202607-S', e:'Payout sent · paid', k:'ok', d:'Reference PAY-79221 · bank account ending 0938'},
+      {t:'Jul 15, 2026 09:03 UTC', stm:'STM-202606-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-78102 · bank account ending 4471'},
+      {t:'Jul 15, 2026 09:05 UTC', stm:'STM-202606-S', e:'Payout sent · paid', k:'ok', d:'Reference PAY-78103 · bank account ending 0938'},
+      {t:'Jun 15, 2026 09:02 UTC', stm:'STM-202605-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-77014 · bank account ending 4471'},
+      {t:'Jun 15, 2026 09:04 UTC', stm:'STM-202605-S', e:'Payout sent · paid', k:'ok', d:'Reference PAY-77015 · bank account ending 0938'},
+      {t:'May 15, 2026 09:01 UTC', stm:'STM-202604-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-76008 · bank account ending 4471'},
+      {t:'Apr 15, 2026 09:00 UTC', stm:'STM-202603-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-75110 · bank account ending 4471'},
+      {t:'Mar 15, 2026 09:00 UTC', stm:'STM-202602-M', e:'Payout sent · paid', k:'ok', d:'Reference PAY-74002 · bank account ending 4471'}
     ],
     lastClaim:null, lastGen:null, stmPartial:false
   };
@@ -768,8 +798,6 @@ function skelRows(n, cols){
   for (let i = 0; i < n; i++){ r += '<tr>' + Array.from({length:cols}, (_, j) => `<td><div class="sk" style="height:12px;width:${50 + ((i * 7 + j * 13) % 45)}%"></div>${j === 1 ? '<div class="sk" style="height:10px;width:40%;margin-top:6px"></div>' : ''}</td>`).join('') + '</tr>'; }
   return r;
 }
-function skelKpis(n){ return `<div class="kpis" style="--n:${n}">` + Array.from({length:n}, () => '<div class="kpi"><div class="sk" style="height:10px;width:50%"></div><div class="sk" style="height:18px;width:70%;margin-top:10px"></div></div>').join('') + '</div>'; }
-
 /* Drawer / modal */
 let drawerFn = null, modalFn = null, drawerClose = null;
 function openDrawer(fn, onClose){
@@ -847,7 +875,7 @@ function onRoute(){
   if (!page || state !== st || PATH[page] !== path){ location.replace('#' + PATH[page || 'marketplace'] + '?state=' + st); return; }
   const keepLink = (drawerFn && LD.col) ? {col: LD.col, tab: LD.tab} : null;
   let closed = false;
-  if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv = freshUI().lv; UI.pick.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); closed = true; }
+  if (st !== S.state || !S.data){ S.state = st; S.data = buildData(st); UI.lv = freshUI().lv; UI.st.page = 1; UI.pick.clear(); UI.dismissed.clear(); closeAll(); stopPlayer(); closed = true; }
   if (page !== S.page){ const first = S.page === null; S.page = page; closeAll(); stopPlayer(); closed = true; if (!first) window.scrollTo(0, 0); }
   render();
   if (S.after){ const f = S.after; S.after = null; f(); }
@@ -1835,31 +1863,48 @@ function stmFiltered(){
   const f = UI.st;
   return D().statements.filter(s => (f.period === 'all' || s.period === f.period) && (f.bc === 'all' || s.bc === f.bc) && (f.status === 'all' || s.status === f.status) && !(D().stmPartial && s.bc === 'sub'));
 }
+function stPagerHtml(total){
+  const size = UI.st.size || 10;
+  const pages = Math.max(1, Math.ceil(total / size));
+  const p = Math.min(Math.max(1, UI.st.page || 1), pages);
+  let nums = '';
+  for (let i = 1; i <= pages; i++) nums += `<button type="button" class="pg-btn ${i === p ? 'on' : ''}" data-act="st-page" data-p="${i}" ${i === p ? 'aria-current="page"' : ''}>${i}</button>`;
+  const from = total ? (p - 1) * size + 1 : 0, to = Math.min(p * size, total);
+  return `<div class="pager">
+    <label class="faint" style="display:inline-flex;align-items:center;gap:6px">Rows per page
+      <select class="select" style="width:68px" name="st-size" data-chg="st-size" aria-label="Page size">${[10, 20].map(n => `<option value="${n}" ${size === n ? 'selected' : ''}>${n}</option>`).join('')}</select>
+    </label>
+    <div class="pg-pages">
+      <button type="button" class="pg-btn" data-act="st-page" data-p="${p - 1}" ${p <= 1 ? 'disabled' : ''} aria-label="Previous page">${ic('chev-left', 14)}</button>
+      ${nums}
+      <button type="button" class="pg-btn" data-act="st-page" data-p="${p + 1}" ${p >= pages ? 'disabled' : ''} aria-label="Next page">${ic('chev-right', 14)}</button>
+    </div>
+    <span class="faint">${from}–${to} of ${plural(total, 'statement')}</span>
+  </div>`;
+}
 function pageSettlement(){
   const st = S.state; const f = UI.st;
   let out = stHeader() + '<div class="stack">';
   if (st === 'error') return out + errorBlock('settlement statements') + '</div>';
   const S2 = D().statements.filter(s => !(D().stmPartial && s.bc === 'sub'));
-  const pend = S2.filter(s => s.status === 'pending'), failed = S2.filter(s => s.status === 'failed'), conf = S2.filter(s => s.status === 'confirming');
+  const conf = S2.filter(s => s.status === 'confirming');
   if (conf.length) out += banner('warn', `<b>Confirmation result unknown for ${conf[0].id}.</b> Your confirmation was submitted but not yet acknowledged. Don\u2019t confirm again.`, `<button class="btn btn-sm" data-act="stm-check" data-id="${conf[0].id}">${ic('refresh', 14)}Check status</button>`, 'clock');
   if (D().stmPartial && !UI.dismissed.has('st-partial')) out += banner('warn', '<b>Some statements couldn\u2019t load.</b> Statements for Shike Interactive · Studio B (Sub BC) are temporarily unavailable. Main BC statements are complete.', '<button class="btn btn-sm" data-act="st-partial-retry">' + ic('refresh', 14) + 'Retry Studio B</button>');
   if (st === 'invalid') out += banner('plain', 'Some links became invalid on Nov 2–3. Earnings before that are still included in statements; nothing changes for already issued statements.');
-  if (st === 'loading') return out + skelKpis(4) + `<div class="panel"><table class="tbl"><tbody>${skelRows(5, 8)}</tbody></table></div></div>`;
+  if (st === 'loading') return out + `<div class="panel"><table class="tbl"><tbody>${skelRows(8, 8)}</tbody></table></div></div>`;
   if (st === 'empty') return out + '<div class="panel">' + emptyBlock('file', 'No settlement statements yet', 'Monthly statements are generated after each period closes, usually by the 2nd of the following month.', '<button class="btn" data-act="go" data-to="links">Go to Distribution Management</button>') + '</div></div>';
-  const sum = arr => arr.reduce((a, s) => a + stmFinal(s), 0);
-  const proc = S2.filter(s => s.status === 'processing');
-  const paid = S2.filter(s => s.status === 'paid');
-  out += `<div class="kpis" style="--n:4">
-    <button class="kpi ${f.status === 'pending' ? 'on' : ''}" data-act="st-kpi" data-s="pending"><div class="kpi-l">Pending confirmation</div><div class="kpi-v ${pend.length ? 'warn' : ''}">${money(sum(pend))}</div><div class="kpi-s">${plural(pend.length, 'statement')} · confirm by Nov 10</div></button>
-    <button class="kpi ${f.status === 'processing' ? 'on' : ''}" data-act="st-kpi" data-s="processing"><div class="kpi-l">Processing</div><div class="kpi-v">${money(sum(proc))}</div><div class="kpi-s">${plural(proc.length, 'statement')} queued for payout</div></button>
-    <button class="kpi ${f.status === 'paid' ? 'on' : ''}" data-act="st-kpi" data-s="paid"><div class="kpi-l">Paid · last 90 days</div><div class="kpi-v">${money(sum(paid))}</div><div class="kpi-s">${plural(paid.length, 'statement')}</div></button>
-    <button class="kpi ${f.status === 'failed' ? 'on' : ''}" data-act="st-kpi" data-s="failed"><div class="kpi-l">Payout exceptions</div><div class="kpi-v ${failed.length ? 'err' : ''}">${failed.length}</div><div class="kpi-s">${failed.length ? 'Action needed' : 'None'}</div></button></div>`;
-  out += `<div class="toolbar"><div class="left">${sel('st.period', f.period, [['all','All periods'],['Oct 2026','Oct 2026'],['Sep 2026','Sep 2026'],['Aug 2026','Aug 2026']], 'Period')}${sel('st.bc', f.bc, [['all','All Business Centers'],['main', BCS.main.name + ' (Main)'],['sub', 'Studio B (Sub)']], 'Business Center')}${sel('st.status', f.status, [['all','All statuses'],['pending','Pending confirmation'],['confirming','Confirming'],['processing','Processing'],['paid','Paid'],['failed','Payout failed']], 'Status')}</div><div class="right"><button class="btn" data-act="st-export">${ic('download', 14)}Export statements</button></div></div>`;
-  const list = stmFiltered();
+  const periods = [['all','All periods']].concat(Array.from(new Set(D().statements.map(s => s.period))).map(p => [p, p]));
+  out += `<div class="toolbar"><div class="left">${sel('st.period', f.period, periods, 'Period')}${sel('st.bc', f.bc, [['all','All Business Centers'],['main', BCS.main.name + ' (Main)'],['sub', 'Studio B (Sub)']], 'Business Center')}${sel('st.status', f.status, [['all','All statuses'],['pending','Pending confirmation'],['confirming','Confirming'],['processing','Processing'],['paid','Paid'],['failed','Payout failed']], 'Status')}</div><div class="right"><button class="btn" data-act="st-export">${ic('download', 14)}Export statements</button></div></div>`;
+  const all = stmFiltered();
+  const size = f.size || 10;
+  const pages = Math.max(1, Math.ceil(all.length / size));
+  const page = Math.min(Math.max(1, f.page || 1), pages);
+  if (f.page !== page) f.page = page;
+  const list = all.slice((page - 1) * size, page * size);
   const rows = list.map(s => { const b = BCS[s.bc];
     const act = s.status === 'pending' ? `<button class="btn btn-sm btn-primary" data-act="open-stm" data-id="${s.id}">Review and confirm</button>` : s.status === 'failed' ? `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">Fix payout</button>` : s.status === 'confirming' ? `<button class="btn btn-sm" data-act="stm-check" data-id="${s.id}">Check status</button>` : `<button class="btn btn-sm" data-act="open-stm" data-id="${s.id}">View</button>`;
     return `<tr class="clickable" data-act="open-stm" data-id="${s.id}"><td><div class="cell-title mono" style="font-size:13px">${s.id}</div><div class="cell-sub">${s.generated}</div></td><td>${s.period}</td><td><div class="ell">${b.name}</div><div class="cell-sub">${b.role}</div></td><td class="num">${s.split.length}</td><td class="num"><b>${money(stmFinal(s))}</b>${s.adj ? '<div class="cell-sub">' + money(s.adj) + ' adj.</div>' : ''}</td><td>v${s.version}${s.revised ? ' <span class="tag warn">Revised</span>' : ''}</td><td>${stChip(STM_ST, s.status)}${s.failReason ? '<div class="st-reason">' + s.failReason + '</div>' : ''}</td><td>${act}</td></tr>`; }).join('');
-  out += `<div class="panel"><div class="panel-h"><h3>Statements</h3><span class="faint" style="font-size:12px">${plural(list.length, 'statement')}</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:150px">Statement</th><th style="width:90px">Period</th><th>Business Center</th><th class="num" style="width:70px">Dramas</th><th class="num" style="width:130px">Final amount</th><th style="width:100px">Version</th><th style="width:190px">Status</th><th style="width:150px">Action</th></tr></thead><tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No statements match your filters', '', '<button class="btn" data-act="st-clear">Clear filters</button>')}</td></tr>`}</tbody></table></div></div>`;
+  out += `<div class="panel"><div class="panel-h"><h3>Statements</h3><span class="faint" style="font-size:12px">${plural(all.length, 'statement')}</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:150px">Statement</th><th style="width:90px">Period</th><th>Business Center</th><th class="num" style="width:70px">Dramas</th><th class="num" style="width:130px">Final amount</th><th style="width:100px">Version</th><th style="width:190px">Status</th><th style="width:150px">Action</th></tr></thead><tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No statements match your filters', '', '<button class="btn" data-act="st-clear">Clear filters</button>')}</td></tr>`}</tbody></table></div>${stPagerHtml(all.length)}</div>`;
   return out + '</div>';
 }
 function stmDrawer(id){
@@ -2007,7 +2052,7 @@ const ACT = {
   'bd-collapse': () => { UI.bd.open.clear(); render(); },
   'bd-clear': () => { UI.bd.q = ''; render(); },
   'open-stm': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; if (S.page !== 'settlement') go('settlement', () => openDrawer(() => stmDrawer(id))); else openDrawer(() => stmDrawer(id)); },
-  'st-kpi': el => { UI.st.status = UI.st.status === el.dataset.s ? 'all' : el.dataset.s; render(); },
+  'st-page': el => { const p = +el.dataset.p; if (!p || p < 1) return; UI.st.page = p; render(); },
   'st-clear': () => { UI.st = freshUI().st; render(); },
   'st-export': () => { const list = stmFiltered(); if (!list.length){ toast('No statements match your filters.', 'warn'); return; }
     download('settlement-statements.csv', csv([['Statement','Period','Business Center','BC ID','Version','Gross (USD)','Adjustments (USD)','Final amount (USD)','Status']].concat(list.map(s => [s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, s.gross.toFixed(2), s.adj.toFixed(2), stmFinal(s).toFixed(2), STM_ST[s.status][1]]))));
@@ -2045,12 +2090,14 @@ const CHG = {
       UI.lv.page = 1; UI.lv.menu = null;
       if (key === 'range' && el.value === 'custom'){ if (!UI.lv.from) UI.lv.from = '2026-10-07'; if (!UI.lv.to) UI.lv.to = DEMO_TODAY; }
     }
+    if (grp === 'st') UI.st.page = 1;
     render();
   },
   'mk-pick': el => { el.checked ? UI.pick.add(el.dataset.id) : UI.pick.delete(el.dataset.id); render(); },
   'cf-key': el => { el.checked ? CF.keys.add(el.value) : CF.keys.delete(el.value); refreshModal(); },
   'dr-sel': el => { el.checked ? DS.sel.add(el.dataset.id) : DS.sel.delete(el.dataset.id); refreshDrawer(); },
   'lv-size': el => { UI.lv.size = +el.value || 10; UI.lv.page = 1; UI.lv.menu = null; render(); },
+  'st-size': el => { UI.st.size = +el.value || 10; UI.st.page = 1; render(); },
   'lv-from': el => { UI.lv.from = el.value; UI.lv.page = 1; render(); },
   'lv-to': el => { UI.lv.to = el.value; UI.lv.page = 1; render(); },
   'ld-vis': el => { LD.vis[el.dataset.k] = el.checked; refreshDrawer(); },
