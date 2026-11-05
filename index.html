@@ -247,22 +247,23 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .dr-f .grow{margin-right:auto;color:var(--text2);font-size:12px}
 .dr-tabs{padding:0 24px;margin:0;flex:none;gap:24px}
 .dr-tabs .tab{height:36px;font-size:13px}
-.ld-tools{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:10px}
-.ld-vis{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.ld-vis label{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:13px;user-select:none}
-.ld-range{display:flex;align-items:center;gap:8px;color:var(--text2);font-size:12px;flex-wrap:wrap}
-.ld-range .input{width:138px}
-.ld-export-row{display:flex;justify-content:flex-end;margin:4px 0 12px}
-.bi{border:1px solid var(--border);border-radius:4px;padding:10px 12px 8px;margin-bottom:16px;background:#fff}
-.bi-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+.drawer .toolbar{margin-bottom:12px}
+.bi{border:1px solid var(--border);border-radius:4px;padding:10px 12px 8px;margin-bottom:12px;background:#fff}
+.bi-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;flex-wrap:wrap}
 .bi-h h4{margin:0;font-size:13px;font-weight:600}
+.bi-ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .bi-svg{display:block;width:100%;height:200px}
 .ld-tbl th{white-space:normal;line-height:15px;height:auto;padding:8px 12px}
 .bi-leg{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-top:6px;font-size:11px;color:var(--text2)}
 .bi-leg span{display:inline-flex;align-items:center;gap:6px}
-.bi-leg i{width:16px;height:0;border-top:2px solid currentColor;display:inline-block}
-.bi-leg i.dash{border-top-style:dashed}
-.bi-note{color:var(--text3);font-size:11px}
+.bi-leg i.sw{width:8px;height:8px;border-radius:1px;background:currentColor;display:inline-block}
+.bi-leg i.line{width:16px;height:0;border-top:2px solid #161823;display:inline-block}
+.vp-wrap{position:relative;display:inline-flex}
+.vp-btn{height:32px;padding:0 28px 0 10px;border:1px solid var(--border2);border-radius:4px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%235C6068' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 9px center;min-width:120px;text-align:left;cursor:pointer;font:inherit}
+.vp-btn:hover,.vp-btn.on{border-color:var(--primary)}
+.vp-menu{left:0;right:auto;min-width:188px;padding:6px 0;z-index:40}
+.vp-menu label{display:flex;align-items:center;gap:8px;padding:7px 12px;cursor:pointer;font-size:13px}
+.vp-menu label:hover{background:var(--hover)}
 .num-link{border:0;background:none;padding:0;color:inherit;font:inherit;font-variant-numeric:tabular-nums;cursor:pointer;text-align:right;width:100%}
 .num-link:hover{color:var(--primary-t);text-decoration:underline}
 .modal-mask{z-index:200}
@@ -992,8 +993,8 @@ function coverLeave(){
 /* Drama detail drawer + player */
 const PL = {ctr:null, ep:1, t:0, playing:false, speed:2, timer:null};
 const DS = {sel:new Set()};
-const LD = {col:null, tab:'drama', grain:'daily', vis:{bc:true, account:true, date:true}, from:'2026-10-15', to:'2026-10-21', page:1, size:10};
-function resetLDKeepCol(){ LD.grain = 'daily'; LD.vis = {bc:true, account:true, date:true}; LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.page = 1; LD.size = 10; }
+const LD = {col:null, tab:'drama', grain:'daily', vis:{bc:true, account:true, date:true}, visOpen:false, from:'2026-10-15', to:'2026-10-21', day:null, week:null, page:1, size:10};
+function resetLDKeepCol(){ LD.grain = 'daily'; LD.vis = {bc:true, account:true, date:true}; LD.visOpen = false; LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.day = null; LD.week = null; LD.page = 1; LD.size = 10; }
 const epDur = ep => 88 + (ep * 37) % 46;
 const fmtT = s => { s = Math.floor(s); return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); };
 function stopPlayer(){ if (PL.timer){ clearInterval(PL.timer); PL.timer = null; } PL.playing = false; }
@@ -1432,31 +1433,78 @@ function linkMetricRows(colId){
 function ldFilteredRows(colId){
   return linkMetricRows(colId).filter(r => (!LD.from || r.date >= LD.from) && (!LD.to || r.date <= LD.to));
 }
-function ldChartSeries(rows){
-  const accts = [];
-  const seen = new Set();
-  rows.forEach(r => { if (!seen.has(r.account)){ seen.add(r.account); accts.push(r.account); } });
-  const grain = LD.grain;
-  const buckets = [];
-  const bIndex = new Map();
-  const addBucket = (key, label) => { if (!bIndex.has(key)){ bIndex.set(key, buckets.length); buckets.push({key, label}); } };
-  if (grain === 'weekly'){
-    const weeks = Array.from(new Set(rows.map(r => weekStart(r.date)))).sort();
-    weeks.forEach(w => addBucket(w, fmtMd(w) + '–' + fmtMd(isoAddDays(w, 6))));
-  } else {
-    Array.from(new Set(rows.map(r => r.date))).sort().forEach(d => addBucket(d, fmtMd(d)));
+function ldRangeDates(){
+  return datesBetween(LD.from || '2026-10-01', LD.to || DEMO_TODAY);
+}
+function ldFocusDay(){
+  const dates = ldRangeDates();
+  if (!dates.length) return null;
+  if (LD.day && dates.includes(LD.day)) return LD.day;
+  return dates[dates.length - 1];
+}
+function ldWeekWindows(){
+  const from = LD.from || '2026-10-01', to = LD.to || DEMO_TODAY;
+  const dates = datesBetween(from, to);
+  if (!dates.length) return [];
+  const last = dates.slice(-7);
+  const list = [{id: last[0] + '_' + last[last.length - 1], start: last[0], end: last[last.length - 1], label: fmtMd(last[0]) + ' – ' + fmtMd(last[last.length - 1])}];
+  const seen = new Set([list[0].id]);
+  let w = weekStart(from);
+  while (w <= to){
+    const a = w < from ? from : w;
+    const b0 = isoAddDays(w, 6);
+    const b = b0 > to ? to : b0;
+    const id = a + '_' + b;
+    if (a <= b && !seen.has(id)){ seen.add(id); list.push({id, start:a, end:b, label: fmtMd(a) + ' – ' + fmtMd(b)}); }
+    w = isoAddDays(w, 7);
   }
-  const series = accts.map((acct, i) => {
-    const color = AD_ACCT_COLORS[i % AD_ACCT_COLORS.length];
-    const iaa = buckets.map(() => 0), est = buckets.map(() => 0);
-    rows.filter(r => r.account === acct).forEach(r => {
-      const k = grain === 'weekly' ? weekStart(r.date) : r.date;
-      const idx = bIndex.get(k); if (idx == null) return;
-      iaa[idx] += r.iaa; est[idx] += r.est;
+  return list.sort((x, y) => x.start.localeCompare(y.start) || x.end.localeCompare(y.end));
+}
+function ldFocusWeek(){
+  const wins = ldWeekWindows();
+  if (!wins.length) return null;
+  if (LD.week){ const found = wins.find(w => w.id === LD.week); if (found) return found; }
+  const dates = ldRangeDates();
+  const last = dates.slice(-7);
+  const id = last[0] + '_' + last[last.length - 1];
+  return wins.find(w => w.id === id) || wins[wins.length - 1];
+}
+const HOUR_CURVE = [0.32,0.24,0.2,0.18,0.2,0.28,0.48,0.72,0.92,1.02,1.08,1.12,1.14,1.1,1.08,1.12,1.28,1.48,1.72,1.95,1.82,1.42,0.92,0.55];
+function splitHours(daily, colId, acct, date, ai){
+  const seed = seedFrom(colId + acct + date);
+  const raw = HOUR_CURVE.map((c, h) => c * (1 + 0.14 * Math.sin((seed % 47) / 9 + h * 0.38 + ai)));
+  const sum = raw.reduce((a, b) => a + b, 0) || 1;
+  const hours = raw.map(v => Math.round(daily * v / sum * 100) / 100);
+  const diff = Math.round((daily - hours.reduce((a, b) => a + b, 0)) * 100) / 100;
+  hours[19] = Math.round((hours[19] + diff) * 100) / 100;
+  return hours;
+}
+function ldChartModel(colId){
+  const daily = ldFilteredRows(colId);
+  const accts = adAccountsFor(colId);
+  if (!daily.length || !accts.length) return {buckets:[], series:[], totals:[]};
+  if (LD.grain === 'daily'){
+    const day = ldFocusDay();
+    const buckets = Array.from({length:24}, (_, h) => ({key:h, label:String(h).padStart(2, '0')}));
+    const series = accts.map((acct, i) => {
+      const row = daily.find(r => r.account === acct && r.date === day);
+      return {account:acct, color:AD_ACCT_COLORS[i % AD_ACCT_COLORS.length], values: splitHours(row ? row.iaa : 0, colId, acct, day, i)};
     });
-    return {account: acct, color, iaa: iaa.map(n => Math.round(n * 100) / 100), est: est.map(n => Math.round(n * 100) / 100)};
-  });
-  return {buckets, series};
+    const totals = buckets.map((_, h) => Math.round(series.reduce((s, x) => s + x.values[h], 0) * 100) / 100);
+    return {buckets, series, totals, grain:'daily'};
+  }
+  const win = ldFocusWeek();
+  const days = win ? datesBetween(win.start, win.end) : [];
+  const buckets = days.map(d => ({key:d, label:fmtMd(d)}));
+  const series = accts.map((acct, i) => ({
+    account:acct, color:AD_ACCT_COLORS[i % AD_ACCT_COLORS.length],
+    values: days.map(d => {
+      const row = daily.find(r => r.account === acct && r.date === d);
+      return row ? row.iaa : 0;
+    })
+  }));
+  const totals = buckets.map((_, i) => Math.round(series.reduce((s, x) => s + x.values[i], 0) * 100) / 100);
+  return {buckets, series, totals, grain:'weekly'};
 }
 function niceMax(v){
   if (v <= 0) return 1;
@@ -1465,40 +1513,47 @@ function niceMax(v){
   return Math.ceil(v / step) * step;
 }
 function biChartSvg(model){
-  const W = 880, H = 200, l = 42, r = 36, t = 10, b = 28;
+  const W = 880, H = 200, l = 42, r = 16, t = 10, b = 28;
   const iw = W - l - r, ih = H - t - b;
-  const {buckets, series} = model;
+  const {buckets, series, totals} = model;
   if (!buckets.length || !series.length){
     return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="No chart data"><text x="${W/2}" y="${H/2}" text-anchor="middle" fill="#8A8F99" font-size="12" font-family="inherit">No rows in this date range</text></svg>`;
   }
-  let max = 0;
-  series.forEach(s => { s.iaa.forEach(v => { if (v > max) max = v; }); s.est.forEach(v => { if (v > max) max = v; }); });
-  max = niceMax(max * 1.08);
   const n = buckets.length;
-  const xAt = i => l + (n === 1 ? iw / 2 : iw * i / (n - 1));
+  let max = 0;
+  totals.forEach(v => { if (v > max) max = v; });
+  max = niceMax(max * 1.12);
+  const band = iw / n;
+  const barW = Math.max(4, Math.min(22, band * 0.58));
   const yAt = v => t + ih - (v / max) * ih;
-  const ticks = 4;
+  const xMid = i => l + band * i + band / 2;
   let grid = '';
-  for (let i = 0; i <= ticks; i++){
-    const v = max * (1 - i / ticks), y = t + ih * i / ticks;
+  for (let i = 0; i <= 3; i++){
+    const v = max * (1 - i / 3), y = t + ih * i / 3;
     grid += `<line x1="${l}" y1="${y.toFixed(1)}" x2="${W-r}" y2="${y.toFixed(1)}" stroke="#EEF0F2" stroke-width="1"/>`;
     const lab = v >= 1000 ? (v / 1000).toFixed(v % 1000 ? 1 : 0) + 'k' : String(Math.round(v));
     grid += `<text x="${l-6}" y="${(y + 3).toFixed(1)}" text-anchor="end" fill="#8A8F99" font-size="10" font-family="inherit">${lab}</text>`;
   }
-  const step = n > 8 ? Math.ceil(n / 7) : 1;
+  const step = n > 12 ? 4 : n > 8 ? 2 : 1;
   let xlbl = '';
   buckets.forEach((bk, i) => {
     if (i % step !== 0 && i !== n - 1) return;
-    const anchor = i === 0 ? 'start' : i === n - 1 ? 'end' : 'middle';
-    xlbl += `<text x="${xAt(i).toFixed(1)}" y="${H-8}" text-anchor="${anchor}" fill="#8A8F99" font-size="10" font-family="inherit">${esc(bk.label)}</text>`;
+    xlbl += `<text x="${xMid(i).toFixed(1)}" y="${H-8}" text-anchor="middle" fill="#8A8F99" font-size="10" font-family="inherit">${esc(bk.label)}</text>`;
   });
-  const pathOf = vals => vals.map((v, i) => (i ? 'L' : 'M') + xAt(i).toFixed(1) + ',' + yAt(v).toFixed(1)).join(' ');
-  let lines = '';
-  series.forEach(s => {
-    lines += `<path d="${pathOf(s.iaa)}" fill="none" stroke="${s.color}" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>`;
-    lines += `<path d="${pathOf(s.est)}" fill="none" stroke="${s.color}" stroke-width="1.5" stroke-dasharray="4 3" stroke-linejoin="round" stroke-linecap="round"/>`;
-  });
-  return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Revenue by ad account">${grid}${lines}${xlbl}</svg>`;
+  let bars = '';
+  for (let i = 0; i < n; i++){
+    let y = t + ih;
+    const x = xMid(i) - barW / 2;
+    series.forEach(s => {
+      const v = s.values[i] || 0;
+      const h = (v / max) * ih;
+      y -= h;
+      if (h > 0.4) bars += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${h.toFixed(1)}" fill="${s.color}"/>`;
+    });
+  }
+  const line = totals.map((v, i) => (i ? 'L' : 'M') + xMid(i).toFixed(1) + ',' + yAt(v).toFixed(1)).join(' ');
+  const dots = totals.map((v, i) => n <= 12 ? `<circle cx="${xMid(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="2" fill="#161823"/>` : '').join('');
+  return `<svg class="bi-svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="Revenue by ad account">${grid}${bars}<path d="${line}" fill="none" stroke="#161823" stroke-width="1.75" stroke-linejoin="round" stroke-linecap="round"/>${dots}${xlbl}</svg>`;
 }
 function ldPagerHtml(total){
   const size = LD.size || 10;
@@ -1526,7 +1581,7 @@ function ldDataBody(colId){
   const st = S.state;
   if (st === 'loading'){
     return `<div class="bi"><div class="sk" style="height:14px;width:40%;margin-bottom:12px"></div><div class="sk" style="height:160px;width:100%"></div></div>
-      <div class="ld-tools"><div class="sk" style="height:16px;width:240px"></div><div class="sk" style="height:32px;width:280px"></div></div>
+      <div class="toolbar"><div class="left"><div class="sk" style="height:32px;width:120px"></div><div class="sk" style="height:32px;width:260px"></div></div><div class="right"><div class="sk" style="height:32px;width:88px"></div></div></div>
       <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>BC</th><th>Ad account</th><th>Date</th><th class="num">IAA revenue</th><th class="num">Estimated distribution revenue</th></tr></thead><tbody>${skelRows(6, 5)}</tbody></table></div></div>`;
   }
   if (st === 'error') return errorBlock('distribution data');
@@ -1535,10 +1590,13 @@ function ldDataBody(colId){
   }
   const vis = LD.vis;
   const all = ldFilteredRows(colId);
-  const model = ldChartSeries(all);
-  const legend = model.series.map(s => `<span style="color:${s.color}"><i></i>${esc(s.account)}</span>`).join('') +
-    '<span class="bi-note"><i></i>IAA revenue</span><span class="bi-note"><i class="dash"></i>Estimated distribution revenue</span>';
+  const model = ldChartModel(colId);
+  const legend = model.series.map(s => `<span style="color:${s.color}"><i class="sw"></i>${esc(s.account)}</span>`).join('') +
+    '<span><i class="line"></i>Total IAA revenue</span>';
   const chk = (k, label) => `<label><input type="checkbox" class="cb" name="ld-vis-${k}" data-chg="ld-vis" data-k="${k}" ${vis[k] ? 'checked' : ''}>${label}</label>`;
+  const focus = LD.grain === 'daily'
+    ? `<select class="select" style="width:132px" name="ld-day" data-chg="ld-day" aria-label="Day">${ldRangeDates().map(d => `<option value="${d}" ${d === ldFocusDay() ? 'selected' : ''}>${fmtMd(d)}</option>`).join('')}</select>`
+    : `<select class="select" style="width:168px" name="ld-week" data-chg="ld-week" aria-label="Week">${ldWeekWindows().map(w => `<option value="${w.id}" ${(ldFocusWeek() || {}).id === w.id ? 'selected' : ''}>${esc(w.label)}</option>`).join('')}</select>`;
   const cols = [
     vis.bc ? ['bc','BC'] : null,
     vis.account ? ['account','Ad account'] : null,
@@ -1557,23 +1615,33 @@ function ldDataBody(colId){
   const colW = {bc:'18%', account:'22%', date:'14%', iaa:'20%', est:'26%'};
   return `<div class="bi">
       <div class="bi-h"><h4>Revenue by ad account</h4>
-        <div class="seg" role="group" aria-label="Chart grain">
-          <button type="button" class="${LD.grain === 'daily' ? 'on' : ''}" data-act="ld-grain" data-v="daily">Daily</button>
-          <button type="button" class="${LD.grain === 'weekly' ? 'on' : ''}" data-act="ld-grain" data-v="weekly">Weekly</button>
+        <div class="bi-ctrl">
+          <div class="seg" role="group" aria-label="Chart grain">
+            <button type="button" class="${LD.grain === 'daily' ? 'on' : ''}" data-act="ld-grain" data-v="daily">Daily</button>
+            <button type="button" class="${LD.grain === 'weekly' ? 'on' : ''}" data-act="ld-grain" data-v="weekly">Weekly</button>
+          </div>
+          ${focus}
         </div>
       </div>
       ${biChartSvg(model)}
       <div class="bi-leg">${legend}</div>
     </div>
-    <div class="ld-tools">
-      <div class="ld-vis">${chk('bc','BC')}${chk('account','Ad account')}${chk('date','Date')}</div>
-      <div class="ld-range"><span>Date range</span>
-        <input class="input" type="date" name="ld-from" data-chg="ld-from" value="${esc(LD.from)}" aria-label="From date">
-        <span>to</span>
-        <input class="input" type="date" name="ld-to" data-chg="ld-to" value="${esc(LD.to)}" aria-label="To date">
+    <div class="toolbar">
+      <div class="left">
+        <div class="vp-wrap">
+          <button type="button" class="vp-btn ${LD.visOpen ? 'on' : ''}" data-act="ld-vp-toggle" aria-haspopup="true" aria-expanded="${LD.visOpen}">Viewport</button>
+          ${LD.visOpen ? `<div class="menu vp-menu" role="menu">${chk('bc','BC')}${chk('account','Ad account')}${chk('date','Date')}</div>` : ''}
+        </div>
+        <span class="range-custom">
+          <input class="input" type="date" name="ld-from" data-chg="ld-from" value="${esc(LD.from)}" aria-label="From date">
+          <span class="faint">–</span>
+          <input class="input" type="date" name="ld-to" data-chg="ld-to" value="${esc(LD.to)}" aria-label="To date">
+        </span>
+      </div>
+      <div class="right">
+        <button type="button" class="btn btn-primary" data-act="ld-export">${ic('download', 14)}Export</button>
       </div>
     </div>
-    <div class="ld-export-row"><button type="button" class="btn btn-primary" data-act="ld-export">${ic('download', 14)}Export</button></div>
     <div class="panel"><div class="tbl-wrap"><table class="tbl ld-tbl"><thead><tr>${cols.map(c => `<th class="${c[0]==='iaa'||c[0]==='est'?'num':''}" style="width:${colW[c[0]]}">${c[1]}</th>`).join('')}</tr></thead><tbody>${body}</tbody></table></div>${all.length ? ldPagerHtml(all.length) : ''}</div>`;
 }
 function linkNeighbors(colId){
@@ -1851,8 +1919,9 @@ const ACT = {
   'ex-fmt': el => { EX.fmt = el.dataset.v; refreshDrawer(); },
   'ex-run': () => runExport(),
   'link-details': (el, e) => { if (e) e.stopPropagation(); UI.lv.menu = null; openLinkDrawer(el.dataset.col, el.dataset.tab || 'drama'); },
-  'ld-tab': el => { LD.tab = el.dataset.tab; if (LD.tab !== 'drama') stopPlayer(); refreshDrawer(); const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0; },
-  'ld-grain': el => { LD.grain = el.dataset.v; refreshDrawer(); },
+  'ld-tab': el => { LD.tab = el.dataset.tab; LD.visOpen = false; if (LD.tab !== 'drama') stopPlayer(); refreshDrawer(); const b = $('#drawer-root .dr-b'); if (b) b.scrollTop = 0; },
+  'ld-grain': el => { LD.grain = el.dataset.v; LD.visOpen = false; refreshDrawer(); },
+  'ld-vp-toggle': (el, e) => { if (e) e.stopPropagation(); LD.visOpen = !LD.visOpen; refreshDrawer(); },
   'ld-page': el => { const p = +el.dataset.p; if (!p || p < 1) return; LD.page = p; refreshDrawer(); },
   'ld-export': () => {
     const colId = LD.col; if (!colId) return;
@@ -1873,7 +1942,7 @@ const ACT = {
     download(name, csv([cols.map(c => c[1])].concat(rows.map(r => cols.map(c => val(r, c[0]))))));
     toast('Exported ' + plural(rows.length, 'row') + ' to ' + name);
   },
-  'ld-reset-range': () => { LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.page = 1; refreshDrawer(); },
+  'ld-reset-range': () => { LD.from = '2026-10-15'; LD.to = '2026-10-21'; LD.day = null; LD.week = null; LD.page = 1; refreshDrawer(); },
   'link-nav': el => goLink(el.dataset.col),
   'ttam': (el, e) => { if (e) e.stopPropagation(); UI.lv.menu = null; render(); const c = el.dataset.col; openModal(() => ttamModal(c)); },
   'ttam-go': el => { const c = el.dataset.col; const l = linkOf(c); closeModal(); copyText(l.url, 'Link copied. Opening TTAM...'); setTimeout(() => showTtam(c), 350); },
@@ -1933,8 +2002,10 @@ const CHG = {
   'lv-from': el => { UI.lv.from = el.value; UI.lv.page = 1; render(); },
   'lv-to': el => { UI.lv.to = el.value; UI.lv.page = 1; render(); },
   'ld-vis': el => { LD.vis[el.dataset.k] = el.checked; refreshDrawer(); },
-  'ld-from': el => { LD.from = el.value; LD.page = 1; refreshDrawer(); },
-  'ld-to': el => { LD.to = el.value; LD.page = 1; refreshDrawer(); },
+  'ld-from': el => { LD.from = el.value; LD.page = 1; LD.day = null; LD.week = null; refreshDrawer(); },
+  'ld-to': el => { LD.to = el.value; LD.page = 1; LD.day = null; LD.week = null; refreshDrawer(); },
+  'ld-day': el => { LD.day = el.value; refreshDrawer(); },
+  'ld-week': el => { LD.week = el.value; refreshDrawer(); },
   'ld-size': el => { LD.size = +el.value || 10; LD.page = 1; refreshDrawer(); },
   'ex-scope': el => { EX.scope = el.value; refreshDrawer(); },
   'ex-field': el => { el.checked ? EX.fields.add(el.dataset.f) : EX.fields.delete(el.dataset.f); refreshDrawer(); },
@@ -1953,6 +2024,10 @@ document.addEventListener('click', e => {
     UI.lv.menu = null;
     if (!el){ render(); return; }
   }
+  if (LD.visOpen && !e.target.closest('.vp-wrap')){
+    LD.visOpen = false;
+    if (drawerFn) refreshDrawer();
+  }
   if (!el || el.disabled) return;
   const inner = e.target.closest('button, a, input, select, label');
   if (inner && inner !== el && el.contains(inner)) return;
@@ -1967,6 +2042,7 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if ($('#ttam').classList.contains('show')) backFromTtam();
   else if (modalFn) closeModal();
+  else if (LD.visOpen){ LD.visOpen = false; refreshDrawer(); }
   else if (drawerFn){ closeDrawer(); }
 });
 document.addEventListener('mouseover', e => { const card = e.target.closest && e.target.closest('.card'); const box = card ? card.querySelector('.cover') : null; if (box !== HOV.el){ if (box) coverEnter(box); else coverLeave(); } });
