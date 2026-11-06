@@ -118,6 +118,12 @@ button,input,select{font:inherit;color:inherit}
 .drama-cell .meta{min-width:0;flex:1}
 .dist-url{color:var(--primary-t);font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;background:none;border:0;padding:0;cursor:pointer;text-align:left;display:block}
 .dist-url:hover{text-decoration:underline}
+.dist-cell{position:relative;display:flex;align-items:center;gap:2px;min-width:0;max-width:100%}
+.dist-cell .dist-url{flex:1;min-width:0}
+.dist-copy{flex:none;width:22px;height:22px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;opacity:0;visibility:hidden;pointer-events:none}
+.dist-cell:hover .dist-copy,.dist-cell:focus-within .dist-copy{opacity:1;visibility:visible;pointer-events:auto}
+.dist-copy:hover{background:var(--hover);color:var(--primary-t)}
+.tbl td:has(.dist-cell){overflow:visible}
 .act-row{display:inline-flex;align-items:center;gap:8px}
 .btn-more{width:28px;height:28px;border:0;background:transparent;color:var(--text2);border-radius:4px;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;font-size:16px;letter-spacing:1px;line-height:1}
 .btn-more:hover,.btn-more.on{background:var(--hover);color:var(--text)}
@@ -887,6 +893,12 @@ function banner(kind, body, acts, iconName){
   return `<div class="banner ${kind}">${ic(icn, 16)}<div class="bn-body">${body}</div>${acts ? '<div class="bn-act">' + acts + '</div>' : ''}</div>`;
 }
 function copyBtn(text, label){ return `<button class="btn btn-icon" data-act="copy" data-text="${esc(text)}" data-msg="${esc(label || 'Copied')}" aria-label="Copy">${ic('copy', 14)}</button>`; }
+function distUrlCell(l){
+  const note = l.status !== 'active' ? '. Note: this link is ' + LINK_ST[l.status][1].toLowerCase() : '';
+  const msg = 'Link copied' + note;
+  const attrs = `type="button" data-act="copy" data-text="${esc(l.url)}" data-msg="${esc(msg)}"`;
+  return `<div class="dist-cell"><button ${attrs} class="dist-url" title="${esc(l.url)}">${esc(l.url.replace('https://', ''))}</button><button ${attrs} class="dist-copy" aria-label="Copy link" title="Copy link">${ic('copy', 14)}</button></div>`;
+}
 function emptyBlock(icon, title, text, acts){ return `<div class="empty"><div class="em-ic">${ic(icon, 22)}</div><h3>${title}</h3><p>${text}</p>${acts ? '<div class="acts">' + acts + '</div>' : ''}</div>`; }
 function errorBlock(what){
   return `<div class="panel">${emptyBlock('alert', 'We couldn\u2019t load ' + what, 'The service didn\u2019t respond in time. Your data is safe; nothing was changed. Request ID 7f3a-91c2-0b44.', '<button class="btn btn-primary" data-act="retry">' + ic('refresh', 14) + 'Retry</button><button class="btn" data-act="toast" data-msg="Status page is outside this prototype.">View service status</button>')}</div>`;
@@ -1518,11 +1530,10 @@ function linkViewHead(){
 }
 function linkViewRow(l){
   const c = colOf(l.col), k = ctrOf(c.ctr);
-  const note = l.status !== 'active' ? '. Note: this link is ' + LINK_ST[l.status][1].toLowerCase() : '';
   return `<tr data-row="${l.col}">
       <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}${l.isNew ? ' <span class="tag teal">New</span>' : ''}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
       <td><div class="cell-title ell" title="${esc(pubOf(c))}">${esc(pubOf(c))}</div><div class="cell-sub ell">${esc(colLabel(c))}</div></td>
-      <td><button type="button" class="dist-url" data-act="copy" data-text="${esc(l.url)}" data-msg="${esc('Link copied' + note)}" title="${esc(l.url)}">${esc(l.url.replace('https://', ''))}</button></td>
+      <td>${distUrlCell(l)}</td>
       <td>${linkStCell(l)}</td>
       <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.iaa)}</button></td>
       <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.est)}</button></td>
