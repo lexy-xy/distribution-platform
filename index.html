@@ -77,6 +77,7 @@ button,input,select{font:inherit;color:inherit}
 .btn-icon:hover{background:var(--hover);color:var(--text)}
 .btn-link{border:0;background:none;padding:0;height:auto;color:var(--primary-t);font-weight:500;cursor:pointer;display:inline-flex;align-items:center;gap:4px;font-size:inherit}
 .btn-link:hover{text-decoration:underline}
+.btn-link[disabled]{opacity:.45;cursor:not-allowed;text-decoration:none}
 .btn[disabled]{opacity:.5;cursor:not-allowed}
 .btn.loading{pointer-events:none;opacity:.8}
 .input,.select{height:32px;border:1px solid var(--border2);border-radius:4px;background:#fff;padding:0 10px;outline:none;min-width:0}
@@ -183,12 +184,17 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .kpi-v.err{color:var(--err)}.kpi-v.warn{color:var(--warn)}
 
 /* Marketplace */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px;align-items:start}
 .card{background:#fff;border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
 .card:hover{border-color:#B9C0C7}
 .card:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
 .card.picked{border-color:var(--primary);box-shadow:0 0 0 1px var(--primary)}
 .card-pick{width:24px;height:24px;border-radius:3px;background:rgba(255,255,255,.94);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.view-seg{display:inline-flex;border:1px solid var(--border2);border-radius:4px;overflow:hidden}
+.view-seg button{width:32px;height:32px;padding:0;border:0;border-right:1px solid var(--border2);background:#fff;color:var(--text2);display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.view-seg button:last-child{border-right:0}
+.view-seg button:hover{background:var(--hover);color:var(--text)}
+.view-seg button.on{background:var(--primary-bg);color:var(--primary-t)}
 .selbar{position:fixed;left:264px;right:24px;bottom:16px;z-index:60;background:#fff;border:1px solid var(--border2);border-left:3px solid var(--primary);border-radius:4px;box-shadow:0 4px 16px rgba(22,24,35,.14);display:flex;align-items:center;gap:8px;padding:8px 12px 8px 16px}
 .selbar .grow{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text2)}
 .selbar .grow b{color:var(--text)}
@@ -207,13 +213,13 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .mk-chip .faint{font-weight:400;font-size:12px}
 .flow-h{font-size:12px;font-weight:600;color:var(--text2);margin:0 0 8px}
 .tbl td.grp{border-right:1px solid var(--row);vertical-align:top}
-.poster-box{position:relative;aspect-ratio:9/16;background:#1d2329;overflow:hidden}
-.cover .cv-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.poster-box{position:relative;aspect-ratio:16/9;background:#1d2329;overflow:hidden}
+.cover .cv-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0}
 .cover .cv-f{opacity:0;transition:opacity .5s}
 .cover .cv-f.on{opacity:1}
 .cover .cv-v{opacity:0;transition:opacity .25s}
 .cover .cv-v.on{opacity:1}
-.cv-prog{position:absolute;left:8px;right:8px;bottom:6px;display:flex;gap:3px;opacity:0;transition:opacity .2s;pointer-events:none}
+.cv-prog{position:absolute;left:40px;right:8px;top:10px;bottom:auto;display:flex;gap:3px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:4}
 .cover.hov .cv-prog{opacity:1}
 .cover.nomedia .cv-prog{display:none}
 .cv-prog i{flex:1;height:2px;background:rgba(255,255,255,.38);border-radius:1px;overflow:hidden}
@@ -221,18 +227,27 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .cv-prog i.done b{width:100%}
 .cv-prog i.run b{animation:cvfill 800ms linear forwards}
 @keyframes cvfill{from{width:0}to{width:100%}}
-.poster-box svg.poster{position:absolute;inset:0;width:100%;height:100%;display:block}
-.poster-box .ov-tl{position:absolute;top:8px;left:8px;display:flex;gap:4px}
-.poster-box .ov-tr{position:absolute;top:8px;right:8px}
-.poster-box .ov-b{position:absolute;left:0;right:0;bottom:0;padding:24px 10px 8px;background:linear-gradient(transparent,rgba(0,0,0,.65));color:#fff;font-size:12px;display:flex;justify-content:space-between}
-.card-b{padding:10px 12px;display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
+.poster-box svg.poster{position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0}
+.poster-box .ov-tl{position:absolute;top:8px;left:8px;display:flex;gap:4px;z-index:5}
+.poster-box .ov-tr{position:absolute;top:8px;right:8px;z-index:5}
+.poster-box .ov-b{position:absolute;left:0;right:0;bottom:0;padding:40px 14px 12px;background:linear-gradient(180deg,transparent 0%,rgba(0,0,0,.55) 42%,rgba(0,0,0,.82) 100%);color:#fff;display:flex;align-items:flex-end;gap:10px;z-index:3;pointer-events:none}
+.ov-copy{min-width:0;flex:1}
+.ov-t{font-size:18px;font-weight:700;line-height:24px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
+.ov-m{font-size:13px;line-height:20px;color:rgba(255,255,255,.88);margin-top:2px}
+.card-b{padding:10px 12px 8px;display:flex;flex-direction:column;gap:10px;min-width:0}
 .card-t{font-size:14px;font-weight:600;line-height:20px;color:var(--text)}
 .card-m{font-size:12px;color:var(--text2);line-height:18px}
 .card .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .tags{max-height:20px;overflow:hidden;margin:5px 0 3px}
+.card .tags{display:flex;flex-wrap:wrap;gap:4px;max-height:none;overflow:visible;margin:0}
 .card-meta{font-size:12px;color:var(--text3);line-height:18px}
+.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
+.card-stats .n{font-size:16px;font-weight:600;line-height:22px;color:var(--text)}
+.card-stats .l{font-size:12px;color:var(--text2);line-height:16px}
+.card-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
+.card-acts .btn{width:100%}
 .card-f{padding:7px 12px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:31px;font-size:12px}
 .mk-count{font-size:12px;color:var(--text2)}
+.thumb.wide{width:48px;height:27px}
 
 /* Drawer & modal */
 .mask{position:fixed;inset:0;background:rgba(22,24,35,.45);z-index:100;opacity:0;transition:opacity .15s}
@@ -429,6 +444,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="i-grid" viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="3" width="4.5" height="4.5" rx="1.2"/><rect x="9.75" y="3" width="4.5" height="4.5" rx="1.2"/><rect x="16.5" y="3" width="4.5" height="4.5" rx="1.2"/><rect x="3" y="9.75" width="4.5" height="4.5" rx="1.2"/><rect x="9.75" y="9.75" width="4.5" height="4.5" rx="1.2"/><rect x="16.5" y="9.75" width="4.5" height="4.5" rx="1.2"/><rect x="3" y="16.5" width="4.5" height="4.5" rx="1.2"/><rect x="9.75" y="16.5" width="4.5" height="4.5" rx="1.2"/><rect x="16.5" y="16.5" width="4.5" height="4.5" rx="1.2"/></symbol>
+    <symbol id="i-list" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13"/><circle cx="4" cy="6" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="12" r="1.2" fill="currentColor" stroke="none"/><circle cx="4" cy="18" r="1.2" fill="currentColor" stroke="none"/></symbol>
     <symbol id="i-tiktok" viewBox="0 0 24 24" fill="currentColor"><path d="M16.6 5.8A4.3 4.3 0 0 1 15.5 3h-3.1v12.4a2.6 2.6 0 1 1-2.6-2.6c.3 0 .5 0 .8.1V9.7a5.7 5.7 0 1 0 4.9 5.7V9.1a7.4 7.4 0 0 0 4.3 1.4V7.4a4.3 4.3 0 0 1-3.2-1.6z"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></symbol>
     <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M9.2 9.2a2.9 2.9 0 0 1 5.6 1c0 1.9-2.8 2.6-2.8 2.6"/><path d="M12 17h.01"/></symbol>
@@ -624,7 +640,7 @@ const S = {state:'normal', page:null, data:null, after:null};
 const UI = freshUI();
 function freshUI(){
   return {
-    mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop'},
+    mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop', view:'card', page:1, size:10},
     lv:{q:'', status:'all', market:'all', range:'30', from:'2026-10-07', to:DEMO_TODAY, page:1, size:10, menu:null},
     pick:new Set(),
     bd:{q:'', open:new Set(['CTR-902184'])},
@@ -995,6 +1011,79 @@ function claimSummary(ctrId){
   if (n('available')) return `<span class="st ok">${n('available')} of ${cs.length} available</span>`;
   return `<span class="st muted">All ${cs.length} claimed by you</span>`;
 }
+function mkStats(c){
+  const cs = colsOf(c.id);
+  const avail = cs.filter(x => x.claim === 'available' && x.dist === 'open');
+  const claimed = cs.filter(x => x.claim === 'claimed').length;
+  const confirming = cs.filter(x => x.claim === 'confirming').length;
+  const shares = cs.map(x => x.share);
+  const lo = Math.min.apply(null, shares), hi = Math.max.apply(null, shares);
+  const share = !shares.length ? '—' : lo === hi ? lo + '%' : lo + '–' + hi + '%';
+  let status = 'Available', statusCls = 'teal';
+  if (confirming && !avail.length){ status = 'Confirming'; statusCls = 'info'; }
+  else if (avail.length && claimed){ status = 'Partly claimed'; statusCls = 'info'; }
+  else if (!avail.length && claimed === cs.length){ status = 'Claimed'; statusCls = ''; }
+  else if (!avail.length){ status = 'Unavailable'; statusCls = 'err'; }
+  const lang = cs[0] ? cs[0].lang : '';
+  return {n:cs.length, share, status, statusCls, canClaim:avail.length > 0, pre:avail.map(x => x.id), genre:c.genres[0] || '', signal:'#' + c.rank + (lang ? ' in ' + lang : '')};
+}
+function mkViewSeg(){
+  const v = UI.mk.view === 'list' ? 'list' : 'card';
+  return `<div class="view-seg" role="tablist" aria-label="Marketplace view">
+    <button type="button" class="${v === 'card' ? 'on' : ''}" data-act="mk-view" data-v="card" role="tab" aria-selected="${v === 'card'}" aria-label="Card view">${ic('grid', 16)}</button>
+    <button type="button" class="${v === 'list' ? 'on' : ''}" data-act="mk-view" data-v="list" role="tab" aria-selected="${v === 'list'}" aria-label="List view">${ic('list', 16)}</button>
+  </div>`;
+}
+function mkPagerHtml(total){
+  const size = UI.mk.size || 10;
+  const pages = Math.max(1, Math.ceil(total / size));
+  const p = Math.min(Math.max(1, UI.mk.page || 1), pages);
+  let nums = '';
+  for (let i = 1; i <= pages; i++) nums += `<button type="button" class="pg-btn ${i === p ? 'on' : ''}" data-act="mk-page" data-p="${i}" ${i === p ? 'aria-current="page"' : ''}>${i}</button>`;
+  const from = total ? (p - 1) * size + 1 : 0, to = Math.min(p * size, total);
+  return `<div class="pager">
+    <label class="faint" style="display:inline-flex;align-items:center;gap:6px">Rows per page
+      <select class="select" style="width:68px" name="mk-size" data-chg="mk-size" aria-label="Page size">${[10, 20].map(n => `<option value="${n}" ${size === n ? 'selected' : ''}>${n}</option>`).join('')}</select>
+    </label>
+    <div class="pg-pages">
+      <button type="button" class="pg-btn" data-act="mk-page" data-p="${p - 1}" ${p <= 1 ? 'disabled' : ''} aria-label="Previous page">${ic('chev-left', 14)}</button>
+      ${nums}
+      <button type="button" class="pg-btn" data-act="mk-page" data-p="${p + 1}" ${p >= pages ? 'disabled' : ''} aria-label="Next page">${ic('chev-right', 14)}</button>
+    </div>
+    <span class="faint">${from}–${to} of ${plural(total, 'drama')}</span>
+  </div>`;
+}
+function mkList(list){
+  const size = UI.mk.size || 10;
+  const pages = Math.max(1, Math.ceil(list.length / size));
+  const page = Math.min(Math.max(1, UI.mk.page || 1), pages);
+  if (UI.mk.page !== page) UI.mk.page = page;
+  const rows = list.slice((page - 1) * size, page * size);
+  const head = `<thead><tr>
+    <th style="width:22%">Drama</th>
+    <th style="width:20%">Tags</th>
+    <th class="num" style="width:80px">Markets</th>
+    <th class="num" style="width:110px">Revenue share</th>
+    <th style="width:100px">Published</th>
+    <th style="width:12%">Market signal</th>
+    <th style="width:110px">Status</th>
+    <th class="act" style="width:168px">Action</th>
+  </tr></thead>`;
+  const body = rows.map(c => {
+    const st = mkStats(c);
+    return `<tr class="clickable" data-act="open-drama" data-id="${c.id}">
+      <td><div class="drama-cell"><div class="thumb wide">${poster(c.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(c.title)}">${c.title}</div><div class="cell-sub ell">${esc(st.genre)} · ${c.episodes} episodes · ${esc(c.plays)} plays</div></div></div></td>
+      <td><div class="tags"><span class="tag teal">${esc(c.format)}</span><span class="tag">${esc(c.source)}</span></div></td>
+      <td class="num">${st.n}</td>
+      <td class="num">${st.share}</td>
+      <td class="nowrap">${c.launchL}</td>
+      <td>${esc(st.signal)}</td>
+      <td><span class="tag ${st.statusCls}">${st.status}</span></td>
+      <td class="act"><div class="act-row"><button type="button" class="btn-link" data-act="open-drama" data-id="${c.id}">View details</button><button type="button" class="btn-link" data-act="mk-claim" data-id="${c.id}" ${st.canClaim ? '' : 'disabled'}>Claim</button></div></td>
+    </tr>`;
+  }).join('');
+  return `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${body}</tbody></table></div>${mkPagerHtml(list.length)}</div>`;
+}
 function mkFiltered(){
   const f = UI.mk; const q = f.q.trim().toLowerCase();
   let list = CONTRACTS.filter(c => {
@@ -1033,10 +1122,13 @@ function pageMarketplace(){
       ${sel('mk.genre', f.genre, [['all','All genres']].concat(genres.map(g => [g, g])), 'Genre', 108)}
       ${sel('mk.avail', f.avail, [['all','Any availability'],['available','Has available collections'],['claimed','Claimed by me']], 'Availability', 136)}
       ${sel('mk.sort', f.sort, [['pop','Sort: Popularity'],['new','Sort: Newest'],['eps','Sort: Fewest episodes']], 'Sort', 140)}
-    </div></div>`;
+    </div><div class="right">${mkViewSeg()}</div></div>`;
   }
+  const listView = f.view === 'list';
   if (st === 'loading'){
-    out += '<div class="grid">' + Array.from({length:4}, () => '<div class="card" style="cursor:default"><div class="poster-box sk" style="border-radius:0"></div><div class="card-b"><div class="sk" style="height:14px;width:70%"></div><div class="sk" style="height:10px;width:50%"></div><div class="sk" style="height:10px;width:85%"></div></div></div>').join('') + '</div>';
+    out += listView
+      ? `<div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Drama</th><th>Tags</th><th>Markets</th><th>Revenue share</th><th>Published</th><th>Market signal</th><th>Status</th><th>Action</th></tr></thead><tbody>${skelRows(6, 8)}</tbody></table></div></div>`
+      : '<div class="grid">' + Array.from({length:4}, () => '<div class="card" style="cursor:default"><div class="poster-box sk" style="border-radius:0"></div><div class="card-b"><div class="sk" style="height:14px;width:70%"></div><div class="sk" style="height:10px;width:50%"></div><div class="sk" style="height:10px;width:85%"></div></div></div>').join('') + '</div>';
   } else if (st === 'error'){
     out += errorBlock('dramas');
   } else if (st === 'empty'){
@@ -1044,9 +1136,9 @@ function pageMarketplace(){
   } else {
     const list = mkFiltered();
     const pk = UI.pick.size;
-    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract${pk ? '' : ' · tick the box on a poster to claim several dramas at once'}</div>`;
+    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract${listView || pk ? '' : ' · tick the box on a poster to claim several dramas at once'}</div>`;
     if (!list.length) out += '<div class="panel">' + emptyBlock('search', 'No dramas match your filters', 'Try a different keyword or clear filters.', '<button class="btn" data-act="mk-clear">Clear filters</button>') + '</div>';
-    else out += '<div class="grid">' + list.map(card).join('') + '</div>';
+    else out += listView ? mkList(list) : '<div class="grid">' + list.map(card).join('') + '</div>';
     if (pk){
       const names = Array.from(UI.pick).map(id => ctrOf(id).title);
       out += `<div class="page-pad-sel"></div><div class="selbar" role="region" aria-label="Selected dramas"><span class="grow"><b>${plural(pk, 'drama')} selected</b> · ${esc(names.join(', '))}</span><button class="btn" data-act="pick-all">Select all shown</button><button class="btn" data-act="pick-clear">Clear</button><button class="btn btn-primary" data-act="bulk-claim">Claim collections</button></div>`;
@@ -1062,19 +1154,26 @@ function cover(id){
 }
 function card(c){
   const on = UI.pick.has(c.id);
-  const markets = Array.from(new Set(colsOf(c.id).map(x => x.code))).join(', ');
-  const meta = `${c.episodes} eps · ${c.launchL} · ${markets}`;
+  const st = mkStats(c);
+  const meta = `${st.genre} · ${c.episodes} episodes · ${c.plays} plays`;
   return `<div class="card ${on ? 'picked' : ''}" role="button" tabindex="0" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
     ${cover(c.id)}
       <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label></div>
+      <div class="ov-b"><div class="ov-copy"><div class="ov-t ell" title="${esc(c.title)}">${c.title}</div><div class="ov-m ell" title="${esc(meta)}">${esc(meta)}</div></div></div>
     </div>
     <div class="card-b">
-      <div class="card-t ell" title="${esc(c.title)}">${c.title}</div>
-      <div class="card-m ell" title="${esc(c.holder + ' · ' + c.source)}">${c.holder} · ${c.source}</div>
-      <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
-      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
+      <div class="tags"><span class="tag teal">${esc(c.format)}</span><span class="tag">${esc(c.source)}</span><span class="tag ${st.statusCls}">${st.status}</span></div>
+      <div class="card-stats">
+        <div><div class="n">${st.n}</div><div class="l">market versions</div></div>
+        <div><div class="n">${st.share}</div><div class="l">revenue share</div></div>
+        <div><div class="n">${c.launchL}</div><div class="l">Published</div></div>
+        <div><div class="n">${esc(st.signal)}</div><div class="l">Market signal</div></div>
+      </div>
     </div>
-    <div class="card-f">${claimSummary(c.id)}</div></div>`;
+    <div class="card-acts">
+      <button type="button" class="btn" data-act="open-drama" data-id="${c.id}">View details</button>
+      <button type="button" class="btn btn-primary" data-act="mk-claim" data-id="${c.id}" ${st.canClaim ? '' : 'disabled'}>Claim</button>
+    </div></div>`;
 }
 
 /* Cover hover previews: clip, keyframes, static */
@@ -1084,7 +1183,8 @@ function coverEnter(box){
   const id = box.dataset.id, m = box.dataset.cover;
   if (m === 'frames'){
     const n = MEDIA[id][1]; const prog = box.querySelector('.cv-prog');
-    for (let i = 2; i <= n; i++) if (!box.querySelector('.cv-f[data-f="' + i + '"]')){ const im = document.createElement('img'); im.className = 'cv-media cv-f'; im.dataset.f = i; im.alt = ''; im.decoding = 'async'; im.src = frameSrc(id, i); box.insertBefore(im, prog); }
+    const before = prog || box.querySelector('.ov-b');
+    for (let i = 2; i <= n; i++) if (!box.querySelector('.cv-f[data-f="' + i + '"]')){ const im = document.createElement('img'); im.className = 'cv-media cv-f'; im.dataset.f = i; im.alt = ''; im.decoding = 'async'; im.src = frameSrc(id, i); box.insertBefore(im, before); }
     let k = 0;
     const step = () => {
       $$('.cv-f', box).forEach((im, j) => im.classList.toggle('on', j === k));
@@ -1096,7 +1196,7 @@ function coverEnter(box){
     if (!v){
       v = document.createElement('video'); v.className = 'cv-media cv-v'; v.muted = true; v.loop = true; v.playsInline = true; v.preload = 'auto'; v.setAttribute('aria-hidden', 'true');
       v.addEventListener('playing', () => { if (HOV.el === box) v.classList.add('on'); });
-      v.src = clipSrc(id); box.insertBefore(v, box.querySelector('.cv-prog'));
+      v.src = clipSrc(id); box.insertBefore(v, box.querySelector('.cv-prog') || box.querySelector('.ov-b'));
     }
     try { v.currentTime = 0; } catch (e) {}
     const p = v.play(); if (p && p.catch) p.catch(() => {});
@@ -2062,7 +2162,16 @@ const ACT = {
   'dismiss': el => { UI.dismissed.add(el.dataset.k); render(); },
   'stm-fx-dismiss': (el, e) => { if (e) e.stopPropagation(); UI.dismissed.add('stm-fx-' + el.dataset.id); refreshDrawer(); },
   'retry': el => { const b = el; busy(b, 700, () => { setState('normal'); toast('Loaded successfully.'); }); },
-  'mk-clear': () => { UI.mk = freshUI().mk; render(); },
+  'mk-clear': () => { const v = UI.mk.view; UI.mk = freshUI().mk; UI.mk.view = v || 'card'; render(); },
+  'mk-view': el => { UI.mk.view = el.dataset.v === 'list' ? 'list' : 'card'; coverLeave(); render(); },
+  'mk-page': el => { UI.mk.page = +el.dataset.p; render(); },
+  'mk-claim': (el, e) => {
+    if (e) e.stopPropagation();
+    const c = ctrOf(el.dataset.id); if (!c) return;
+    const st = mkStats(c);
+    if (!st.canClaim){ toast('No collections available to claim on this drama.', 'warn'); return; }
+    openDrama(c.id, st.pre);
+  },
   'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
   'pl-toggle': () => playToggle(),
   'pl-prev': () => setEp(PL.ep - 1),
@@ -2191,6 +2300,7 @@ const CHG = {
       if (key === 'range' && el.value === 'custom'){ if (!UI.lv.from) UI.lv.from = '2026-10-07'; if (!UI.lv.to) UI.lv.to = DEMO_TODAY; }
     }
     if (grp === 'st') UI.st.page = 1;
+    if (grp === 'mk') UI.mk.page = 1;
     render();
   },
   'mk-pick': el => { el.checked ? UI.pick.add(el.dataset.id) : UI.pick.delete(el.dataset.id); render(); },
@@ -2198,6 +2308,7 @@ const CHG = {
   'dr-sel': el => { el.checked ? DS.sel.add(el.dataset.id) : DS.sel.delete(el.dataset.id); refreshDrawer(); },
   'lv-size': el => { UI.lv.size = +el.value || 10; UI.lv.page = 1; UI.lv.menu = null; render(); },
   'st-size': el => { UI.st.size = +el.value || 10; UI.st.page = 1; render(); },
+  'mk-size': el => { UI.mk.size = +el.value || 10; UI.mk.page = 1; render(); },
   'lv-from': el => { UI.lv.from = el.value; UI.lv.page = 1; render(); },
   'lv-to': el => { UI.lv.to = el.value; UI.lv.page = 1; render(); },
   'ld-vis': el => { LD.vis[el.dataset.k] = el.checked; refreshDrawer(); },
@@ -2224,7 +2335,7 @@ const CHG = {
   'stm-ack': el => { CS.ack = el.checked; const b = $('[data-act="stm-confirm-submit"]'); if (b) b.disabled = !CS.ack; }
 };
 const INP = {
-  'mk-q': el => { UI.mk.q = el.value; render(); },
+  'mk-q': el => { UI.mk.q = el.value; UI.mk.page = 1; render(); },
   'lv-q': el => { UI.lv.q = el.value; UI.lv.page = 1; render(); },
   'bd-q': el => { UI.bd.q = el.value; render(); }
 };
