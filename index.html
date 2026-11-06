@@ -295,11 +295,14 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .dr-cols{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}
 .dr-aside{display:flex;flex-direction:column;gap:20px;min-width:0}
 .dr-aside .sec{margin-top:0}
-.stm-stack{display:flex;flex-direction:column;gap:20px}
+.stm-stack{display:flex;flex-direction:column;gap:36px}
 .stm-stack .sec{margin-top:0}
+.stm-row1{display:flex;flex-direction:column;gap:10px}
 .stm-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,280px);gap:12px;align-items:stretch}
 .stm-top .kpis{min-height:88px}
 .stm-top .box{display:flex;flex-direction:column;justify-content:center}
+.stm-note{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;background:#F1F2F4;border-radius:8px;border-left:3px solid var(--primary);font-size:13px;line-height:20px;color:var(--text)}
+.stm-note-ic{flex:none;width:18px;height:18px;margin-top:1px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-style:italic;line-height:1}
 .kv .k{font-size:12px;color:var(--text2)}
 .kv .v{font-size:13px;word-break:break-word}
 .box{border:1px solid var(--border);border-radius:4px;padding:12px 14px}
@@ -1988,8 +1991,6 @@ function pageSettlement(){
 function stmDrawer(id){
   const s = stmOf(id), b = BCS[s.bc];
   const cols = stmColRows(s);
-  const gmv = cols.reduce((a, r) => a + r.gmv, 0);
-  const dist = cols.reduce((a, r) => a + r.dist, 0);
   const logs = stmTimeline(s);
   const bodyRows = cols.map(r => {
     const k = ctrOf(r.ctrId);
@@ -2002,16 +2003,18 @@ function stmDrawer(id){
   else foot += `<button class="btn btn-primary" data-act="close-drawer">Close</button>`;
   const notes = s.revised ? banner('warn', '<b>Amount revised: v1 to v2.</b> An adjustment of ' + money(s.adj) + ' was added on Nov 2 (' + s.adjNote + '). Please review and confirm again; your earlier review doesn\u2019t apply to the new version.') : '';
   const failBan = s.status === 'failed' ? banner('err', '<b>Payout failed · ' + s.failReason + '.</b> The bank rejected the transfer because the account holder name doesn\u2019t match the beneficiary on file. Update the beneficiary name in Billing, then request a payout retry.') : '';
+  const fxNote = s.status === 'pending' ? `<div class="stm-note"><span class="stm-note-ic" aria-hidden="true">i</span><div>Non-USD revenue is converted to USD using the platform reference rates at month end; this statement uses EUR/USD 1.0832 and GBP/USD 1.2764.</div></div>` : '';
   return {title:'Settlement statement ' + s.id, sub:`<span>${s.period}</span>${stChip(STM_ST, s.status)}`,
     body:`${notes || failBan ? (notes + failBan) + '<div style="height:12px"></div>' : ''}
       <div class="stm-stack">
-        <div class="stm-top">
-          <div class="kpis" style="--n:3">
-            <div class="kpi"><div class="kpi-l">GMV</div><div class="kpi-v">${money(gmv)}</div><div class="kpi-s">${plural(cols.length, 'collection')}</div></div>
-            <div class="kpi"><div class="kpi-l">Distribution revenue</div><div class="kpi-v">${money(dist)}</div><div class="kpi-s">Before adjustments</div></div>
-            <div class="kpi"><div class="kpi-l">Final amount</div><div class="kpi-v">${money(stmFinal(s))}</div><div class="kpi-s">${s.adj ? money(s.adj) + ' adj.' : 'USD'}</div></div>
+        <div class="stm-row1">
+          <div class="stm-top">
+            <div class="kpis" style="--n:1">
+              <div class="kpi"><div class="kpi-l">Final amount</div><div class="kpi-v">${money(stmFinal(s))}</div><div class="kpi-s">${s.adj ? money(s.adj) + ' adj.' : 'USD'}</div></div>
+            </div>
+            <div class="box"><div class="kv one"><div><div class="k">Business Center</div><div class="v">${b.name}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div></div></div>
           </div>
-          <div class="box"><div class="kv one"><div><div class="k">Business Center</div><div class="v">${b.name}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div></div></div>
+          ${fxNote}
         </div>
         <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4></div><div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Contract</th><th>Collection</th><th class="num" style="width:120px">GMV</th><th class="num" style="width:110px">Revenue share</th><th class="num" style="width:150px">Distribution revenue</th></tr></thead><tbody>${bodyRows}
         ${s.adj ? `<tr><td>Adjustments</td><td colspan="3" class="cell-sub">${s.adjNote}</td><td class="num">${money(s.adj)}</td></tr>` : ''}
