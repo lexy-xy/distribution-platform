@@ -295,6 +295,11 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .dr-cols{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:20px;align-items:start}
 .dr-aside{display:flex;flex-direction:column;gap:20px;min-width:0}
 .dr-aside .sec{margin-top:0}
+.stm-stack{display:flex;flex-direction:column;gap:20px}
+.stm-stack .sec{margin-top:0}
+.stm-top{display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,280px);gap:12px;align-items:stretch}
+.stm-top .kpis{min-height:88px}
+.stm-top .box{display:flex;flex-direction:column;justify-content:center}
 .kv .k{font-size:12px;color:var(--text2)}
 .kv .v{font-size:13px;word-break:break-word}
 .box{border:1px solid var(--border);border-radius:4px;padding:12px 14px}
@@ -754,6 +759,79 @@ const linkOf = colId => D().links.find(l => l.col === colId);
 const stmOf = id => D().statements.find(s => s.id === id);
 const stmFinal = s => s.gross + s.adj;
 const colLabel = c => c.market + ' · ' + c.lang;
+function stmWhen(s, hm, dayOff){
+  if (!dayOff) return s.generated + ' ' + hm + ' UTC';
+  const d = new Date(s.generated + ' UTC');
+  d.setUTCDate(d.getUTCDate() + dayOff);
+  const mon = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getUTCMonth()];
+  return mon + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear() + ' ' + hm + ' UTC';
+}
+function stmBefore(iso, minutes){
+  const m = String(iso).match(/^(.+?) (\d{2}):(\d{2}) UTC$/);
+  if (!m) return iso;
+  let h = +m[2], mi = +m[3] - minutes;
+  while (mi < 0){ mi += 60; h -= 1; }
+  if (h < 0) h += 24;
+  return m[1] + ' ' + String(h).padStart(2, '0') + ':' + String(mi).padStart(2, '0') + ' UTC';
+}
+function stmColRows(s){
+  const rows = [];
+  s.split.forEach(([ctrId, cols]) => cols.forEach(([colId, dist]) => {
+    const c = COLLECTIONS.find(x => x.id === colId) || {id:colId, market:colId, lang:'', share:40};
+    const share = c.share || 40;
+    const gmv = Math.round(dist / (share / 100) * 100) / 100;
+    rows.push({ctrId, col:c, dist, gmv, share});
+  }));
+  return rows;
+}
+function stmTimeline(s){
+  const bank = s.bc === 'main' ? '4471' : '0938';
+  const batch = 'PB-' + s.id.replace('STM-', '').replace('-', '').slice(0, 6) + '-' + (s.bc === 'main' ? '01' : '02');
+  const payRef = 'PAY-' + String(80000 + Math.abs(s.id.split('').reduce((a, ch) => a + ch.charCodeAt(0), 0))).slice(-5);
+  const amt = money(stmFinal(s));
+  const gen = stmWhen(s, '09:00');
+  const conf = s.confirmedAt || (s.status === 'processing' && s.updated && /UTC/.test(s.updated) ? stmBefore(s.updated, 2) : stmWhen(s, '10:41', 1));
+  const queue = s.queuedAt || (s.status === 'processing' && s.updated && /UTC/.test(s.updated) ? stmBefore(s.updated, 1) : stmWhen(s, '10:42', 1));
+  const sent = s.sentAt || (s.status === 'paid' && s.updated ? stmBefore(s.updated, 2) : (s.updated && /09:14/.test(s.updated) ? s.updated.replace('09:14', '09:12') : stmWhen(s, '09:12', 13)));
+  const steps = [];
+  const add = (t, e, k, d) => steps.push({t, e, k: k || '', d: d || ''});
+  add(gen, 'Statement generated', '', s.period + ' · ' + amt);
+  if (s.revised && s.status === 'pending'){
+    add(stmWhen(s, '10:41', 0), 'Confirmed by you', 'info', 'Version 1. Payout had not started yet.');
+    add(s.updated, 'Statement revised · v1 to v2 · re-confirmation required', 'warn', 'Adjustment of ' + money(s.adj) + ' added' + (s.adjNote ? ' (' + s.adjNote + ')' : '') + '. Your earlier review no longer applies.');
+    add(s.updated, 'Awaiting your confirmation', 'warn', 'Confirm the new version to start payout.');
+    return steps.reverse();
+  }
+  if (s.status === 'pending'){
+    add(gen, 'Awaiting your confirmation', 'warn', 'Payout starts after you confirm.');
+    return steps.reverse();
+  }
+  if (s.status === 'confirming'){
+    add(s.updated, 'Confirmation submitted · result unknown', 'warn', 'The settlement system hasn\u2019t acknowledged yet. Don\u2019t confirm again; use Check status.');
+    return steps.reverse();
+  }
+  add(conf, 'Confirmed by you', 'info', amt);
+  add(queue, 'Queued for payout', 'info', 'Payout batch ' + batch);
+  if (s.status === 'processing' && !s.retried){
+    add(s.updated, 'Payout processing', 'info', 'Expected by Nov 15, 2026');
+    return steps.reverse();
+  }
+  add(sent, 'Payout sent to bank', 'info', 'Reference ' + payRef + ' · bank account ending ' + bank);
+  if (s.status === 'paid'){
+    add(s.updated, 'Paid', 'ok', 'Reference ' + payRef + ' · bank account ending ' + bank);
+    return steps.reverse();
+  }
+  const failT = s.failedAt || s.updated;
+  const reason = s.failReason || 'Beneficiary name mismatch';
+  add(failT, 'Payout failed · ' + reason.toLowerCase(), 'err', 'Bank returned R03: account holder \u201cSHIKE INTERACTIVE TECH LTD\u201d doesn\u2019t match beneficiary \u201cShike Interactive Ltd\u201d. Update the beneficiary name in Billing, then request a payout retry.');
+  if (s.retried){
+    const rt = s.retryAt || 'Nov 3, 2026 03:16 UTC';
+    add(rt, 'Payout retry requested', 'info', 'Beneficiary details re-verified.');
+    add(rt, 'Queued for payout', 'info', 'Expected by Nov 6, 2026');
+    if (s.status === 'processing') add(s.updated || rt, 'Payout processing', 'info', 'Retry in progress.');
+  }
+  return steps.reverse();
+}
 
 /* ---------- Generic UI ---------- */
 function toast(msg, type){
@@ -1909,24 +1987,37 @@ function pageSettlement(){
 }
 function stmDrawer(id){
   const s = stmOf(id), b = BCS[s.bc];
-  const logs = D().logs.filter(l => l.stm === id);
-  const split = s.split.map(([ctrId, cols]) => { const k = ctrOf(ctrId); const tot = cols.reduce((a, c) => a + c[1], 0);
-    return `<tr><td><div class="cell-title">${k.title}</div><div class="cell-sub mono">${k.id}</div></td><td class="cell-sub" style="white-space:normal">${cols.map(c => { const cc = COLLECTIONS.find(x => x.id === c[0]); return cc.code + ' · ' + cc.lang + ' <span class="mono">' + c[0] + '</span> ' + money(c[1]); }).join('<br>')}</td><td class="num">${money(tot)}</td></tr>`; }).join('');
+  const cols = stmColRows(s);
+  const gmv = cols.reduce((a, r) => a + r.gmv, 0);
+  const dist = cols.reduce((a, r) => a + r.dist, 0);
+  const logs = stmTimeline(s);
+  const bodyRows = cols.map(r => {
+    const k = ctrOf(r.ctrId);
+    return `<tr><td><div class="cell-title">${k.title}</div><div class="cell-sub mono">${k.id}</div></td><td><div class="cell-title">${r.col.market}${r.col.lang ? ' · ' + r.col.lang : ''}</div><div class="cell-sub mono">${r.col.id}</div></td><td class="num">${money(r.gmv)}</td><td class="num">${r.share}%</td><td class="num">${money(r.dist)}</td></tr>`;
+  }).join('');
   let foot = `<button class="btn" data-act="stm-download" data-id="${id}">${ic('download', 14)}Download statement</button>`;
   if (s.status === 'pending') foot = `<span class="grow">Downloading doesn\u2019t confirm this statement.</span>` + foot + `<button class="btn btn-primary" data-act="stm-confirm" data-id="${id}">Confirm settlement</button>`;
   else if (s.status === 'failed') foot += `<button class="btn" data-act="outside" data-name="Billing">Update beneficiary in Billing</button><button class="btn btn-primary" data-act="stm-retry" data-id="${id}">Request payout retry</button>`;
   else if (s.status === 'confirming') foot += `<button class="btn btn-primary" data-act="stm-check" data-id="${id}">${ic('refresh', 14)}Check status</button>`;
   else foot += `<button class="btn btn-primary" data-act="close-drawer">Close</button>`;
-  return {title:'Settlement statement ' + s.id, sub:`<span>${s.period}</span><span class="faint">·</span><span>${b.name}</span><span class="faint">·</span><span>Version ${s.version}</span>${stChip(STM_ST, s.status)}`,
-    body:`${s.revised ? banner('warn', '<b>Amount revised: v1 to v2.</b> An adjustment of ' + money(s.adj) + ' was added on Nov 2 (' + s.adjNote + '). Please review and confirm again; your earlier review doesn\u2019t apply to the new version.') + '<div style="height:12px"></div>' : ''}
-      ${s.status === 'failed' ? banner('err', '<b>Payout failed · ' + s.failReason + '.</b> The bank rejected the transfer because the account holder name doesn\u2019t match the beneficiary on file. Update the beneficiary name in Billing, then request a payout retry.') + '<div style="height:12px"></div>' : ''}
-      <div class="dr-cols"><div class="dr-main">
-        <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4><span class="faint" style="font-size:12px">${plural(s.split.length, 'Contract')}</span></div><div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:180px">Drama (Contract)</th><th>Collections</th><th class="num" style="width:110px">Amount</th></tr></thead><tbody>${split}
-        ${s.adj ? `<tr><td><div class="cell-title">Adjustments</div></td><td class="cell-sub">${s.adjNote}</td><td class="num">${money(s.adj)}</td></tr>` : ''}
-        <tr><td style="font-weight:600">Final amount</td><td></td><td class="num" style="font-weight:600">${money(stmFinal(s))}</td></tr></tbody></table></div></div></div>
-      <div class="sec"><div class="sec-h"><h4>Payout and activity log</h4></div>${logs.length ? '<ul class="timeline">' + logs.map(l => `<li class="${l.k}"><div class="tl-t">${l.t}</div><div class="tl-e">${l.e}</div><div class="tl-d">${l.d}</div></li>`).join('') + '</ul>' : '<div class="faint">No activity yet.</div>'}</div></div>
-      <div class="dr-aside"><div class="box"><div class="box-l">Final amount · ${s.status === 'pending' ? 'requires your confirmation' : 'formal receivable'}</div><div class="amount-xl">${money(stmFinal(s))}</div><div class="cell-sub">USD · gross ${money(s.gross)} · adjustments ${money(s.adj)}</div></div>
-      <div class="box"><div class="kv one"><div><div class="k">Business Center</div><div class="v">${b.name} (${b.role})</div></div><div><div class="k">BC ID</div><div class="v mono">${b.id}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div><div><div class="k">Version</div><div class="v">${s.version}</div></div><div><div class="k">Confirm by</div><div class="v">${s.due}</div></div></div></div></div></div>`,
+  const notes = s.revised ? banner('warn', '<b>Amount revised: v1 to v2.</b> An adjustment of ' + money(s.adj) + ' was added on Nov 2 (' + s.adjNote + '). Please review and confirm again; your earlier review doesn\u2019t apply to the new version.') : '';
+  const failBan = s.status === 'failed' ? banner('err', '<b>Payout failed · ' + s.failReason + '.</b> The bank rejected the transfer because the account holder name doesn\u2019t match the beneficiary on file. Update the beneficiary name in Billing, then request a payout retry.') : '';
+  return {title:'Settlement statement ' + s.id, sub:`<span>${s.period}</span>${stChip(STM_ST, s.status)}`,
+    body:`${notes || failBan ? (notes + failBan) + '<div style="height:12px"></div>' : ''}
+      <div class="stm-stack">
+        <div class="stm-top">
+          <div class="kpis" style="--n:3">
+            <div class="kpi"><div class="kpi-l">GMV</div><div class="kpi-v">${money(gmv)}</div><div class="kpi-s">${plural(cols.length, 'collection')}</div></div>
+            <div class="kpi"><div class="kpi-l">Distribution revenue</div><div class="kpi-v">${money(dist)}</div><div class="kpi-s">Before adjustments</div></div>
+            <div class="kpi"><div class="kpi-l">Final amount</div><div class="kpi-v">${money(stmFinal(s))}</div><div class="kpi-s">${s.adj ? money(s.adj) + ' adj.' : 'USD'}</div></div>
+          </div>
+          <div class="box"><div class="kv one"><div><div class="k">Business Center</div><div class="v">${b.name}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div></div></div>
+        </div>
+        <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4></div><div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Contract</th><th>Collection</th><th class="num" style="width:120px">GMV</th><th class="num" style="width:110px">Revenue share</th><th class="num" style="width:150px">Distribution revenue</th></tr></thead><tbody>${bodyRows}
+        ${s.adj ? `<tr><td>Adjustments</td><td colspan="3" class="cell-sub">${s.adjNote}</td><td class="num">${money(s.adj)}</td></tr>` : ''}
+        </tbody></table></div></div></div>
+        <div class="sec"><div class="sec-h"><h4>Payout and activity log</h4></div>${logs.length ? '<ul class="timeline">' + logs.map(l => `<li class="${l.k}"><div class="tl-t">${l.t}</div><div class="tl-e">${l.e}</div><div class="tl-d">${l.d}</div></li>`).join('') + '</ul>' : '<div class="faint">No activity yet.</div>'}</div>
+      </div>`,
     footer:foot};
 }
 const CS = {ack:false};
@@ -2058,20 +2149,20 @@ const ACT = {
     download('settlement-statements.csv', csv([['Statement','Period','Business Center','BC ID','Version','Gross (USD)','Adjustments (USD)','Final amount (USD)','Status']].concat(list.map(s => [s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, s.gross.toFixed(2), s.adj.toFixed(2), stmFinal(s).toFixed(2), STM_ST[s.status][1]]))));
     toast('Exported ' + plural(list.length, 'statement') + '. Exporting doesn\u2019t confirm any statement.'); },
   'st-partial-retry': el => busy(el, 800, () => { D().stmPartial = false; render(); toast('Studio B statements loaded.'); }),
-  'stm-download': el => { const s = stmOf(el.dataset.id); const rows = [['Statement','Period','Business Center','BC ID','Version','Contract ID','Drama','Collection ID','Amount (USD)']];
-    s.split.forEach(([k, cols]) => cols.forEach(c => rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, k, ctrOf(k).title, c[0], c[1].toFixed(2)])));
-    if (s.adj) rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, '', 'Adjustments', '', s.adj.toFixed(2)]);
-    rows.push([s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, '', 'Final amount', '', stmFinal(s).toFixed(2)]);
+  'stm-download': el => { const s = stmOf(el.dataset.id); const rows = [['Statement','Period','Business Center','Contract','Collection','GMV (USD)','Revenue share','Distribution revenue (USD)']];
+    stmColRows(s).forEach(r => rows.push([s.id, s.period, BCS[s.bc].name, ctrOf(r.ctrId).title, r.col.id, r.gmv.toFixed(2), r.share + '%', r.dist.toFixed(2)]));
+    if (s.adj) rows.push([s.id, s.period, BCS[s.bc].name, 'Adjustments', s.adjNote, '', '', s.adj.toFixed(2)]);
+    rows.push([s.id, s.period, BCS[s.bc].name, 'Final amount', '', '', '', stmFinal(s).toFixed(2)]);
     download(s.id + '-v' + s.version + '.csv', csv(rows)); toast('Statement downloaded.' + (s.status === 'pending' ? ' It still needs your confirmation.' : ''), s.status === 'pending' ? 'warn' : ''); },
   'stm-confirm': el => { CS.ack = false; const id = el.dataset.id; openModal(() => stmConfirmModal(id)); },
   'stm-confirm-submit': el => { if (!CS.ack){ toast('Check the confirmation box first.', 'warn'); return; } const id = el.dataset.id; busy(el, 900, () => {
     const s = stmOf(id); closeModal();
-    if (S.state === 'unknown'){ s.status = 'confirming'; D().logs.unshift({t:'Nov 3, 2026 03:15 UTC', stm:id, e:'Confirmation submitted · result unknown', k:'warn', d:'Not yet acknowledged. Don\u2019t confirm again; use Check status.'}); toast('Submitted. Result not confirmed yet; don\u2019t confirm again.', 'warn'); }
-    else { s.status = 'processing'; s.revised = false; s.updated = 'Nov 3, 2026 03:15 UTC'; D().logs.unshift({t:'Nov 3, 2026 03:15 UTC', stm:id, e:'Confirmed by you · queued for payout', k:'info', d:'Version ' + s.version + ' · ' + money(stmFinal(s)) + ' · expected by Nov 15, 2026'}); toast('Settlement confirmed. ' + id + ' is queued for payout.'); }
+    if (S.state === 'unknown'){ s.status = 'confirming'; s.updated = 'Nov 3, 2026 03:15 UTC'; toast('Submitted. Result not confirmed yet; don\u2019t confirm again.', 'warn'); }
+    else { s.status = 'processing'; s.revised = false; s.confirmedAt = 'Nov 3, 2026 03:15 UTC'; s.queuedAt = 'Nov 3, 2026 03:16 UTC'; s.updated = 'Nov 3, 2026 03:16 UTC'; toast('Settlement confirmed. ' + id + ' is queued for payout.'); }
     refreshDrawer(); render(); }); },
-  'stm-check': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; busy(el, 800, () => { const s = stmOf(id); s.status = 'processing'; D().logs.unshift({t:'Nov 3, 2026 03:16 UTC', stm:id, e:'Confirmation acknowledged · queued for payout', k:'info', d:'Your earlier confirmation was received. No second confirmation was recorded.'}); toast('Confirmation received. ' + id + ' is processing.'); refreshDrawer(); render(); }); },
+  'stm-check': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; busy(el, 800, () => { const s = stmOf(id); s.status = 'processing'; s.confirmedAt = s.confirmedAt || 'Nov 3, 2026 03:15 UTC'; s.queuedAt = 'Nov 3, 2026 03:16 UTC'; s.updated = 'Nov 3, 2026 03:16 UTC'; toast('Confirmation received. ' + id + ' is processing.'); refreshDrawer(); render(); }); },
   'stm-retry': el => { const id = el.dataset.id; openModal(() => ({title:'Request payout retry', width:500, body:'<p style="margin:0">Request a retry only after the beneficiary name in Billing matches your bank account exactly (\u201cSHIKE INTERACTIVE TECH LTD\u201d). Otherwise the payout will fail again.</p>', footer:`<button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="stm-retry-submit" data-id="${id}">I updated it, request retry</button>`})); },
-  'stm-retry-submit': el => { const id = el.dataset.id; busy(el, 800, () => { const s = stmOf(id); s.status = 'processing'; s.failReason = ''; D().logs.unshift({t:'Nov 3, 2026 03:16 UTC', stm:id, e:'Payout retry requested · queued', k:'info', d:'Beneficiary details re-verified. Expected by Nov 6, 2026.'}); closeModal(); refreshDrawer(); render(); toast('Payout retry requested for ' + id + '.'); }); },
+  'stm-retry-submit': el => { const id = el.dataset.id; busy(el, 800, () => { const s = stmOf(id); s.retried = true; s.retryAt = 'Nov 3, 2026 03:16 UTC'; s.failedAt = s.failedAt || s.updated; s.status = 'processing'; s.updated = 'Nov 3, 2026 03:16 UTC'; closeModal(); refreshDrawer(); render(); toast('Payout retry requested for ' + id + '.'); }); },
   'demo-open': () => { DEMO.open = true; renderDemo(); },
   'demo-close': () => { DEMO.open = false; renderDemo(); },
   'demo-page': el => go(el.dataset.p),

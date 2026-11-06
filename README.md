@@ -38,6 +38,8 @@ Each view/state combination is deep-linkable, e.g. `#/distribution/links?state=i
 
 ![Settlement](screenshots/settlement.png)
 
+![Settlement statement](screenshots/settlement-statement.png)
+
 More in [`screenshots/`](screenshots/).
 
 ## Run locally
