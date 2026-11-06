@@ -137,7 +137,8 @@ button,input,select{font:inherit;color:inherit}
 .tbl tr.sel td{background:#F2FAF9}
 .tbl tr.flash td{animation:flash 1.6s ease-out}
 @keyframes flash{0%{background:#CDEDEA}100%{background:transparent}}
-.tbl tr.sub td{background:#FBFBFC}
+.tbl tr.sub td{background:#FBFBFC;overflow:visible}
+.tbl tr.sub .tbl{border:1px solid var(--border);background:#fff}
 .tbl tr.clickable{cursor:pointer}
 .cell-title{font-weight:500;color:var(--text)}
 .cell-sub{font-size:12px;color:var(--text2)}
@@ -621,7 +622,7 @@ function poster(ctrId){
 }
 
 const STATES = [['normal','Normal'],['empty','Empty'],['loading','Loading'],['error','Error'],['partial','Partial success'],['unknown','Result unknown'],['invalid','Link invalid & auto-pausing'],['pending','Settlement pending confirmation'],['payout','Payout exception']];
-const PAGES = [['marketplace','Drama Marketplace','/marketplace'],['links','Distribution Management · Link view','/distribution/links'],['dramas','Distribution Management · By drama','/distribution/dramas'],['settlement','Settlement','/settlement']];
+const PAGES = [['marketplace','Drama Marketplace','/marketplace'],['links','Distribution Management · Link view','/distribution/links'],['dramas','Distribution Management · Drama view','/distribution/dramas'],['settlement','Settlement','/settlement']];
 const PATH = Object.fromEntries(PAGES.map(p => [p[0], p[2]]));
 const ROUTE = Object.assign(Object.fromEntries(PAGES.map(p => [p[2], p[0]])), {'/revenue/settlement':'settlement', '/revenue/data':'settlement'});
 
@@ -1431,7 +1432,7 @@ function linksReadyModal(){
 /* ---------- Distribution Management ---------- */
 function dmHeader(tab){
   return `<div class="ph"><div><h1>Distribution Management</h1><p>Copy, export, and monitor distribution links for your claimed collections. In TTAM, the link identifies which collection you can promote.</p></div></div>
-  <div class="tabs"><a class="tab ${tab === 'links' ? 'on' : ''}" href="#${PATH.links}?state=${S.state}">Link view</a><a class="tab ${tab === 'dramas' ? 'on' : ''}" href="#${PATH.dramas}?state=${S.state}">By drama</a></div>`;
+  <div class="tabs"><a class="tab ${tab === 'links' ? 'on' : ''}" href="#${PATH.links}?state=${S.state}">Link view</a><a class="tab ${tab === 'dramas' ? 'on' : ''}" href="#${PATH.dramas}?state=${S.state}">Drama view</a></div>`;
 }
 function dmBanners(){
   let out = '';
@@ -1503,6 +1504,45 @@ function pagerHtml(total){
     <span class="faint">${from}–${to} of ${plural(total, 'link')}</span>
   </div>`;
 }
+function linkViewHead(){
+  return `<thead><tr>
+      <th style="width:24%">Drama</th>
+      <th style="width:16%">Publisher account</th>
+      <th style="width:14%">Distribution link</th>
+      <th style="width:11%">Status</th>
+      <th class="num" style="width:10%" title="IAA revenue">IAA revenue</th>
+      <th class="num" style="width:12%" title="Estimated distribution revenue">Estimated distribution revenue</th>
+      <th style="width:10%">Link created</th>
+      <th style="width:100px">Actions</th>
+    </tr></thead>`;
+}
+function linkViewRow(l){
+  const c = colOf(l.col), k = ctrOf(c.ctr);
+  const note = l.status !== 'active' ? '. Note: this link is ' + LINK_ST[l.status][1].toLowerCase() : '';
+  return `<tr data-row="${l.col}">
+      <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}${l.isNew ? ' <span class="tag teal">New</span>' : ''}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
+      <td><div class="cell-title ell" title="${esc(pubOf(c))}">${esc(pubOf(c))}</div><div class="cell-sub ell">${esc(colLabel(c))}</div></td>
+      <td><button type="button" class="dist-url" data-act="copy" data-text="${esc(l.url)}" data-msg="${esc('Link copied' + note)}" title="${esc(l.url)}">${esc(l.url.replace('https://', ''))}</button></td>
+      <td>${linkStCell(l)}</td>
+      <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.iaa)}</button></td>
+      <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.est)}</button></td>
+      <td class="cell-sub nowrap">${esc(l.created)}</td>
+      <td class="act"><div class="act-row"><button type="button" class="btn-link" data-act="link-details" data-col="${l.col}">Details</button><span class="more-wrap"><button type="button" class="btn-more ${UI.lv.menu === l.col ? 'on' : ''}" data-act="lv-more" data-col="${l.col}" aria-label="More actions" aria-haspopup="menu" aria-expanded="${UI.lv.menu === l.col ? 'true' : 'false'}">${ic('more', 16)}</button>${lvMenu(l)}</span></div></td></tr>`;
+}
+function dvNoLinkRow(c, k){
+  const act = c.claim === 'available'
+    ? `<div class="act-row"><button type="button" class="btn-link" data-act="open-drama" data-id="${k.id}" data-pre="${c.id}">Claim</button></div>`
+    : '<span class="faint">No link</span>';
+  return `<tr>
+      <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
+      <td><div class="cell-title ell" title="${esc(pubOf(c))}">${esc(pubOf(c))}</div><div class="cell-sub ell">${esc(colLabel(c))}</div></td>
+      <td><span class="faint">No link</span></td>
+      <td><span class="faint">No link</span></td>
+      <td class="num faint">—</td>
+      <td class="num faint">—</td>
+      <td class="faint">—</td>
+      <td class="act">${act}</td></tr>`;
+}
 function pageLinks(){
   const st = S.state; const f = UI.lv;
   let out = dmHeader('links') + '<div class="stack">' + dmBanners();
@@ -1519,16 +1559,7 @@ function pageLinks(){
     </div><div class="right">
       <button class="btn btn-primary" data-act="export-links">${ic('download', 14)}Export</button>
     </div></div>`;
-  const head = `<thead><tr>
-      <th style="width:24%">Drama</th>
-      <th style="width:16%">Publisher account</th>
-      <th style="width:14%">Distribution link</th>
-      <th style="width:11%">Status</th>
-      <th class="num" style="width:10%" title="IAA revenue">IAA revenue</th>
-      <th class="num" style="width:12%" title="Estimated distribution revenue">Estimated distribution revenue</th>
-      <th style="width:10%">Link created</th>
-      <th style="width:100px">Actions</th>
-    </tr></thead>`;
+  const head = linkViewHead();
   if (st === 'loading') return out + `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${skelRows(5, 8)}</tbody></table></div></div></div>`;
   if (st === 'empty') return out + '<div class="panel">' + emptyBlock('link', 'No distribution links yet', 'Claim collections in Drama Marketplace. Each claimed collection gets a distribution link for your Business Center automatically.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const all = lvFiltered();
@@ -1536,19 +1567,7 @@ function pageLinks(){
   const pages = Math.max(1, Math.ceil(all.length / size));
   const page = Math.min(Math.max(1, f.page || 1), pages);
   const rows = all.slice((page - 1) * size, page * size);
-  const body = rows.length ? rows.map(l => {
-    const c = colOf(l.col), k = ctrOf(c.ctr);
-    const note = l.status !== 'active' ? '. Note: this link is ' + LINK_ST[l.status][1].toLowerCase() : '';
-    return `<tr data-row="${l.col}">
-      <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}${l.isNew ? ' <span class="tag teal">New</span>' : ''}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
-      <td><div class="cell-title ell" title="${esc(pubOf(c))}">${esc(pubOf(c))}</div><div class="cell-sub ell">${esc(colLabel(c))}</div></td>
-      <td><button type="button" class="dist-url" data-act="copy" data-text="${esc(l.url)}" data-msg="${esc('Link copied' + note)}" title="${esc(l.url)}">${esc(l.url.replace('https://', ''))}</button></td>
-      <td>${linkStCell(l)}</td>
-      <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.iaa)}</button></td>
-      <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.est)}</button></td>
-      <td class="cell-sub nowrap">${esc(l.created)}</td>
-      <td class="act"><div class="act-row"><button type="button" class="btn-link" data-act="link-details" data-col="${l.col}">Details</button><span class="more-wrap"><button type="button" class="btn-more ${f.menu === l.col ? 'on' : ''}" data-act="lv-more" data-col="${l.col}" aria-label="More actions" aria-haspopup="menu" aria-expanded="${f.menu === l.col ? 'true' : 'false'}">${ic('more', 16)}</button>${lvMenu(l)}</span></div></td></tr>`;
-  }).join('') : `<tr><td colspan="8">${emptyBlock('search', 'No links match your filters', 'Try another time range, keyword, or clear filters.', '<button class="btn" data-act="lv-clear">Clear filters</button>')}</td></tr>`;
+  const body = rows.length ? rows.map(linkViewRow).join('') : `<tr><td colspan="8">${emptyBlock('search', 'No links match your filters', 'Try another time range, keyword, or clear filters.', '<button class="btn" data-act="lv-clear">Clear filters</button>')}</td></tr>`;
   out += `<div class="panel"><div class="tbl-wrap" style="overflow:visible"><table class="tbl">${head}<tbody>${body}</tbody></table></div>${pagerHtml(all.length)}</div>`;
   return out + '</div>';
 }
@@ -1558,8 +1577,17 @@ function pageDramas(){
   if (st === 'error') return out + errorBlock('dramas and links') + '</div>';
   out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label></div>
     <div class="right"><button class="btn" data-act="bd-expand">Expand all</button><button class="btn" data-act="bd-collapse">Collapse all</button><button class="btn btn-primary" data-act="export-links">${ic('download', 14)}Export</button></div></div>`;
-  const head = '<thead><tr><th style="width:44px"></th><th>Drama (Contract)</th><th style="width:110px">Claimed</th><th style="width:150px">Links</th><th>Markets</th><th style="width:120px">Actions</th></tr></thead>';
-  if (st === 'loading') return out + `<div class="panel"><table class="tbl">${head}<tbody>${skelRows(4, 6)}</tbody></table></div></div>`;
+  const head = `<thead><tr>
+      <th style="width:44px"></th>
+      <th>Drama (Contract)</th>
+      <th style="width:100px">Claimed</th>
+      <th style="width:150px">Links</th>
+      <th>Markets</th>
+      <th class="num" style="width:10%" title="IAA revenue">IAA revenue</th>
+      <th class="num" style="width:12%" title="Estimated distribution revenue">Estimated distribution revenue</th>
+      <th style="width:100px">Actions</th>
+    </tr></thead>`;
+  if (st === 'loading') return out + `<div class="panel"><table class="tbl">${head}<tbody>${skelRows(4, 8)}</tbody></table></div></div>`;
   if (st === 'empty') return out + '<div class="panel">' + emptyBlock('film', 'No claimed dramas yet', 'Dramas appear here once you claim at least one collection in Drama Marketplace.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const q = f.q.trim().toLowerCase();
   const list = ALL_CONTRACTS.filter(k => colsOf(k.id).some(c => c.claim !== 'available') && (!q || [k.title, k.id].concat(colsOf(k.id).map(c => c.id)).join(' ').toLowerCase().includes(q)));
@@ -1568,21 +1596,23 @@ function pageDramas(){
     const claimed = cs.filter(c => c.claim === 'claimed').length;
     const ls = cs.map(c => linkOf(c.id)).filter(Boolean);
     const inv = ls.filter(l => l.status === 'invalid').length, unk = ls.filter(l => l.status === 'unknown').length;
+    const iaa = ls.reduce((s, l) => s + (Number(l.iaa) || 0), 0);
+    const est = ls.reduce((s, l) => s + (Number(l.est) || 0), 0);
     let r = `<tr class="clickable" data-act="bd-toggle" data-id="${k.id}"><td><button class="btn btn-icon" data-act="bd-toggle" data-id="${k.id}" aria-label="Expand" aria-expanded="${open}">${ic(open ? 'chev-down' : 'chev-right', 16)}</button></td>
-      <td><div style="display:flex;gap:10px;align-items:center"><div class="poster-box" style="width:30px;flex:none;border-radius:2px">${poster(k.id)}</div><div style="min-width:0"><div class="cell-title ell">${k.title}</div><div class="cell-sub mono">${k.id}</div></div></div></td>
+      <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}</div><div class="cell-sub mono">${k.id}</div></div></div></td>
       <td>${claimed} of ${cs.length}</td>
       <td>${ls.length} link${ls.length === 1 ? '' : 's'}${inv ? ' · <span class="st err">' + inv + ' invalid</span>' : ''}${unk ? ' · <span class="st warn">' + unk + ' unknown</span>' : ''}</td>
       <td class="cell-sub">${cs.map(c => c.code + ' · ' + c.lang).join(', ')}</td>
-      <td><button class="btn btn-sm" data-act="open-drama" data-id="${k.id}">${ic('play', 12)}Preview</button></td></tr>`;
-    if (open) r += `<tr class="sub"><td></td><td colspan="5" style="padding:4px 12px 12px"><table class="tbl" style="border:1px solid var(--border);background:#fff"><thead><tr><th>Market · language</th><th style="width:140px">Collection ID</th><th style="width:150px">Claim</th><th>Link status</th><th style="width:150px">Actions</th></tr></thead><tbody>${cs.map(c => {
+      <td class="num usd">${usd(iaa)}</td>
+      <td class="num usd">${usd(est)}</td>
+      <td class="act"><div class="act-row"><button type="button" class="btn-link" data-act="open-drama" data-id="${k.id}">Preview</button></div></td></tr>`;
+    if (open) r += `<tr class="sub"><td></td><td colspan="7" style="padding:4px 12px 12px"><table class="tbl">${linkViewHead()}<tbody>${cs.map(c => {
       const l = linkOf(c.id);
-      const claim = c.claim === 'claimed' ? '<span class="st ok">Claimed</span>' : c.claim === 'confirming' ? '<span class="st warn spin">Confirming</span>' : '<span class="st muted">Not claimed</span>';
-      const act = l ? `${copyBtn(l.url, 'Link copied')}<button class="btn btn-sm" data-act="link-details" data-col="${c.id}">Details</button>` : c.claim === 'available' ? `<button class="btn btn-sm" data-act="open-drama" data-id="${k.id}" data-pre="${c.id}">Claim</button>` : '<span class="faint">No link</span>';
-      return `<tr><td>${colLabel(c)}</td><td class="mono">${c.id}</td><td>${claim}</td><td>${l ? linkStCell(l) : '<span class="faint">No link</span>'}</td><td>${act}</td></tr>`;
+      return l ? linkViewRow(l) : dvNoLinkRow(c, k);
     }).join('')}</tbody></table></td></tr>`;
     return r;
   }).join('');
-  out += `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${rows || `<tr><td colspan="6">${emptyBlock('search', 'No dramas match your search', 'Try another keyword.', '<button class="btn" data-act="bd-clear">Clear search</button>')}</td></tr>`}</tbody></table></div>
+  out += `<div class="panel"><div class="tbl-wrap" style="overflow:visible"><table class="tbl">${head}<tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No dramas match your search', 'Try another keyword.', '<button class="btn" data-act="bd-clear">Clear search</button>')}</td></tr>`}</tbody></table></div>
     <div class="panel-f"><span>${plural(list.length, 'drama')} with claimed collections</span><span>Each row under a drama is one Collection × ${BCS.main.name}.</span></div></div>`;
   return out + '</div>';
 }
@@ -1994,7 +2024,7 @@ function backFromTtam(){
   render(); window.scrollTo(0, ctx.scroll);
   const row = $(`[data-row="${ctx.col}"]`); if (row){ row.classList.add('flash'); }
   const filt = ['status','market'].filter(k => ctx.filters[k] !== 'all').length + (ctx.filters.q ? 1 : 0) + (ctx.filters.range && ctx.filters.range !== '30' ? 1 : 0);
-  const where = ctx.page === 'links' ? 'Link view' : ctx.page === 'dramas' ? 'By drama' : 'this page';
+  const where = ctx.page === 'links' ? 'Link view' : ctx.page === 'dramas' ? 'Drama view' : 'this page';
   toast(`Back in Business Center. Context preserved: ${where}, ${plural(filt, 'filter')}, scroll position${ctx.drawer ? ', link details' : ''}.`);
 }
 

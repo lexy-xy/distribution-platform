@@ -9,12 +9,12 @@ An interactive HTML prototype (one `index.html` plus a folder of cover media) of
 Three business modules, all under **Creatives → Distribution Center** in the left nav:
 
 - **Drama Marketplace** — browse distributable dramas in card or list view (icon toggle on the filter row; the choice sticks for the session). Cards use 9:16 portrait covers with title, episode count, and plays on a dark bottom gradient. Claim collections one drama at a time or in bulk: tick the checkbox on several drama cards, then **Claim collections** to claim across multiple contracts at once. Claiming is a two-step flow: **Confirm selection** (pick the collections to claim) → **Generate links** (distribution links are generated, with **Copy all** / **Export all** for use in TTAM).
-- **Distribution Management** — link view (drama, publisher account, revenue, status) and by-drama view. Export links, open TTAM from row actions, and monitor validity. Claiming in Marketplace auto-generates links.
+- **Distribution Management** — link view (drama, publisher account, revenue, status) and drama view. Export links, open TTAM from row actions, and monitor validity. Claiming in Marketplace auto-generates links.
 - **Settlement** — settlement statements and confirmation.
 
 A **floating demo controller** (bottom-left, dashed yellow outline — not part of the product UI) switches between **4 views × 9 states**:
 
-- Views: Drama Marketplace · Link view · By drama · Settlement
+- Views: Drama Marketplace · Link view · Drama view · Settlement
 - States: Normal · Empty · Loading · Error · Partial success · Result unknown · Link invalid & auto-pausing · Settlement pending confirmation · Payout exception
 
 The controller also has a **Cover style** option for the Marketplace, which sets what a drama cover does on hover:
@@ -35,6 +35,8 @@ Each view/state combination is deep-linkable, e.g. `#/distribution/links?state=i
 ![Drama Marketplace — cover hover preview](screenshots/marketplace-hover.png)
 
 ![Bulk claim — Confirm selection](screenshots/bulk-claim.png)
+
+![Distribution Management — Drama view](screenshots/drama-view.png)
 
 ![Distribution Management — link invalid, auto-pausing](screenshots/link-invalid-autopause.png)
 
