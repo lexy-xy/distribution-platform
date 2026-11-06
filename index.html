@@ -304,7 +304,6 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .stm-amt{display:flex;align-items:baseline;gap:10px;margin-top:2px;flex-wrap:wrap}
 .stm-amt .kpi-v{margin:0}
 .stm-ccy{font-size:16px;font-weight:600;line-height:24px;color:var(--text);letter-spacing:.02em}
-.stm-ccy-l{font-size:12px;color:var(--text2);font-weight:400;margin-left:4px}
 .stm-note{position:relative;display:flex;align-items:flex-start;gap:10px;padding:10px 36px 10px 14px;background:#F1F2F4;border-radius:8px;border-left:3px solid var(--primary);font-size:13px;line-height:20px;color:var(--text)}
 .stm-note-ic{flex:none;width:18px;height:18px;margin-top:1px;border-radius:50%;background:var(--primary);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;font-style:italic;line-height:1}
 .stm-note .btn-icon{position:absolute;top:4px;right:4px;width:24px;height:24px;flex:none}
@@ -2015,7 +2014,7 @@ function stmDrawer(id){
         <div class="stm-row1">
           <div class="stm-top">
             <div class="kpis" style="--n:1">
-              <div class="kpi"><div class="kpi-l">Final amount</div><div class="stm-amt"><div class="kpi-v">${money(stmFinal(s))}</div><div class="stm-ccy">USD<span class="stm-ccy-l"> settlement currency</span></div></div>${s.adj ? `<div class="kpi-s">${money(s.adj)} adj.</div>` : ''}</div>
+              <div class="kpi"><div class="kpi-l">Final amount</div><div class="stm-amt"><div class="kpi-v">${money(stmFinal(s))}</div><div class="stm-ccy">USD</div></div>${s.adj ? `<div class="kpi-s">${money(s.adj)} adj.</div>` : ''}</div>
             </div>
             <div class="box"><div class="kv one"><div><div class="k">Business Center</div><div class="v">${b.name}</div></div><div><div class="k">Period</div><div class="v">${s.period}</div></div></div></div>
           </div>
