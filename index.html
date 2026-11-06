@@ -113,7 +113,7 @@ button,input,select{font:inherit;color:inherit}
 .tbl td.act .btn-link{display:inline-flex;justify-content:flex-start}
 .tbl tr:has(.menu){position:relative;z-index:5}
 .thumb{width:32px;height:42px;border-radius:4px;overflow:hidden;flex:none;background:#1d2329;position:relative}
-.thumb .poster,.thumb svg.poster{position:absolute;inset:0;width:100%;height:100%;display:block}
+.thumb .poster,.thumb svg.poster,.thumb img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
 .drama-cell{display:flex;gap:10px;align-items:flex-start;min-width:0}
 .drama-cell .meta{min-width:0;flex:1}
 .dist-url{color:var(--primary-t);font-family:var(--mono);font-size:12px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;background:none;border:0;padding:0;cursor:pointer;text-align:left;display:block}
@@ -242,7 +242,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .card-meta{font-size:12px;color:var(--text3);line-height:18px}
 .card-f{padding:7px 12px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:31px;font-size:12px}
 .mk-count{font-size:12px;color:var(--text2)}
-.thumb.wide{width:48px;height:27px}
+.thumb.portrait{width:27px;height:48px}
 
 /* Drawer & modal */
 .mask{position:fixed;inset:0;background:rgba(22,24,35,.45);z-index:100;opacity:0;transition:opacity .15s}
@@ -1054,9 +1054,11 @@ function mkList(list){
   const page = Math.min(Math.max(1, UI.mk.page || 1), pages);
   if (UI.mk.page !== page) UI.mk.page = page;
   const rows = list.slice((page - 1) * size, page * size);
+  const allOn = rows.length && rows.every(c => UI.pick.has(c.id));
   const head = `<thead><tr>
+    <th style="width:40px"><input type="checkbox" class="cb" name="mk-page" data-act="pick-page" ${allOn ? 'checked' : ''} aria-label="Select all on this page"></th>
     <th style="width:22%">Drama</th>
-    <th style="width:20%">Tags</th>
+    <th style="width:18%">Tags</th>
     <th class="num" style="width:80px">Markets</th>
     <th class="num" style="width:110px">Revenue share</th>
     <th style="width:100px">Published</th>
@@ -1066,8 +1068,10 @@ function mkList(list){
   </tr></thead>`;
   const body = rows.map(c => {
     const st = mkStats(c);
-    return `<tr class="clickable" data-act="open-drama" data-id="${c.id}">
-      <td><div class="drama-cell"><div class="thumb wide">${poster(c.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(c.title)}">${c.title}</div><div class="cell-sub ell">${esc(st.genre)} · ${c.episodes} episodes · ${esc(c.plays)} plays</div></div></div></td>
+    const on = UI.pick.has(c.id);
+    return `<tr class="clickable ${on ? 'sel' : ''}" data-act="open-drama" data-id="${c.id}">
+      <td><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></td>
+      <td><div class="drama-cell"><div class="thumb portrait">${poster(c.id)}<img src="${frameSrc(c.id, 1)}" alt="" loading="lazy" decoding="async"></div><div class="meta"><div class="cell-title ell" title="${esc(c.title)}">${c.title}</div><div class="cell-sub ell">${esc(st.genre)} · ${esc(c.plays)} plays</div></div></div></td>
       <td><div class="tags"><span class="tag teal">${esc(c.format)}</span><span class="tag">${esc(c.source)}</span></div></td>
       <td class="num">${st.n}</td>
       <td class="num">${st.share}</td>
@@ -1122,7 +1126,7 @@ function pageMarketplace(){
   const listView = f.view === 'list';
   if (st === 'loading'){
     out += listView
-      ? `<div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Drama</th><th>Tags</th><th>Markets</th><th>Revenue share</th><th>Published</th><th>Market signal</th><th>Status</th><th>Action</th></tr></thead><tbody>${skelRows(6, 8)}</tbody></table></div></div>`
+      ? `<div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th></th><th>Drama</th><th>Tags</th><th>Markets</th><th>Revenue share</th><th>Published</th><th>Market signal</th><th>Status</th><th>Action</th></tr></thead><tbody>${skelRows(6, 9)}</tbody></table></div></div>`
       : '<div class="grid">' + Array.from({length:4}, () => '<div class="card" style="cursor:default"><div class="poster-box sk" style="border-radius:0"></div><div class="card-b"><div class="sk" style="height:14px;width:70%"></div><div class="sk" style="height:10px;width:50%"></div><div class="sk" style="height:10px;width:85%"></div></div></div>').join('') + '</div>';
   } else if (st === 'error'){
     out += errorBlock('dramas');
@@ -1131,7 +1135,7 @@ function pageMarketplace(){
   } else {
     const list = mkFiltered();
     const pk = UI.pick.size;
-    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract${listView || pk ? '' : ' · tick the box on a poster to claim several dramas at once'}</div>`;
+    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract${pk ? '' : ' · tick the box to claim several dramas at once'}</div>`;
     if (!list.length) out += '<div class="panel">' + emptyBlock('search', 'No dramas match your filters', 'Try a different keyword or clear filters.', '<button class="btn" data-act="mk-clear">Clear filters</button>') + '</div>';
     else out += listView ? mkList(list) : '<div class="grid">' + list.map(card).join('') + '</div>';
     if (pk){
@@ -1151,7 +1155,7 @@ function card(c){
   const on = UI.pick.has(c.id);
   const markets = Array.from(new Set(colsOf(c.id).map(x => x.code))).join(', ');
   const ovMeta = `${c.episodes} episodes · ${c.plays} plays`;
-  const meta = `${c.episodes} eps · ${c.launchL} · ${markets}`;
+  const meta = `${c.launchL} · ${markets}`;
   return `<div class="card ${on ? 'picked' : ''}" role="button" tabindex="0" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
     ${cover(c.id)}
       <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label></div>
@@ -1161,7 +1165,7 @@ function card(c){
       <div class="card-t ell" title="${esc(c.title)}">${c.title}</div>
       <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
       <div class="card-m ell" title="${esc(c.holder + ' · ' + c.source)}">${c.holder} · ${c.source}</div>
-      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
+      <div class="card-meta ell" title="${esc('launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
     </div>
     <div class="card-f">${claimSummary(c.id)}</div></div>`;
 }
@@ -2187,6 +2191,17 @@ const ACT = {
   'bulk-claim': () => { if (!UI.pick.size){ toast('Select at least one drama.', 'warn'); return; } openClaimFlow(CONTRACTS.map(c => c.id).filter(id => UI.pick.has(id)), []); },
   'pick-clear': () => { UI.pick.clear(); render(); },
   'pick-all': () => { mkFiltered().forEach(c => UI.pick.add(c.id)); render(); },
+  'pick-page': (el, e) => {
+    if (e) e.stopPropagation();
+    const list = mkFiltered();
+    const size = UI.mk.size || 10;
+    const pages = Math.max(1, Math.ceil(list.length / size));
+    const page = Math.min(Math.max(1, UI.mk.page || 1), pages);
+    const rows = list.slice((page - 1) * size, page * size);
+    const allOn = rows.length && rows.every(c => UI.pick.has(c.id));
+    rows.forEach(c => allOn ? UI.pick.delete(c.id) : UI.pick.add(c.id));
+    render();
+  },
   'cf-submit': el => {
     if (!CF.keys.size){ toast('Pick at least one market.', 'warn'); return; }
     const items = [].concat(...claimPlan().map(p => p.items.filter(i => i.act === 'claim' || i.act === 'link')));
