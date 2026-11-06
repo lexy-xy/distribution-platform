@@ -184,7 +184,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .kpi-v.err{color:var(--err)}.kpi-v.warn{color:var(--warn)}
 
 /* Marketplace */
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(248px,1fr));gap:12px;align-items:start}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
 .card{background:#fff;border:1px solid var(--border);border-radius:4px;overflow:hidden;cursor:pointer;display:flex;flex-direction:column;text-align:left;padding:0}
 .card:hover{border-color:#B9C0C7}
 .card:focus-visible{outline:2px solid var(--primary);outline-offset:1px}
@@ -213,7 +213,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .mk-chip .faint{font-weight:400;font-size:12px}
 .flow-h{font-size:12px;font-weight:600;color:var(--text2);margin:0 0 8px}
 .tbl td.grp{border-right:1px solid var(--row);vertical-align:top}
-.poster-box{position:relative;aspect-ratio:16/9;background:#1d2329;overflow:hidden}
+.poster-box{position:relative;aspect-ratio:9/16;background:#1d2329;overflow:hidden}
 .cover .cv-media{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;z-index:0}
 .cover .cv-f{opacity:0;transition:opacity .5s}
 .cover .cv-f.on{opacity:1}
@@ -234,17 +234,12 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .ov-copy{min-width:0;flex:1}
 .ov-t{font-size:18px;font-weight:700;line-height:24px;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.35)}
 .ov-m{font-size:13px;line-height:20px;color:rgba(255,255,255,.88);margin-top:2px}
-.card-b{padding:10px 12px 8px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card-b{padding:10px 12px;display:flex;flex-direction:column;gap:1px;flex:1;min-width:0}
 .card-t{font-size:14px;font-weight:600;line-height:20px;color:var(--text)}
 .card-m{font-size:12px;color:var(--text2);line-height:18px}
 .card .ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.card .tags{display:flex;flex-wrap:wrap;gap:4px;max-height:none;overflow:visible;margin:0}
+.card .tags{max-height:20px;overflow:hidden;margin:5px 0 3px}
 .card-meta{font-size:12px;color:var(--text3);line-height:18px}
-.card-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px 16px}
-.card-stats .n{font-size:16px;font-weight:600;line-height:22px;color:var(--text)}
-.card-stats .l{font-size:12px;color:var(--text2);line-height:16px}
-.card-acts{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:0 12px 12px}
-.card-acts .btn{width:100%}
 .card-f{padding:7px 12px;border-top:1px solid var(--row);display:flex;align-items:center;min-height:31px;font-size:12px}
 .mk-count{font-size:12px;color:var(--text2)}
 .thumb.wide{width:48px;height:27px}
@@ -1154,26 +1149,21 @@ function cover(id){
 }
 function card(c){
   const on = UI.pick.has(c.id);
-  const st = mkStats(c);
-  const meta = `${st.genre} · ${c.episodes} episodes · ${c.plays} plays`;
+  const markets = Array.from(new Set(colsOf(c.id).map(x => x.code))).join(', ');
+  const ovMeta = `${c.episodes} episodes · ${c.plays} plays`;
+  const meta = `${c.episodes} eps · ${c.launchL} · ${markets}`;
   return `<div class="card ${on ? 'picked' : ''}" role="button" tabindex="0" data-act="open-drama" data-id="${c.id}" aria-label="${esc(c.title)}">
     ${cover(c.id)}
       <div class="ov-tl"><label class="card-pick" title="Select for bulk claim"><input type="checkbox" class="cb" name="pick-${c.id}" data-chg="mk-pick" data-id="${c.id}" ${on ? 'checked' : ''} aria-label="Select ${esc(c.title)}"></label></div>
-      <div class="ov-b"><div class="ov-copy"><div class="ov-t ell" title="${esc(c.title)}">${c.title}</div><div class="ov-m ell" title="${esc(meta)}">${esc(meta)}</div></div></div>
+      <div class="ov-b"><div class="ov-copy"><div class="ov-t ell" title="${esc(c.title)}">${c.title}</div><div class="ov-m ell" title="${esc(ovMeta)}">${esc(ovMeta)}</div></div></div>
     </div>
     <div class="card-b">
-      <div class="tags"><span class="tag teal">${esc(c.format)}</span><span class="tag">${esc(c.source)}</span><span class="tag ${st.statusCls}">${st.status}</span></div>
-      <div class="card-stats">
-        <div><div class="n">${st.n}</div><div class="l">market versions</div></div>
-        <div><div class="n">${st.share}</div><div class="l">revenue share</div></div>
-        <div><div class="n">${c.launchL}</div><div class="l">Published</div></div>
-        <div><div class="n">${esc(st.signal)}</div><div class="l">Market signal</div></div>
-      </div>
+      <div class="card-t ell" title="${esc(c.title)}">${c.title}</div>
+      <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
+      <div class="card-m ell" title="${esc(c.holder + ' · ' + c.source)}">${c.holder} · ${c.source}</div>
+      <div class="card-meta ell" title="${esc(c.episodes + ' episodes · launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
     </div>
-    <div class="card-acts">
-      <button type="button" class="btn" data-act="open-drama" data-id="${c.id}">View details</button>
-      <button type="button" class="btn btn-primary" data-act="mk-claim" data-id="${c.id}" ${st.canClaim ? '' : 'disabled'}>Claim</button>
-    </div></div>`;
+    <div class="card-f">${claimSummary(c.id)}</div></div>`;
 }
 
 /* Cover hover previews: clip, keyframes, static */
