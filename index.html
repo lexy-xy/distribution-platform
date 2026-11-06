@@ -1162,7 +1162,6 @@ function card(c){
       <div class="ov-b"><div class="ov-copy"><div class="ov-t ell" title="${esc(c.title)}">${c.title}</div><div class="ov-m ell" title="${esc(ovMeta)}">${esc(ovMeta)}</div></div></div>
     </div>
     <div class="card-b">
-      <div class="card-t ell" title="${esc(c.title)}">${c.title}</div>
       <div class="tags">${c.genres.map(g => '<span class="tag">' + g + '</span>').join('')}</div>
       <div class="card-m ell" title="${esc(c.holder + ' · ' + c.source)}">${c.holder} · ${c.source}</div>
       <div class="card-meta ell" title="${esc('launched ' + c.launchL + ' · markets ' + markets)}">${meta}</div>
