@@ -366,6 +366,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .det-cols.sec{margin-top:0}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
 .drawer.drama.fs .det{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 32px}
+.drawer.drama.fs .det-l,.drawer.drama.fs .det-eps{margin-top:24px}
 .drawer.drama.fs .det-info{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"hero hero" "facts syn";gap:16px;align-items:stretch}
 .drawer.drama.fs .det-hero{grid-area:hero}
 .det-facts{display:contents}
@@ -1358,7 +1359,7 @@ function dramaBody(ctrId){
           <div class="det-hero-meta ell" title="${esc(heroMetaPlain)}">${heroMeta}</div>
           ${heroChip}
         </div>
-        <button type="button" class="btn btn-primary" data-act="drama-play">${ic('play', 14)}Play now</button>
+        <button type="button" class="btn btn-primary" data-act="drama-cols">Select collections</button>
       </div>
       <div class="det-facts">
       <div class="kv">
@@ -2311,14 +2312,13 @@ const ACT = {
     openDrama(c.id, st.pre);
   },
   'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
-  'drama-play': () => {
+  'drama-cols': () => {
     const b = $('#drawer-root .dr-b');
-    const t = $('#player');
+    const t = $('#drawer-root .det-cols');
     if (b && t){
       const top = t.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 8;
       b.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
     }
-    if (!PL.playing) playToggle();
   },
   'drama-size': () => {
     DR.wide = !DR.wide;
