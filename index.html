@@ -365,17 +365,27 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .det-cols{grid-area:cols;min-width:0}
 .det-cols.sec{margin-top:0}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
-.drawer.drama.fs .det{grid-template-columns:204px minmax(0,1fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 40px}
-.drawer.drama.fs .det-info{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.35fr);gap:20px 48px;align-items:start}
-.drawer.drama.fs .kv{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 28px}
-.drawer.drama.fs .det-syn{font-size:14px;line-height:1.7;max-width:72ch}
-.drawer.drama.fs .det-l{position:static;width:204px}
-.drawer.drama.fs .player{width:100%}
+.drawer.drama.fs .det{grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 32px}
+.drawer.drama.fs .det-info{display:flex;flex-direction:column;gap:16px}
+.drawer.drama.fs .det-info .kv{display:none}
+.drawer.drama.fs .det-syn{font-size:14px;line-height:1.7;max-width:80ch}
+.drawer.drama.fs .det-l{position:static;width:auto}
+.player-stage{display:contents}
+.drawer.drama.fs .player-stage{display:flex;align-items:center;justify-content:center;width:100%;height:363px;background:#111417;border-radius:4px;overflow:hidden}
+.drawer.drama.fs .player{width:auto;height:100%;aspect-ratio:9/16;border-radius:0}
 .drawer.drama.fs .series{margin-top:8px}
-.drawer.drama.fs .pl-time{font-size:10px}
-.drawer.drama.fs .pl-speed button{padding:0 4px}
-.drawer.drama.fs .ep-grid{grid-template-columns:repeat(15,minmax(0,1fr));gap:6px}
+.drawer.drama.fs .ep-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
 .drawer.drama.fs .ep{height:28px}
+.det-hero{display:none}
+.drawer.drama.fs .det-hero{display:flex;align-items:center;gap:16px;padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:var(--th)}
+.det-hero-cover{position:relative;width:54px;flex:none;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#1d2329}
+.det-hero-cover .poster,.det-hero-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.det-hero-copy{flex:1;min-width:0}
+.det-hero-title{font-size:16px;font-weight:600;line-height:22px}
+.det-hero-meta{margin-top:4px;font-size:12px;color:var(--text2);line-height:18px}
+.det-hero-chip{display:inline-flex;align-items:center;gap:4px;height:22px;margin-top:8px;padding:0 8px;border-radius:11px;background:var(--ok-bg);color:var(--ok);font-size:12px;font-weight:500}
+.det-hero-chip.claimed{background:var(--info-bg);color:var(--info)}
+.det-hero .btn{flex:none}
 .player{position:relative;width:100%;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
 .player svg.poster{position:absolute;inset:0;width:100%;height:100%}
 .player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -1289,8 +1299,16 @@ function colStatus(c){
   if (c.claim === 'confirming') return '<span class="st warn spin">Confirming claim</span>';
   return '<span class="st info">Available</span>';
 }
+function distEndL(c){
+  const d = new Date(c.launch + 'T00:00:00Z');
+  if (isNaN(d)) return '—';
+  d.setUTCFullYear(d.getUTCFullYear() + 1);
+  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  return months[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
+}
 function dramaBody(ctrId){
   const c = ctrOf(ctrId); const cs = colsOf(ctrId);
+  const primary = cs.find(x => x.code === 'US') || cs[0];
   const pw = c.paywall, N = c.episodes;
   const eps = Array.from({length:N}, (_, i) => i + 1).map(e => {
     const cls = ['ep', e <= 10 ? 'hook' : '', e > pw ? 'paid' : '', e === pw ? 'pw' : '', e === PL.ep ? 'cur' : ''].join(' ');
@@ -1304,9 +1322,28 @@ function dramaBody(ctrId){
       <td><span class="copyable"><span class="mono">${x.id}</span>${copyBtn(x.id, 'Collection ID copied')}</span></td>
       <td class="num">${x.share}%</td><td>${colStatus(x)}</td></tr>`;
   }).join('');
+  const heroId = primary ? primary.id : c.id;
+  const heroMetaPlain = primary
+    ? `${heroId} · ${primary.market} · ${primary.lang} · ${N} episodes · Launched ${c.launchL} · Distribution ends ${distEndL(c)}`
+    : `${heroId} · ${N} episodes · Launched ${c.launchL} · Distribution ends ${distEndL(c)}`;
+  const heroMeta = primary
+    ? `<span class="mono">${esc(heroId)}</span> · ${esc(primary.market)} · ${esc(primary.lang)} · ${N} episodes · Launched ${esc(c.launchL)} · Distribution ends ${esc(distEndL(c))}`
+    : `<span class="mono">${esc(heroId)}</span> · ${N} episodes · Launched ${esc(c.launchL)} · Distribution ends ${esc(distEndL(c))}`;
+  const heroChip = availCount
+    ? `<span class="det-hero-chip">${ic('check-circle', 12)}Available</span>`
+    : `<span class="det-hero-chip claimed">${ic('check-circle', 12)}Claimed</span>`;
   const body = `
   <div class="det">
     <div class="det-info">
+      <div class="det-hero">
+        <div class="det-hero-cover">${poster(ctrId)}<img src="${frameSrc(ctrId, 1)}" alt="" decoding="async"></div>
+        <div class="det-hero-copy">
+          <div class="det-hero-title ell" title="${esc(c.title)}">${esc(c.title)}</div>
+          <div class="det-hero-meta ell" title="${esc(heroMetaPlain)}">${heroMeta}</div>
+          ${heroChip}
+        </div>
+        <button type="button" class="btn btn-primary" data-act="drama-play">${ic('play', 14)}Play now</button>
+      </div>
       <div class="kv">
         <div><div class="k">Rights holder</div><div class="v">${c.holder}</div></div>
         <div><div class="k">Format</div><div class="v">${c.format}</div></div>
@@ -1320,6 +1357,7 @@ function dramaBody(ctrId){
       <p class="det-syn">${c.synopsis}</p>
     </div>
     <div class="det-l">
+      <div class="player-stage">
       <div class="player ${PL.playing ? 'playing' : ''}" id="player">
         ${poster(ctrId)}<img class="pl-frame" id="pl-frame" src="${frameSrc(ctrId, (PL.ep - 1) % MEDIA[ctrId][1] + 1)}" alt=""><div class="pl-dim"></div>
         <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span>
@@ -1336,6 +1374,7 @@ function dramaBody(ctrId){
             <span class="pl-speed">${[1, 1.5, 2].map(s => `<button class="${PL.speed === s ? 'on' : ''}" data-act="pl-speed" data-v="${s}">${s}x</button>`).join('')}</span>
           </div>
         </div>
+      </div>
       </div>
       <div class="series"><div class="trk"><div class="free" style="width:${(pw - 1) / N * 100}%"></div><div class="mark" style="left:${(pw - 1) / N * 100}%" title="Paywall"></div><div class="cur" id="pl-cur" style="left:${(PL.ep - 0.5) / N * 100}%"></div></div>
         <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
@@ -2254,6 +2293,15 @@ const ACT = {
     openDrama(c.id, st.pre);
   },
   'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
+  'drama-play': () => {
+    const b = $('#drawer-root .dr-b');
+    const t = $('#player');
+    if (b && t){
+      const top = t.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 8;
+      b.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+    if (!PL.playing) playToggle();
+  },
   'drama-size': () => {
     DR.wide = !DR.wide;
     const dr = $('#drawer-root .drawer');
