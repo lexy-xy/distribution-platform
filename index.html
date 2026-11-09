@@ -254,26 +254,18 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 /* Drawer & modal */
 .mask{position:fixed;inset:0;background:rgba(22,24,35,.45);z-index:100;opacity:0;transition:opacity .15s}
 .mask.show{opacity:1}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(944px,calc(100vw - 48px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease,width .2s ease}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(944px,calc(100vw - 48px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
 .drawer.show{transform:none}
-.drawer.drama{flex-direction:row;align-items:stretch}
-.drawer.drama.fs{left:0;right:0;width:100%;transform:none;opacity:0;transition:opacity .18s ease,width .2s ease}
-.drawer.drama.fs.show{opacity:1;transform:none}
+.drawer.drama{flex-direction:row;align-items:stretch;transition:transform .36s cubic-bezier(.4,0,.2,1),width .36s cubic-bezier(.4,0,.2,1)}
+.drawer.drama.fs{width:100%}
 .dr-rail{width:48px;flex:none;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;border-right:1px solid var(--border);background:#FAFBFC}
 .dr-rail .btn-icon{width:32px;height:32px}
 .dr-rail-bot{margin-top:auto}
 .dr-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
-.drawer.drama.fs .dr-h{padding:14px 32px 14px 28px}
+.drawer.drama.fs .dr-h{padding:14px 40px 14px 32px}
 .drawer.drama.fs .dr-h h2{font-size:18px;line-height:26px}
-.drawer.drama.fs .dr-b{padding:20px 32px 28px}
-.drawer.drama.fs .dr-f{padding:12px 32px}
-.drawer.drama.fs .det{grid-template-columns:320px minmax(0,1.15fr) minmax(300px,.9fr);grid-template-rows:auto auto 1fr;gap:20px 32px}
-.drawer.drama.fs .det-r{display:contents}
-.drawer.drama.fs .det-l{grid-column:1;grid-row:1 / span 3}
-.drawer.drama.fs .kv{grid-column:2;grid-row:1}
-.drawer.drama.fs .det-syn{grid-column:2;grid-row:2}
-.drawer.drama.fs .det-eps{grid-column:3;grid-row:1 / span 3;margin-top:0}
-.drawer.drama.fs .ep-grid{grid-template-columns:repeat(10,minmax(0,1fr))}
+.drawer.drama.fs .dr-b{padding:18px 40px 20px}
+.drawer.drama.fs .dr-f{padding:12px 40px}
 .dr-h{min-height:56px;padding:12px 20px 12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
 .dr-h .t{flex:1;min-width:0}
 .dr-h h2{margin:0;font-size:16px;line-height:24px;font-weight:600}
@@ -365,12 +357,25 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* Player */
-.det{display:grid;grid-template-columns:280px minmax(0,1fr);gap:24px;align-items:start}
-.det-l{position:sticky;top:0;min-width:0}
-.det-r{min-width:0;display:flex;flex-direction:column;gap:16px}
-.det-r .sec{margin-top:0}
+.det{display:grid;grid-template-columns:280px minmax(0,1fr);grid-template-areas:"player info" "player eps" "cols cols";gap:16px 24px;align-items:start}
+.det-l{grid-area:player;position:sticky;top:0;min-width:0}
+.det-info{grid-area:info;min-width:0;display:flex;flex-direction:column;gap:16px}
+.det-eps{grid-area:eps;min-width:0}
+.det-eps.sec{margin-top:0}
+.det-cols{grid-area:cols;min-width:0}
+.det-cols.sec{margin-top:0}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
-.det + .sec{margin-top:22px}
+.drawer.drama.fs .det{grid-template-columns:204px minmax(0,1fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 40px}
+.drawer.drama.fs .det-info{display:grid;grid-template-columns:minmax(280px,.9fr) minmax(0,1.35fr);gap:20px 48px;align-items:start}
+.drawer.drama.fs .kv{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 28px}
+.drawer.drama.fs .det-syn{font-size:14px;line-height:1.7;max-width:72ch}
+.drawer.drama.fs .det-l{position:static;width:204px}
+.drawer.drama.fs .player{width:100%}
+.drawer.drama.fs .series{margin-top:8px}
+.drawer.drama.fs .pl-time{font-size:10px}
+.drawer.drama.fs .pl-speed button{padding:0 4px}
+.drawer.drama.fs .ep-grid{grid-template-columns:repeat(15,minmax(0,1fr));gap:6px}
+.drawer.drama.fs .ep{height:28px}
 .player{position:relative;width:100%;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
 .player svg.poster{position:absolute;inset:0;width:100%;height:100%}
 .player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -938,7 +943,7 @@ function openDrawer(fn, onClose){
   drawerFn = fn; drawerClose = onClose || null;
   const r = fn();
   $('#drawer-root').innerHTML = `<div class="mask" data-act="close-drawer"></div><aside class="${drawerClass(r)}" role="dialog" aria-modal="true">${drawerInner(r)}</aside>`;
-  requestAnimationFrame(() => { $$('#drawer-root .mask, #drawer-root .drawer').forEach(e => e.classList.add('show')); });
+  requestAnimationFrame(() => requestAnimationFrame(() => { $$('#drawer-root .mask, #drawer-root .drawer').forEach(e => e.classList.add('show')); }));
 }
 function drawerInner(r){
   if (r.kind === 'drama'){
@@ -1301,6 +1306,19 @@ function dramaBody(ctrId){
   }).join('');
   const body = `
   <div class="det">
+    <div class="det-info">
+      <div class="kv">
+        <div><div class="k">Rights holder</div><div class="v">${c.holder}</div></div>
+        <div><div class="k">Format</div><div class="v">${c.format}</div></div>
+        <div><div class="k">Source</div><div class="v">${c.source}</div></div>
+        <div><div class="k">Episodes</div><div class="v">${N} · paywall from Ep ${pw}</div></div>
+        <div><div class="k">Launched</div><div class="v">${c.launchL}</div></div>
+        <div><div class="k">Plays (30 days)</div><div class="v">${c.plays}</div></div>
+        <div><div class="k">Languages</div><div class="v">${Array.from(new Set(cs.map(x => x.lang))).join(', ')}</div></div>
+        <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
+      </div>
+      <p class="det-syn">${c.synopsis}</p>
+    </div>
     <div class="det-l">
       <div class="player ${PL.playing ? 'playing' : ''}" id="player">
         ${poster(ctrId)}<img class="pl-frame" id="pl-frame" src="${frameSrc(ctrId, (PL.ep - 1) % MEDIA[ctrId][1] + 1)}" alt=""><div class="pl-dim"></div>
@@ -1322,27 +1340,14 @@ function dramaBody(ctrId){
       <div class="series"><div class="trk"><div class="free" style="width:${(pw - 1) / N * 100}%"></div><div class="mark" style="left:${(pw - 1) / N * 100}%" title="Paywall"></div><div class="cur" id="pl-cur" style="left:${(PL.ep - 0.5) / N * 100}%"></div></div>
         <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
     </div>
-    <div class="det-r">
-      <div class="kv">
-        <div><div class="k">Rights holder</div><div class="v">${c.holder}</div></div>
-        <div><div class="k">Format</div><div class="v">${c.format}</div></div>
-        <div><div class="k">Source</div><div class="v">${c.source}</div></div>
-        <div><div class="k">Episodes</div><div class="v">${N} · paywall from Ep ${pw}</div></div>
-        <div><div class="k">Launched</div><div class="v">${c.launchL}</div></div>
-        <div><div class="k">Plays (30 days)</div><div class="v">${c.plays}</div></div>
-        <div><div class="k">Languages</div><div class="v">${Array.from(new Set(cs.map(x => x.lang))).join(', ')}</div></div>
-        <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
-      </div>
-      <p class="det-syn">${c.synopsis}</p>
-      <div class="sec det-eps"><div class="sec-h"><h4>Episodes</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
-        <div class="filters" style="margin-bottom:8px"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
-        <div class="ep-grid" id="ep-grid">${eps}</div>
-        <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
-      </div>
+    <div class="sec det-eps"><div class="sec-h"><h4>Episodes</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
+      <div class="filters" style="margin-bottom:8px"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
+      <div class="ep-grid" id="ep-grid">${eps}</div>
+      <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
     </div>
-  </div>
-  <div class="sec"><div class="sec-h"><h4>Collections</h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
-    <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+    <div class="sec det-cols"><div class="sec-h"><h4>Collections</h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
+      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+    </div>
   </div>`;
   return {body, availCount};
 }
@@ -2249,7 +2254,23 @@ const ACT = {
     openDrama(c.id, st.pre);
   },
   'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
-  'drama-size': () => { DR.wide = !DR.wide; refreshDrawer(); },
+  'drama-size': () => {
+    DR.wide = !DR.wide;
+    const dr = $('#drawer-root .drawer');
+    if (dr && dr.classList.contains('drama')){
+      dr.classList.toggle('fs', DR.wide);
+      const btn = dr.querySelector('[data-act="drama-size"]');
+      if (btn){
+        const sizeLbl = DR.wide ? 'Collapse to narrow layout' : 'Expand to full screen';
+        btn.setAttribute('aria-label', sizeLbl);
+        btn.setAttribute('title', sizeLbl);
+        btn.setAttribute('aria-pressed', DR.wide ? 'true' : 'false');
+        btn.innerHTML = ic(DR.wide ? 'collapse' : 'expand', 16);
+      }
+      return;
+    }
+    refreshDrawer();
+  },
   'pl-toggle': () => playToggle(),
   'pl-prev': () => setEp(PL.ep - 1),
   'pl-next': () => setEp(PL.ep + 1),
