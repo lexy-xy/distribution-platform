@@ -365,15 +365,21 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .det-cols{grid-area:cols;min-width:0}
 .det-cols.sec{margin-top:0}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
-.drawer.drama.fs .det{grid-template-columns:minmax(0,1.2fr) minmax(300px,.8fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 32px}
-.drawer.drama.fs .det-info{display:flex;flex-direction:column;gap:16px}
-.drawer.drama.fs .det-info .kv{display:none}
-.drawer.drama.fs .det-syn{font-size:14px;line-height:1.7;max-width:80ch}
+.drawer.drama.fs .det{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 32px}
+.drawer.drama.fs .det-info{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"hero hero" "facts syn";gap:16px;align-items:stretch}
+.drawer.drama.fs .det-hero{grid-area:hero}
+.det-facts{display:contents}
+.drawer.drama.fs .det-facts{display:block;grid-area:facts;border:1px solid var(--border);border-radius:4px;padding:14px 16px;background:#fff}
+.drawer.drama.fs .det-facts .kv{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 20px}
+.drawer.drama.fs .det-syn{grid-area:syn;font-size:14px;line-height:1.7;max-width:none;border:1px solid var(--border);border-radius:4px;padding:14px 16px;background:#fff}
 .drawer.drama.fs .det-l{position:static;width:auto}
 .player-stage{display:contents}
-.drawer.drama.fs .player-stage{display:flex;align-items:center;justify-content:center;width:100%;height:363px;background:#111417;border-radius:4px;overflow:hidden}
+.drawer.drama.fs .player-stage{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;height:auto;background:#111417;border-radius:4px;overflow:hidden}
 .drawer.drama.fs .player{width:auto;height:100%;aspect-ratio:9/16;border-radius:0}
+.drawer.drama.fs .pl-time{font-size:10px}
+.drawer.drama.fs .pl-speed button{padding:0 3px}
 .drawer.drama.fs .series{margin-top:8px}
+.det-cols .tbl{min-width:1080px}
 .drawer.drama.fs .ep-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
 .drawer.drama.fs .ep{height:28px}
 .det-hero{display:none}
@@ -1306,6 +1312,14 @@ function distEndL(c){
   const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   return months[d.getUTCMonth()] + ' ' + d.getUTCDate() + ', ' + d.getUTCFullYear();
 }
+const SUGGESTED = {
+  US:['Canada','United Kingdom','Australia'], GB:['Ireland','United States','Australia'], CA:['United States','United Kingdom'],
+  BR:['Portugal','Angola'], MX:['Argentina','Colombia','Spain'], JP:['Taiwan','South Korea'],
+  TH:['Vietnam','Malaysia'], ID:['Malaysia','Singapore'], PH:['Singapore','United States'], KR:['Japan','United States']
+};
+function suggestedMarkets(col){
+  return (SUGGESTED[col.code] || []).join(', ') || '—';
+}
 function dramaBody(ctrId){
   const c = ctrOf(ctrId); const cs = colsOf(ctrId);
   const primary = cs.find(x => x.code === 'US') || cs[0];
@@ -1320,6 +1334,8 @@ function dramaBody(ctrId){
     return `<tr class="${DS.sel.has(x.id) ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="cl-${x.id}" data-chg="dr-sel" data-id="${x.id}" ${DS.sel.has(x.id) ? 'checked' : ''} ${can ? '' : 'disabled'} aria-label="Select ${esc(colLabel(x))}"></td>
       <td><div class="cell-title">${x.market}</div></td><td>${x.lang}</td>
       <td><span class="copyable"><span class="mono">${x.id}</span>${copyBtn(x.id, 'Collection ID copied')}</span></td>
+      <td class="col-extra">${esc(suggestedMarkets(x))}</td>
+      <td class="col-extra nowrap">${esc(distEndL(c))}</td>
       <td class="num">${x.share}%</td><td>${colStatus(x)}</td></tr>`;
   }).join('');
   const heroId = primary ? primary.id : c.id;
@@ -1344,6 +1360,7 @@ function dramaBody(ctrId){
         </div>
         <button type="button" class="btn btn-primary" data-act="drama-play">${ic('play', 14)}Play now</button>
       </div>
+      <div class="det-facts">
       <div class="kv">
         <div><div class="k">Rights holder</div><div class="v">${c.holder}</div></div>
         <div><div class="k">Format</div><div class="v">${c.format}</div></div>
@@ -1353,6 +1370,7 @@ function dramaBody(ctrId){
         <div><div class="k">Plays (30 days)</div><div class="v">${c.plays}</div></div>
         <div><div class="k">Languages</div><div class="v">${Array.from(new Set(cs.map(x => x.lang))).join(', ')}</div></div>
         <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
+      </div>
       </div>
       <p class="det-syn">${c.synopsis}</p>
     </div>
@@ -1385,7 +1403,7 @@ function dramaBody(ctrId){
       <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
     </div>
     <div class="sec det-cols"><div class="sec-h"><h4>Collections</h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
-      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th class="col-extra">Suggested markets</th><th class="col-extra" style="width:150px">Distribution end date</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
     </div>
   </div>`;
   return {body, availCount};
