@@ -34,6 +34,10 @@ Each view/state combination is deep-linkable, e.g. `#/distribution/links?state=i
 
 ![Drama Marketplace — cover hover preview](screenshots/marketplace-hover.png)
 
+![Drama detail — full screen](screenshots/drama-drawer.png)
+
+![Drama detail — narrow 944px](screenshots/drama-drawer-narrow.png)
+
 ![Bulk claim — Confirm selection](screenshots/bulk-claim.png)
 
 ![Distribution Management — Drama view](screenshots/drama-view.png)

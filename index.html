@@ -254,8 +254,26 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 /* Drawer & modal */
 .mask{position:fixed;inset:0;background:rgba(22,24,35,.45);z-index:100;opacity:0;transition:opacity .15s}
 .mask.show{opacity:1}
-.drawer{position:fixed;top:0;right:0;bottom:0;width:min(944px,calc(100vw - 48px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(944px,calc(100vw - 48px));background:#fff;z-index:101;display:flex;flex-direction:column;transform:translateX(100%);transition:transform .2s ease,width .2s ease}
 .drawer.show{transform:none}
+.drawer.drama{flex-direction:row;align-items:stretch}
+.drawer.drama.fs{left:0;right:0;width:100%;transform:none;opacity:0;transition:opacity .18s ease,width .2s ease}
+.drawer.drama.fs.show{opacity:1;transform:none}
+.dr-rail{width:48px;flex:none;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;border-right:1px solid var(--border);background:#FAFBFC}
+.dr-rail .btn-icon{width:32px;height:32px}
+.dr-rail-bot{margin-top:auto}
+.dr-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
+.drawer.drama.fs .dr-h{padding:14px 32px 14px 28px}
+.drawer.drama.fs .dr-h h2{font-size:18px;line-height:26px}
+.drawer.drama.fs .dr-b{padding:20px 32px 28px}
+.drawer.drama.fs .dr-f{padding:12px 32px}
+.drawer.drama.fs .det{grid-template-columns:320px minmax(0,1.15fr) minmax(300px,.9fr);grid-template-rows:auto auto 1fr;gap:20px 32px}
+.drawer.drama.fs .det-r{display:contents}
+.drawer.drama.fs .det-l{grid-column:1;grid-row:1 / span 3}
+.drawer.drama.fs .kv{grid-column:2;grid-row:1}
+.drawer.drama.fs .det-syn{grid-column:2;grid-row:2}
+.drawer.drama.fs .det-eps{grid-column:3;grid-row:1 / span 3;margin-top:0}
+.drawer.drama.fs .ep-grid{grid-template-columns:repeat(10,minmax(0,1fr))}
 .dr-h{min-height:56px;padding:12px 20px 12px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:12px}
 .dr-h .t{flex:1;min-width:0}
 .dr-h h2{margin:0;font-size:16px;line-height:24px;font-weight:600}
@@ -419,6 +437,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .demo-pill .ic{color:#F5B83D}
 .demo-pill em{font-style:normal;color:#A9AFB8;font-weight:500}
 #drawer-root:has(.drawer) ~ .demo .demo-pill em{display:none}
+#drawer-root:has(.drawer.fs) ~ .demo{display:none}
 .demo-panel{width:300px;background:#15171A;border:1px dashed #F5B83D;border-radius:6px;box-shadow:0 8px 24px rgba(0,0,0,.35);overflow:hidden}
 .demo-h{display:flex;align-items:center;gap:8px;padding:10px 10px 10px 14px;border-bottom:1px solid #2C3036}
 .demo-h b{font-size:12px;letter-spacing:.6px;text-transform:uppercase;color:#F5B83D}
@@ -491,6 +510,8 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
     <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/></symbol>
     <symbol id="i-film" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4"/></symbol>
     <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></symbol>
+    <symbol id="i-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M9.5 4v16"/><path d="m16.5 9-3 3 3 3"/></symbol>
+    <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M9.5 4v16"/><path d="m13.5 9 3 3-3 3"/></symbol>
   </defs>
 </svg>
 
@@ -910,20 +931,39 @@ function skelRows(n, cols){
 }
 /* Drawer / modal */
 let drawerFn = null, modalFn = null, drawerClose = null;
+function drawerClass(r){
+  return 'drawer' + (r.kind === 'drama' ? (' drama' + (DR.wide ? ' fs' : '')) : '');
+}
 function openDrawer(fn, onClose){
   drawerFn = fn; drawerClose = onClose || null;
   const r = fn();
-  $('#drawer-root').innerHTML = `<div class="mask" data-act="close-drawer"></div><aside class="drawer" role="dialog" aria-modal="true">${drawerInner(r)}</aside>`;
+  $('#drawer-root').innerHTML = `<div class="mask" data-act="close-drawer"></div><aside class="${drawerClass(r)}" role="dialog" aria-modal="true">${drawerInner(r)}</aside>`;
   requestAnimationFrame(() => { $$('#drawer-root .mask, #drawer-root .drawer').forEach(e => e.classList.add('show')); });
 }
 function drawerInner(r){
+  if (r.kind === 'drama'){
+    const wide = DR.wide;
+    const sizeLbl = wide ? 'Collapse to narrow layout' : 'Expand to full screen';
+    return `<div class="dr-rail">
+      <button type="button" class="btn btn-icon" data-act="close-drawer" aria-label="Close">${ic('close', 18)}</button>
+      <button type="button" class="btn btn-icon dr-rail-bot" data-act="drama-size" aria-label="${esc(sizeLbl)}" title="${esc(sizeLbl)}" aria-pressed="${wide ? 'true' : 'false'}">${ic(wide ? 'collapse' : 'expand', 16)}</button>
+    </div>
+    <div class="dr-main">
+      <div class="dr-h"><div class="t"><h2>${r.title}</h2>${r.sub ? '<div class="s">' + r.sub + '</div>' : ''}</div></div>
+      ${r.tabs ? r.tabs : ''}
+      <div class="dr-b">${r.body}</div>
+      ${r.footer ? '<div class="dr-f">' + r.footer + '</div>' : ''}
+    </div>`;
+  }
   return `<div class="dr-h"><div class="t"><h2>${r.title}</h2>${r.sub ? '<div class="s">' + r.sub + '</div>' : ''}</div><button class="btn btn-icon" data-act="close-drawer" aria-label="Close">${ic('close', 18)}</button></div>${r.tabs ? r.tabs : ''}<div class="dr-b">${r.body}</div>${r.footer ? '<div class="dr-f">' + r.footer + '</div>' : ''}`;
 }
 function refreshDrawer(){
   if (!drawerFn) return;
   const dr = $('#drawer-root .drawer'); if (!dr) return;
   const b = $('.dr-b', dr); const top = b ? b.scrollTop : 0;
-  const r = drawerFn(); dr.innerHTML = drawerInner(r);
+  const r = drawerFn();
+  dr.className = drawerClass(r) + (dr.classList.contains('show') ? ' show' : '');
+  dr.innerHTML = drawerInner(r);
   const nb = $('.dr-b', dr); if (nb) nb.scrollTop = top;
   if (r.after) r.after();
 }
@@ -1222,6 +1262,7 @@ function coverLeave(){
 }
 
 /* Drama detail drawer + player */
+const DR = {wide:true};
 const PL = {ctr:null, ep:1, t:0, playing:false, speed:2, timer:null};
 const DS = {sel:new Set()};
 const LD = {col:null, tab:'drama', grain:'daily', metrics:['iaa','est'], metOpen:false, vis:{bc:true, account:true, date:true}, visOpen:false, from:'2026-10-15', to:'2026-10-21', day:null, week:null, page:1, size:10};
@@ -1232,6 +1273,7 @@ function stopPlayer(){ if (PL.timer){ clearInterval(PL.timer); PL.timer = null; 
 function openDrama(ctrId, preselect){
   stopPlayer(); PL.ctr = ctrId; PL.ep = 1; PL.t = 0; PL.speed = 2;
   DS.sel = new Set(preselect || []);
+  DR.wide = true;
   openDrawer(() => dramaDrawer(ctrId), stopPlayer);
 }
 function colStatus(c){
@@ -1292,7 +1334,7 @@ function dramaBody(ctrId){
         <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
       </div>
       <p class="det-syn">${c.synopsis}</p>
-      <div class="sec"><div class="sec-h"><h4>Episodes</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
+      <div class="sec det-eps"><div class="sec-h"><h4>Episodes</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
         <div class="filters" style="margin-bottom:8px"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
         <div class="ep-grid" id="ep-grid">${eps}</div>
         <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
@@ -1315,7 +1357,7 @@ function dramaDrawer(ctrId){
   const nav = dramaNeighbors(ctrId);
   const prevTip = nav.prev ? 'Previous: ' + ctrOf(nav.prev).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'First drama in the current Marketplace list';
   const nextTip = nav.next ? 'Next: ' + ctrOf(nav.next).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
-  return {title:c.title,
+  return {kind:'drama', title:c.title,
     body,
     footer:`<button class="btn" data-act="drama-prev" ${nav.prev ? 'data-id="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="drama-next" ${nav.next ? 'data-id="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button>${dramaClaimFooter(availCount)}`};
 }
@@ -2207,6 +2249,7 @@ const ACT = {
     openDrama(c.id, st.pre);
   },
   'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
+  'drama-size': () => { DR.wide = !DR.wide; refreshDrawer(); },
   'pl-toggle': () => playToggle(),
   'pl-prev': () => setEp(PL.ep - 1),
   'pl-next': () => setEp(PL.ep + 1),
@@ -2331,7 +2374,7 @@ const ACT = {
   'demo-page': el => go(el.dataset.p),
   'demo-state': el => setState(el.dataset.s),
   'demo-cover': el => { DEMO.cover = el.dataset.v; coverLeave(); renderDemo(); if (S.page === 'marketplace') render(); },
-  'demo-reset': () => { DEMO.cover = 'mixed'; Object.assign(UI, freshUI()); resetLDKeepCol(); LD.col = null; LD.tab = 'drama'; closeAll(); stopPlayer(); S.data = null; S.state = '__'; location.hash = '#' + PATH.marketplace + '?state=normal'; if (location.hash === '#/marketplace?state=normal') onRoute(); toast('Demo reset to Normal.'); },
+  'demo-reset': () => { DEMO.cover = 'mixed'; Object.assign(UI, freshUI()); DR.wide = true; resetLDKeepCol(); LD.col = null; LD.tab = 'drama'; closeAll(); stopPlayer(); S.data = null; S.state = '__'; location.hash = '#' + PATH.marketplace + '?state=normal'; if (location.hash === '#/marketplace?state=normal') onRoute(); toast('Demo reset to Normal.'); },
   'demo-copy': () => copyText(location.href.split('#')[0] + '#' + PATH[S.page] + '?state=' + S.state, 'Demo link copied for this page and state')
 };
 function setState(st){ location.hash = '#' + PATH[S.page] + '?state=' + st; }
