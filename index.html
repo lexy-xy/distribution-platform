@@ -112,6 +112,8 @@ button,input,select{font:inherit;color:inherit}
 .tbl th.act,.tbl td.act{text-align:left;overflow:visible;white-space:nowrap}
 .tbl td.act .btn-link{display:inline-flex;justify-content:flex-start}
 .tbl tr:has(.menu){position:relative;z-index:5}
+.tt-av{width:32px;height:32px;border-radius:50%;flex:none;display:inline-flex;align-items:center;justify-content:center;color:#fff;font-size:11px;font-weight:700;letter-spacing:.02em}
+.tt-acct{display:flex;align-items:center;gap:10px;min-width:0}
 .thumb{width:32px;height:42px;border-radius:4px;overflow:hidden;flex:none;background:#1d2329;position:relative}
 .thumb .poster,.thumb svg.poster,.thumb img{position:absolute;inset:0;width:100%;height:100%;display:block;object-fit:cover}
 .drama-cell{display:flex;gap:10px;align-items:flex-start;min-width:0}
@@ -697,7 +699,7 @@ function freshUI(){
 function mkLink(col, code, created, iaa, est){
   return {col, code, url:'https://dist.ttbc.example/l/' + code, status:'active', reason:'', ap:'none', apNote:'', created, iaa: iaa ?? 1850.40, est: est ?? 1620.15, updated:SYNC, isNew:false,
     ads:(ADS[col] || []).map(a => ({id:a[0], name:a[1], campaign:a[2], st:'Delivering'})),
-    history:[{t:created, e:'Link generated', d:'Key ' + col + ' × BC ' + BCS.main.id, k:'ok'}, {t:created, e:'Link active', d:'Distribution enabled by the rights holder in TTDC', k:'ok'}]};
+    history:[{t:created, e:'Link generated', d:'Account ' + ttAcct(COLLECTIONS.find(x => x.id === col) || {id:col}).handle + ' × BC ' + BCS.main.id, k:'ok'}, {t:created, e:'Link active', d:'Distribution enabled by the rights holder in TTDC', k:'ok'}]};
 }
 function buildData(st){
   const claim = {'COL-US-18421':'claimed','COL-GB-18422':'claimed','COL-BR-77310':'available','COL-MX-77311':'available','COL-US-55001':'claimed','COL-JP-55002':'claimed','COL-TH-34001':'claimed','COL-ID-34002':'claimed','COL-US-77312':'available','COL-US-34003':'available'};
@@ -723,11 +725,11 @@ function buildData(st){
     ],
     statements: [
       {id:'STM-202610-M', period:'Oct 2026', bc:'main', gross:48210.40, adj:-1180.00, version:1, status:'pending', generated:'Nov 2, 2026', updated:'Nov 2, 2026 09:00 UTC', due:'Nov 10, 2026', revised:false,
-        split:[['CTR-902184',[['COL-US-18421',19880.40],['COL-GB-18422',6529.80]]],['CTR-550361',[['COL-US-55001',15320.60]]],['CTR-340918',[['COL-TH-34001',6479.60]]]], adjNote:'Refunded orders on COL-US-18421 (Oct 12–18)'},
+        split:[['CTR-902184',[['COL-US-18421',19880.40],['COL-GB-18422',6529.80]]],['CTR-550361',[['COL-US-55001',15320.60]]],['CTR-340918',[['COL-TH-34001',6479.60]]]], adjNote:'Refunded orders on @northline.us (Oct 12–18)'},
       {id:'STM-202610-S', period:'Oct 2026', bc:'sub', gross:12480.75, adj:0, version:1, status:'processing', generated:'Nov 2, 2026', updated:'Nov 2, 2026 14:22 UTC', due:'Nov 10, 2026', revised:false,
         split:[['CTR-550361',[['COL-JP-55002',8210.35]]],['CTR-781230',[['COL-BR-77310',4270.40]]]], adjNote:''},
       {id:'STM-202609-M', period:'Sep 2026', bc:'main', gross:42305.10, adj:-420.00, version:1, status:'paid', generated:'Oct 2, 2026', updated:'Oct 15, 2026 09:12 UTC', due:'Oct 10, 2026', revised:false,
-        split:[['CTR-902184',[['COL-US-18421',17240.10],['COL-GB-18422',5910.00]]],['CTR-550361',[['COL-US-55001',12890.00]]],['CTR-340918',[['COL-TH-34001',6265.00]]]], adjNote:'Chargebacks on COL-GB-18422'},
+        split:[['CTR-902184',[['COL-US-18421',17240.10],['COL-GB-18422',5910.00]]],['CTR-550361',[['COL-US-55001',12890.00]]],['CTR-340918',[['COL-TH-34001',6265.00]]]], adjNote:'Chargebacks on @northline.gb'},
       {id:'STM-202609-S', period:'Sep 2026', bc:'sub', gross:9904.20, adj:0, version:1, status:'paid', generated:'Oct 2, 2026', updated:'Oct 15, 2026 09:12 UTC', due:'Oct 10, 2026', revised:false,
         split:[['CTR-550361',[['COL-JP-55002',6120.20]]],['CTR-781230',[['COL-BR-77310',3784.00]]]], adjNote:''},
       {id:'STM-202608-M', period:'Aug 2026', bc:'main', gross:36402.75, adj:0, version:1, status:'paid', generated:'Sep 2, 2026', updated:'Sep 15, 2026 09:05 UTC', due:'Sep 10, 2026', revised:false,
@@ -735,7 +737,7 @@ function buildData(st){
       {id:'STM-202608-S', period:'Aug 2026', bc:'sub', gross:8720.40, adj:0, version:1, status:'paid', generated:'Sep 2, 2026', updated:'Sep 15, 2026 09:08 UTC', due:'Sep 10, 2026', revised:false,
         split:[['CTR-550361',[['COL-JP-55002',5210.40]]],['CTR-781230',[['COL-BR-77310',3510.00]]]], adjNote:''},
       {id:'STM-202607-M', period:'Jul 2026', bc:'main', gross:33110.20, adj:-210.00, version:1, status:'paid', generated:'Aug 2, 2026', updated:'Aug 15, 2026 09:04 UTC', due:'Aug 10, 2026', revised:false,
-        split:[['CTR-902184',[['COL-US-18421',19110.20]]],['CTR-340918',[['COL-TH-34001',14000.00]]]], adjNote:'Chargebacks on COL-US-18421'},
+        split:[['CTR-902184',[['COL-US-18421',19110.20]]],['CTR-340918',[['COL-TH-34001',14000.00]]]], adjNote:'Chargebacks on @northline.us'},
       {id:'STM-202607-S', period:'Jul 2026', bc:'sub', gross:8012.55, adj:0, version:1, status:'paid', generated:'Aug 2, 2026', updated:'Aug 15, 2026 09:06 UTC', due:'Aug 10, 2026', revised:false,
         split:[['CTR-550361',[['COL-JP-55002',4812.55]]],['CTR-781230',[['COL-BR-77310',3200.00]]]], adjNote:''},
       {id:'STM-202606-M', period:'Jun 2026', bc:'main', gross:29840.00, adj:0, version:1, status:'paid', generated:'Jul 2, 2026', updated:'Jul 15, 2026 09:03 UTC', due:'Jul 10, 2026', revised:false,
@@ -747,7 +749,7 @@ function buildData(st){
       {id:'STM-202605-S', period:'May 2026', bc:'sub', gross:6910.25, adj:0, version:1, status:'paid', generated:'Jun 2, 2026', updated:'Jun 15, 2026 09:04 UTC', due:'Jun 10, 2026', revised:false,
         split:[['CTR-550361',[['COL-JP-55002',4110.25]]],['CTR-781230',[['COL-BR-77310',2800.00]]]], adjNote:''},
       {id:'STM-202604-M', period:'Apr 2026', bc:'main', gross:25102.10, adj:-90.00, version:1, status:'paid', generated:'May 2, 2026', updated:'May 15, 2026 09:01 UTC', due:'May 10, 2026', revised:false,
-        split:[['CTR-902184',[['COL-US-18421',14102.10]]],['CTR-340918',[['COL-TH-34001',11000.00]]]], adjNote:'Refunded orders on COL-US-18421'},
+        split:[['CTR-902184',[['COL-US-18421',14102.10]]],['CTR-340918',[['COL-TH-34001',11000.00]]]], adjNote:'Refunded orders on @northline.us'},
       {id:'STM-202603-M', period:'Mar 2026', bc:'main', gross:22880.00, adj:0, version:1, status:'paid', generated:'Apr 2, 2026', updated:'Apr 15, 2026 09:00 UTC', due:'Apr 10, 2026', revised:false,
         split:[['CTR-902184',[['COL-US-18421',12880.00]]],['CTR-340918',[['COL-TH-34001',10000.00]]]], adjNote:''},
       {id:'STM-202602-M', period:'Feb 2026', bc:'main', gross:20110.65, adj:0, version:1, status:'paid', generated:'Mar 2, 2026', updated:'Mar 15, 2026 09:00 UTC', due:'Mar 10, 2026', revised:false,
@@ -800,7 +802,7 @@ function buildData(st){
     C('COL-BR-77310').claim = 'claimed';
     if (!L('COL-BR-77310')){ const b = mkLink('COL-BR-77310','b3Rv6k','2026-11-03 02:52', 980.40, 833.34); b.isNew = true; d.links.push(b); }
     d.lastClaim = {ctrs:['CTR-781230'], items:[{col:'COL-BR-77310', r:'ready'}, {col:'COL-MX-77311', r:'failed', why:'Terms changed while you were confirming (revenue share 42% to 40%, version 3 to 4). Review the new terms and try again.'}]};
-    d.lastGen = [{col:'COL-JP-55002', r:'generated'}, {col:'COL-ID-34002', r:'failed', why:'Collection version is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.'}, {col:'COL-US-55001', r:'existed'}];
+    d.lastGen = [{col:'COL-JP-55002', r:'generated'}, {col:'COL-ID-34002', r:'failed', why:'Account authorization is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.'}, {col:'COL-US-55001', r:'existed'}];
     d.stmPartial = true;
   }
   if (st === 'pending'){
@@ -828,6 +830,20 @@ const linkOf = colId => D().links.find(l => l.col === colId);
 const stmOf = id => D().statements.find(s => s.id === id);
 const stmFinal = s => s.gross + s.adj;
 const colLabel = c => c.market + ' · ' + c.lang;
+const AV_BG = ['#FE2C55','#161823','#007A76','#2463D1','#7B5CFF','#0E9F6E','#B76E00','#25C2B8'];
+function ttAcct(c){
+  const holder = String((c && c.pub) || (ctrOf(c.ctr) || {}).holder || 'Studio').split(/[\s/-]/)[0].toLowerCase().replace(/[^a-z0-9]/g, '');
+  const handle = '@' + holder + '.' + String(c.code || 'xx').toLowerCase();
+  let h = 0; const s = String(c.id || '');
+  for (let i = 0; i < s.length; i++) h = (h * 33 + s.charCodeAt(i)) >>> 0;
+  const uid = String(7100000000000000000 + (h % 89999999999999999));
+  const initials = ((holder.slice(0, 1) + String(c.code || 'X').slice(0, 1)) || 'TT').toUpperCase();
+  return {handle, uid, initials, bg: AV_BG[h % AV_BG.length]};
+}
+function ttAvatar(c){
+  const a = ttAcct(c);
+  return `<span class="tt-av" style="background:${a.bg}" aria-hidden="true">${esc(a.initials)}</span>`;
+}
 function stmWhen(s, hm, dayOff){
   if (!dayOff) return s.generated + ' ' + hm + ' UTC';
   const d = new Date(s.generated + ' UTC');
@@ -1181,12 +1197,12 @@ function pageMarketplace(){
   const f = UI.mk; const st = S.state;
   const langs = Array.from(new Set(COLLECTIONS.map(c => c.lang)));
   const genres = Array.from(new Set([].concat(...CONTRACTS.map(c => c.genres)))).sort();
-  let out = `<div class="ph"><div><h1>Drama Marketplace</h1><p>Browse dramas rights holders have opened for distribution, preview episodes, and claim collections. Select several dramas to claim the same markets for all of them at once.</p></div></div>`;
+  let out = `<div class="ph"><div><h1>Drama Marketplace</h1><p>Browse dramas rights holders have opened for distribution, preview episodes, and start distribution on accounts and regions. Select several dramas to cover the same markets for all of them at once.</p></div></div>`;
   out += '<div class="stack">';
   const gn = globalNotice(); if (gn) out += gn;
-  if (st === 'partial' && D().lastClaim && !UI.dismissed.has('mk-partial')) out += banner('warn', '<b>Your last claim partially succeeded.</b> A House by the Tide: 1 collection claimed with its link ready, 1 failed because the terms changed during confirmation.', '<button class="btn btn-sm" data-act="last-claim">View results</button><button class="btn btn-icon" data-act="dismiss" data-k="mk-partial" aria-label="Dismiss">' + ic('close', 14) + '</button>');
-  if (st === 'unknown' && colOf('COL-MX-77311').claim === 'confirming') out += banner('warn', '<b>A claim is still being confirmed.</b> A House by the Tide · Mexico · Spanish (COL-MX-77311). Don\u2019t submit it again; its link is generated automatically once the claim is confirmed.', '<button class="btn btn-sm" data-act="recheck-claim" data-col="COL-MX-77311">Check again</button>', 'clock');
-  if (st === 'invalid') out += banner('err', '<b>3 collections you claimed are no longer open for distribution.</b> Their links are invalid and TTAM is auto-pausing affected ads.', '<button class="btn btn-sm" data-act="go-links-invalid">Review links</button>');
+  if (st === 'partial' && D().lastClaim && !UI.dismissed.has('mk-partial')) out += banner('warn', '<b>Your last distribution request partially succeeded.</b> A House by the Tide: 1 account is ready with its link, 1 failed because the terms changed during confirmation.', '<button class="btn btn-sm" data-act="last-claim">View results</button><button class="btn btn-icon" data-act="dismiss" data-k="mk-partial" aria-label="Dismiss">' + ic('close', 14) + '</button>');
+  if (st === 'unknown' && colOf('COL-MX-77311').claim === 'confirming') out += banner('warn', '<b>A distribution request is still being confirmed.</b> A House by the Tide · Mexico · Spanish. Don\u2019t submit it again; its link is generated automatically once confirmed.', '<button class="btn btn-sm" data-act="recheck-claim" data-col="COL-MX-77311">Check again</button>', 'clock');
+  if (st === 'invalid') out += banner('err', '<b>3 accounts you distribute are no longer open for distribution.</b> Their links are invalid and TTAM is auto-pausing affected ads.', '<button class="btn btn-sm" data-act="go-links-invalid">Review links</button>');
   if (st !== 'empty' && st !== 'error'){
     out += `<div class="toolbar"><div class="left">
       <label class="search">${ic('search', 14)}<input class="input" style="width:176px" name="mk-q" data-inp="mk-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label>
@@ -1194,7 +1210,7 @@ function pageMarketplace(){
       ${sel('mk.format', f.format, [['all','All formats'],['Live action','Live action'],['AI animation','AI animation']], 'Format', 112)}
       ${sel('mk.source', f.source, [['all','All sources'],['Local original','Local original'],['Localized','Localized']], 'Source', 116)}
       ${sel('mk.genre', f.genre, [['all','All genres']].concat(genres.map(g => [g, g])), 'Genre', 108)}
-      ${sel('mk.avail', f.avail, [['all','Any availability'],['available','Has available collections'],['claimed','Claimed by me']], 'Availability', 136)}
+      ${sel('mk.avail', f.avail, [['all','Any availability'],['available','Has available accounts'],['claimed','Distributed by me']], 'Availability', 136)}
       ${sel('mk.sort', f.sort, [['pop','Sort: Popularity'],['new','Sort: Newest'],['eps','Sort: Fewest episodes']], 'Sort', 140)}
     </div><div class="right">${mkViewSeg()}</div></div>`;
   }
@@ -1210,12 +1226,12 @@ function pageMarketplace(){
   } else {
     const list = mkFiltered();
     const pk = UI.pick.size;
-    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by Contract${pk ? '' : ' · tick the box to claim several dramas at once'}</div>`;
+    out += `<div class="mk-count">${plural(list.length, 'drama')} · grouped by drama${pk ? '' : ' · tick the box to start distribution on several dramas at once'}</div>`;
     if (!list.length) out += '<div class="panel">' + emptyBlock('search', 'No dramas match your filters', 'Try a different keyword or clear filters.', '<button class="btn" data-act="mk-clear">Clear filters</button>') + '</div>';
     else out += listView ? mkList(list) : '<div class="grid">' + list.map(card).join('') + '</div>';
     if (pk){
       const names = Array.from(UI.pick).map(id => ctrOf(id).title);
-      out += `<div class="page-pad-sel"></div><div class="selbar" role="region" aria-label="Selected dramas"><span class="grow"><b>${plural(pk, 'drama')} selected</b> · ${esc(names.join(', '))}</span><button class="btn" data-act="pick-all">Select all shown</button><button class="btn" data-act="pick-clear">Clear</button><button class="btn btn-primary" data-act="bulk-claim">Claim collections</button></div>`;
+      out += `<div class="page-pad-sel"></div><div class="selbar" role="region" aria-label="Selected dramas"><span class="grow"><b>${plural(pk, 'drama')} selected</b> · ${esc(names.join(', '))}</span><button class="btn" data-act="pick-all">Select all shown</button><button class="btn" data-act="pick-clear">Clear</button><button class="btn btn-primary" data-act="bulk-claim">Start distribution</button></div>`;
     }
   }
   return out + '</div>';
@@ -1332,20 +1348,22 @@ function dramaBody(ctrId){
   const availCount = cs.filter(x => x.claim === 'available' && x.dist === 'open').length;
   const rows = cs.map(x => {
     const can = x.claim === 'available' && x.dist === 'open';
-    return `<tr class="${DS.sel.has(x.id) ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="cl-${x.id}" data-chg="dr-sel" data-id="${x.id}" ${DS.sel.has(x.id) ? 'checked' : ''} ${can ? '' : 'disabled'} aria-label="Select ${esc(colLabel(x))}"></td>
+    const acct = ttAcct(x);
+    return `<tr class="${DS.sel.has(x.id) ? 'sel' : ''}"><td><input type="checkbox" class="cb" name="cl-${x.id}" data-chg="dr-sel" data-id="${x.id}" ${DS.sel.has(x.id) ? 'checked' : ''} ${can ? '' : 'disabled'} aria-label="Select ${esc(acct.handle)} · ${esc(colLabel(x))}"></td>
+      <td>${ttAvatar(x)}</td>
+      <td><div class="cell-title ell" title="${esc(acct.handle)}">${esc(acct.handle)}</div><div class="cell-sub mono ell" title="${esc(acct.uid)}">${esc(acct.uid)}</div></td>
       <td><div class="cell-title">${x.market}</div></td><td>${x.lang}</td>
-      <td><span class="copyable"><span class="mono">${x.id}</span>${copyBtn(x.id, 'Collection ID copied')}</span></td>
       <td class="col-extra">${esc(suggestedMarkets(x))}</td>
       <td class="col-extra nowrap">${esc(distEndL(c))}</td>
       <td class="num">${x.share}%</td><td>${colStatus(x)}</td></tr>`;
   }).join('');
-  const heroId = primary ? primary.id : c.id;
-  const heroMetaPlain = primary
-    ? `${heroId} · ${primary.market} · ${primary.lang} · ${N} episodes · Launched ${c.launchL} · Distribution ends ${distEndL(c)}`
-    : `${heroId} · ${N} episodes · Launched ${c.launchL} · Distribution ends ${distEndL(c)}`;
-  const heroMeta = primary
-    ? `<span class="mono">${esc(heroId)}</span> · ${esc(primary.market)} · ${esc(primary.lang)} · ${N} episodes · Launched ${esc(c.launchL)} · Distribution ends ${esc(distEndL(c))}`
-    : `<span class="mono">${esc(heroId)}</span> · ${N} episodes · Launched ${esc(c.launchL)} · Distribution ends ${esc(distEndL(c))}`;
+  const heroAcct = primary ? ttAcct(primary) : null;
+  const heroMetaPlain = heroAcct
+    ? `${heroAcct.handle} · ${heroAcct.uid} · ${primary.market} · ${primary.lang} · ${N} episodes · Launched ${c.launchL} · Distribution ends ${distEndL(c)}`
+    : `${N} episodes · Launched ${c.launchL} · Distribution ends ${distEndL(c)}`;
+  const heroMeta = heroAcct
+    ? `${esc(heroAcct.handle)} · <span class="mono">${esc(heroAcct.uid)}</span> · ${esc(primary.market)} · ${esc(primary.lang)} · ${N} episodes · Launched ${esc(c.launchL)} · Distribution ends ${esc(distEndL(c))}`
+    : `${N} episodes · Launched ${esc(c.launchL)} · Distribution ends ${esc(distEndL(c))}`;
   const heroChip = availCount
     ? `<span class="det-hero-chip">${ic('check-circle', 12)}Available</span>`
     : `<span class="det-hero-chip claimed">${ic('check-circle', 12)}Claimed</span>`;
@@ -1359,7 +1377,7 @@ function dramaBody(ctrId){
           <div class="det-hero-meta ell" title="${esc(heroMetaPlain)}">${heroMeta}</div>
           ${heroChip}
         </div>
-        <button type="button" class="btn btn-primary" data-act="drama-cols">Select collections</button>
+        <button type="button" class="btn btn-primary" data-act="drama-cols">Start distribution</button>
       </div>
       <div class="det-facts">
       <div class="kv">
@@ -1403,8 +1421,8 @@ function dramaBody(ctrId){
       <div class="ep-grid" id="ep-grid">${eps}</div>
       <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
     </div>
-    <div class="sec det-cols"><div class="sec-h"><h4>Collections</h4><span class="faint" style="font-size:12px">${availCount} available to claim</span></div>
-      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:180px">Market</th><th style="width:140px">Language</th><th>Collection ID</th><th class="col-extra">Suggested markets</th><th class="col-extra" style="width:150px">Distribution end date</th><th style="width:110px" class="num">Rev. share</th><th style="width:200px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+    <div class="sec det-cols"><div class="sec-h"><h4>Accounts and regions</h4><span class="faint" style="font-size:12px">${availCount} available to distribute</span></div>
+      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:44px"></th><th>TikTok account name (ID)</th><th style="width:140px">Market</th><th style="width:110px">Language</th><th class="col-extra">Suggested markets</th><th class="col-extra" style="width:150px">Distribution end date</th><th style="width:96px" class="num">Rev. share</th><th style="width:180px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
     </div>
   </div>`;
   return {body, availCount};
@@ -1412,7 +1430,7 @@ function dramaBody(ctrId){
 function dramaClaimFooter(availCount){
   const n = DS.sel.size;
   const claimed = !availCount;
-  return `<button class="btn btn-primary" data-act="claim-open" ${claimed ? 'disabled title="All collections on this drama are already claimed"' : ''}>Claim selected${n ? ' (' + n + ')' : ''}</button>`;
+  return `<button class="btn btn-primary" data-act="claim-open" ${claimed ? 'disabled title="All accounts on this drama are already in distribution"' : ''}>Distribute selected${n ? ' (' + n + ')' : ''}</button>`;
 }
 function dramaDrawer(ctrId){
   const c = ctrOf(ctrId);
@@ -1437,8 +1455,8 @@ function goDrama(id){
 }
 function mockDramaFile(c, ep){
   const payload = ep == null
-    ? {prototype:true, kind:'series', drama:c.title, contractId:c.id, episodes:c.episodes, files:Array.from({length:c.episodes}, (_, i) => ({episode:i + 1, durationSec:epDur(i + 1)})), note:'Placeholder for the prototype. No video file is included.'}
-    : {prototype:true, kind:'episode', drama:c.title, contractId:c.id, episode:ep, episodes:c.episodes, durationSec:epDur(ep), note:'Placeholder for the prototype. No video file is included.'};
+    ? {prototype:true, kind:'series', drama:c.title, dramaId:c.id, episodes:c.episodes, files:Array.from({length:c.episodes}, (_, i) => ({episode:i + 1, durationSec:epDur(i + 1)})), note:'Placeholder for the prototype. No video file is included.'}
+    : {prototype:true, kind:'episode', drama:c.title, dramaId:c.id, episode:ep, episodes:c.episodes, durationSec:epDur(ep), note:'Placeholder for the prototype. No video file is included.'};
   return JSON.stringify(payload, null, 2);
 }
 function updatePlayer(){
@@ -1504,18 +1522,18 @@ function confirmSelModal(){
   let rows = '';
   plan.forEach(p => {
     const c = ctrOf(p.ctr); const span = p.items.length + (p.missing.length ? 1 : 0);
-    if (!span){ rows += `<tr><td class="grp"><div class="cell-title">${c.title}</div><div class="cell-sub mono">${c.id}</div></td><td colspan="3" class="faint">Pick a market above</td></tr>`; return; }
-    const head = `<td class="grp" rowspan="${span}"><div class="cell-title">${c.title}</div><div class="cell-sub mono">${c.id}</div></td>`;
+    if (!span){ rows += `<tr><td class="grp"><div class="cell-title">${c.title}</div></td><td colspan="3" class="faint">Pick a market above</td></tr>`; return; }
+    const head = `<td class="grp" rowspan="${span}"><div class="cell-title">${c.title}</div></td>`;
     p.items.forEach((it, i) => { const x = colOf(it.col);
-      rows += `<tr>${i === 0 ? head : ''}<td><div class="cell-title">${colLabel(x)}</div><div class="cell-sub mono">${x.id} · ${x.share}%</div></td><td>${stChip(OUT, it.act)}</td><td class="cell-sub" style="white-space:normal">${it.note}</td></tr>`; });
+      rows += `<tr>${i === 0 ? head : ''}<td><div class="tt-acct">${ttAvatar(x)}<div class="meta"><div class="cell-title">${esc(ttAcct(x).handle)}</div><div class="cell-sub">${esc(colLabel(x))} · ${x.share}%</div></div></div></td><td>${stChip(OUT, it.act)}</td><td class="cell-sub" style="white-space:normal">${it.note}</td></tr>`; });
     if (p.missing.length) rows += `<tr>${p.items.length ? '' : head}<td class="faint">${p.missing.map(esc).join(', ')}</td><td>${stChip(OUT, 'na')}</td><td class="cell-sub" style="white-space:normal">This drama has no ${p.missing.length > 1 ? 'versions' : 'version'} for ${p.missing.length > 1 ? 'these markets' : 'this market'}</td></tr>`;
   });
-  return {title:'Claim collections', width:780, sub:`<span>${plural(M, 'drama')}</span><span class="faint">·</span><span>${BCS.main.name} (BC ${BCS.main.id})</span>`,
+  return {title:'Start distribution', width:780, sub:`<span>${plural(M, 'drama')}</span><span class="faint">·</span><span>${BCS.main.name} (BC ${BCS.main.id})</span>`,
     body:`${stepper(1)}
       <div class="flow-h">Markets · applied to every selected drama</div>
       <div class="mk-chips">${chips}</div>
-      <div class="flow-h" style="margin-top:16px">What will be claimed</div>
-      <div class="panel"><table class="tbl"><thead><tr><th style="width:200px">Drama</th><th style="width:210px">Collection</th><th style="width:120px">Outcome</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+      <div class="flow-h" style="margin-top:16px">What will be distributed</div>
+      <div class="panel"><table class="tbl"><thead><tr><th style="width:200px">Drama</th><th style="width:230px">Account and region</th><th style="width:120px">Outcome</th><th>Details</th></tr></thead><tbody>${rows}</tbody></table></div>`,
     footer:`<span class="grow"></span><button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="cf-submit" ${todo.length ? '' : 'disabled'}>Confirm selection${todo.length ? ' (' + todo.length + ')' : ''}</button>`};
 }
 function runClaim(items){
@@ -1523,7 +1541,7 @@ function runClaim(items){
   return items.map((it, i) => {
     const c = colOf(it.col);
     if (S.state === 'unknown'){ if (c.claim === 'available') c.claim = 'confirming'; return {col:c.id, r:'unknown'}; }
-    if (S.state === 'partial' && N > 1 && i === N - 1) return {col:c.id, r:'failed', why: c.claim === 'claimed' ? 'Collection version is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.' : 'Terms changed while you were confirming (revenue share ' + c.share + '% to ' + (c.share - 2) + '%). Review the new terms and try again.'};
+    if (S.state === 'partial' && N > 1 && i === N - 1) return {col:c.id, r:'failed', why: c.claim === 'claimed' ? 'Account authorization is updating in TTDC. Retry in a few minutes; retrying won\u2019t create a duplicate link.' : 'Terms changed while you were confirming (revenue share ' + c.share + '% to ' + (c.share - 2) + '%). Review the new terms and try again.'};
     c.claim = 'claimed';
     if (S.state === 'partial' && N > 2 && i === 1){ if (!linkOf(c.id)) createLink(c.id).isNew = false; return {col:c.id, r:'existed', why:'Already claimed for this BC a moment ago. Existing link returned; no duplicate created.'}; }
     if (!linkOf(c.id)) createLink(c.id);
@@ -1538,17 +1556,17 @@ function linksReadyModal(){
   const rows = R.map(x => { const c = colOf(x.col); const l = linkOf(x.col);
     const linkCell = l && (x.r === 'ready' || x.r === 'existed') ? `<div class="linkbox"><span class="mono">${l.url}</span>${copyBtn(l.url, 'Link copied')}</div>${x.why ? '<div class="cell-sub" style="white-space:normal">' + x.why + '</div>' : ''}`
       : `<span class="cell-sub" style="white-space:normal">${x.why || (x.r === 'unknown' ? 'Waiting for confirmation. The link is generated automatically once confirmed.' : '')}</span>`;
-    return `<tr><td><div class="cell-title">${ctrOf(c.ctr).title}</div><div class="cell-sub">${colLabel(c)} · <span class="mono">${c.id}</span></div></td><td>${stChip(FLOW_R, x.r)}</td><td>${linkCell}</td></tr>`; }).join('');
-  return {title:'Claim collections', width:780, sub:`<span>${plural(new Set(R.map(x => colOf(x.col).ctr)).size, 'drama')}</span><span class="faint">·</span><span>${BCS.main.name} (BC ${BCS.main.id})</span>`,
+    return `<tr><td><div class="cell-title">${ctrOf(c.ctr).title}</div><div class="cell-sub">${esc(ttAcct(c).handle)} · ${esc(colLabel(c))}</div></td><td>${stChip(FLOW_R, x.r)}</td><td>${linkCell}</td></tr>`; }).join('');
+  return {title:'Start distribution', width:780, sub:`<span>${plural(new Set(R.map(x => colOf(x.col).ctr)).size, 'drama')}</span><span class="faint">·</span><span>${BCS.main.name} (BC ${BCS.main.id})</span>`,
     body:`${stepper(2)}
-      ${unknown ? banner('warn', 'We\u2019re still confirming with the rights holder system. <b>Don\u2019t submit again</b>; a repeat request won\u2019t create a duplicate claim or link.', '', 'clock') + '<div style="height:12px"></div>' : ''}
-      <div class="panel"><table class="tbl"><thead><tr><th>Drama · collection</th><th style="width:124px">Result</th><th style="width:340px">Distribution link</th></tr></thead><tbody>${rows}</tbody></table></div>`,
+      ${unknown ? banner('warn', 'We\u2019re still confirming with the rights holder system. <b>Don\u2019t submit again</b>; a repeat request won\u2019t create a duplicate account or link.', '', 'clock') + '<div style="height:12px"></div>' : ''}
+      <div class="panel"><table class="tbl"><thead><tr><th>Drama · account</th><th style="width:124px">Result</th><th style="width:340px">Distribution link</th></tr></thead><tbody>${rows}</tbody></table></div>`,
     footer:`<span class="grow"></span>${unknown ? '<button class="btn" data-act="cf-recheck">' + ic('refresh', 14) + 'Check again</button>' : ''}${failed ? '<button class="btn" data-act="cf-retry">Retry failed</button>' : ''}<button class="btn" data-act="cf-copy">${ic('copy', 14)}Copy all</button><button class="btn" data-act="cf-export">${ic('download', 14)}Export all</button><button class="btn btn-primary" data-act="close-modal">Done</button>`};
 }
 
 /* ---------- Distribution Management ---------- */
 function dmHeader(tab){
-  return `<div class="ph"><div><h1>Distribution Management</h1><p>Copy, export, and monitor distribution links for your claimed collections. In TTAM, the link identifies which collection you can promote.</p></div></div>
+  return `<div class="ph"><div><h1>Distribution Management</h1><p>Copy, export, and monitor distribution links for accounts you distribute. In TTAM, the link identifies which account and region you can promote.</p></div></div>
   <div class="tabs"><a class="tab ${tab === 'links' ? 'on' : ''}" href="#${PATH.links}?state=${S.state}">Link view</a><a class="tab ${tab === 'dramas' ? 'on' : ''}" href="#${PATH.dramas}?state=${S.state}">Drama view</a></div>`;
 }
 function dmBanners(){
@@ -1677,7 +1695,7 @@ function pageLinks(){
     </div></div>`;
   const head = linkViewHead();
   if (st === 'loading') return out + `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${skelRows(5, 8)}</tbody></table></div></div></div>`;
-  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('link', 'No distribution links yet', 'Claim collections in Drama Marketplace. Each claimed collection gets a distribution link for your Business Center automatically.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
+  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('link', 'No distribution links yet', 'Start distribution in Drama Marketplace. Each account you distribute gets a distribution link for your Business Center automatically.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const all = lvFiltered();
   const size = f.size || 10;
   const pages = Math.max(1, Math.ceil(all.length / size));
@@ -1695,7 +1713,7 @@ function pageDramas(){
     <div class="right"><button class="btn" data-act="bd-expand">Expand all</button><button class="btn" data-act="bd-collapse">Collapse all</button><button class="btn btn-primary" data-act="export-links">${ic('download', 14)}Export</button></div></div>`;
   const head = `<thead><tr>
       <th style="width:44px"></th>
-      <th>Drama (Contract)</th>
+      <th>Drama</th>
       <th style="width:100px">Claimed</th>
       <th style="width:150px">Links</th>
       <th>Markets</th>
@@ -1704,7 +1722,7 @@ function pageDramas(){
       <th style="width:100px">Actions</th>
     </tr></thead>`;
   if (st === 'loading') return out + `<div class="panel"><table class="tbl">${head}<tbody>${skelRows(4, 8)}</tbody></table></div></div>`;
-  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('film', 'No claimed dramas yet', 'Dramas appear here once you claim at least one collection in Drama Marketplace.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
+  if (st === 'empty') return out + '<div class="panel">' + emptyBlock('film', 'No claimed dramas yet', 'Dramas appear here once you start distribution on at least one account in Drama Marketplace.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const q = f.q.trim().toLowerCase();
   const list = ALL_CONTRACTS.filter(k => colsOf(k.id).some(c => c.claim !== 'available') && (!q || [k.title, k.id].concat(colsOf(k.id).map(c => c.id)).join(' ').toLowerCase().includes(q)));
   const rows = list.map(k => {
@@ -1715,7 +1733,7 @@ function pageDramas(){
     const iaa = ls.reduce((s, l) => s + (Number(l.iaa) || 0), 0);
     const est = ls.reduce((s, l) => s + (Number(l.est) || 0), 0);
     let r = `<tr class="clickable" data-act="bd-toggle" data-id="${k.id}"><td><button class="btn btn-icon" data-act="bd-toggle" data-id="${k.id}" aria-label="Expand" aria-expanded="${open}">${ic(open ? 'chev-down' : 'chev-right', 16)}</button></td>
-      <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}</div><div class="cell-sub mono">${k.id}</div></div></div></td>
+      <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}</div></div></div></td>
       <td>${claimed} of ${cs.length}</td>
       <td>${ls.length} link${ls.length === 1 ? '' : 's'}${inv ? ' · <span class="st err">' + inv + ' invalid</span>' : ''}${unk ? ' · <span class="st warn">' + unk + ' unknown</span>' : ''}</td>
       <td class="cell-sub">${cs.map(c => c.code + ' · ' + c.lang).join(', ')}</td>
@@ -1729,7 +1747,7 @@ function pageDramas(){
     return r;
   }).join('');
   out += `<div class="panel"><div class="tbl-wrap" style="overflow:visible"><table class="tbl">${head}<tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No dramas match your search', 'Try another keyword.', '<button class="btn" data-act="bd-clear">Clear search</button>')}</td></tr>`}</tbody></table></div>
-    <div class="panel-f"><span>${plural(list.length, 'drama')} with claimed collections</span><span>Each row under a drama is one Collection × ${BCS.main.name}.</span></div></div>`;
+    <div class="panel-f"><span>${plural(list.length, 'drama')} with distribution started</span><span>Each row under a drama is one account × ${BCS.main.name}.</span></div></div>`;
   return out + '</div>';
 }
 
@@ -1738,7 +1756,7 @@ let CODE_N = 0;
 function createLink(colId){
   const codes = ['q4Tn7w','h9Bc2r','z6Pk3m','w2Ds8v','r7Ga5n'];
   const created = DEMO_TODAY + ' 03:12';
-  const l = mkLink(colId, codes[CODE_N++ % codes.length] + CODE_N, created); l.isNew = true; l.history = [{t:created, e:'Link generated', d:'Key ' + colId + ' × BC ' + BCS.main.id, k:'ok'}, {t:created, e:'Link active', d:'Distribution enabled by the rights holder in TTDC', k:'ok'}];
+  const l = mkLink(colId, codes[CODE_N++ % codes.length] + CODE_N, created); l.isNew = true; l.history = [{t:created, e:'Link generated', d:'Account ' + ttAcct(colOf(colId) || {id:colId}).handle + ' × BC ' + BCS.main.id, k:'ok'}, {t:created, e:'Link active', d:'Distribution enabled by the rights holder in TTDC', k:'ok'}];
   D().links.push(l); return l;
 }
 
@@ -1989,7 +2007,7 @@ function ldDataBody(colId){
   }
   if (st === 'error') return errorBlock('distribution data');
   if (st === 'empty'){
-    return '<div class="panel">' + emptyBlock('inbox', 'No distribution data yet', 'Data appears after you claim collections and ads start delivering in TTAM.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>';
+    return '<div class="panel">' + emptyBlock('inbox', 'No distribution data yet', 'Data appears after you start distribution and ads start delivering in TTAM.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>';
   }
   const vis = LD.vis;
   const all = ldFilteredRows(colId);
@@ -2087,7 +2105,7 @@ function goLink(colId){
 function linkDrawer(colId){
   const l = linkOf(colId); const c = colOf(colId); const k = c ? ctrOf(c.ctr) : null;
   const title = k ? k.title + ' · ' + c.market : 'Link details';
-  const sub = c ? `<span>${c.lang}</span><span class="faint">·</span><span class="mono">${c.id}</span>${l ? stChip(LINK_ST, l.status) : ''}` : '';
+  const sub = c ? `<span>${esc(ttAcct(c).handle)}</span><span class="faint">·</span><span>${esc(colLabel(c))}</span>${l ? stChip(LINK_ST, l.status) : ''}` : '';
   const tabs = linkTabs();
   if (LD.tab === 'data'){
     return {title, sub, tabs, body: ldDataBody(colId)};
@@ -2096,7 +2114,7 @@ function linkDrawer(colId){
   if (st === 'loading') return {title, sub, tabs, body: `<div class="det"><div class="det-l"><div class="sk" style="aspect-ratio:9/16;width:100%"></div></div><div class="det-r"><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:14px;width:80%;margin-top:10px"></div><div class="sk" style="height:72px;width:100%;margin-top:16px"></div></div></div>`};
   if (st === 'error') return {title, sub, tabs, body: errorBlock('drama details')};
   if (st === 'empty' || !k){
-    return {title, sub, tabs, body: '<div class="panel">' + emptyBlock('film', 'No drama details yet', 'Claim a collection in Drama Marketplace to see the drama and its data here.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>'};
+    return {title, sub, tabs, body: '<div class="panel">' + emptyBlock('film', 'No drama details yet', 'Start distribution in Drama Marketplace to see the drama and its data here.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>'};
   }
   const {body, availCount} = dramaBody(c.ctr);
   const nav = linkNeighbors(colId);
@@ -2115,10 +2133,10 @@ function ttamModal(colId){
   const bad = l.status !== 'active';
   return {title:'Open TTAM', width:580, sub:'TikTok Ads Manager opens in a new tab',
     body:`${bad ? banner('err', '<b>This link is ' + LINK_ST[l.status][1].toLowerCase() + '.</b> Don\u2019t create new ads with it. Use TTAM to review and pause affected ads.') + '<div style="height:12px"></div>' : ''}
-      <div class="box"><div class="box-l">Distribution link</div><div class="linkbox"><span class="mono" style="font-size:13px">${l.url}</span></div><div class="cell-sub" style="margin-top:4px">Identifies: ${k.title} · ${colLabel(c)} · <span class="mono">${c.id}</span></div></div>
+      <div class="box"><div class="box-l">Distribution link</div><div class="linkbox"><span class="mono" style="font-size:13px">${l.url}</span></div><div class="cell-sub" style="margin-top:4px">Identifies: ${k.title} · ${esc(ttAcct(c).handle)} · ${colLabel(c)}</div></div>
       <ol class="muted" style="margin:12px 0 0;padding-left:18px">
         <li>We\u2019ll copy the link and open TTAM.</li>
-        <li>When you create a campaign, paste it in <b>Distribution link</b>. TTAM uses it to identify the collection you can promote.</li>
+        <li>When you create a campaign, paste it in <b>Distribution link</b>. TTAM uses it to identify the account and region you can promote.</li>
         <li>Choose or create ad creatives in TTAM\u2019s Creative Library, then publish.</li></ol>
       <div class="banner plain" style="margin-top:12px">${ic('check-circle', 16)}<div class="bn-body">When you come back, your view, filters, scroll position and selection are preserved.</div></div>`,
     footer:`<button class="btn" data-act="close-modal">Cancel</button><button class="btn btn-primary" data-act="ttam-go" data-col="${colId}">${ic('external', 14)}Copy link and open TTAM</button>`};
@@ -2130,7 +2148,7 @@ function showTtam(colId){
   el.innerHTML = `<div class="ttam-h">${ic('tiktok', 20)}<b>TikTok Ads Manager</b><span class="tag warn">Simulated for this prototype</span><span style="margin-left:auto"></span><button class="btn btn-primary" data-act="ttam-back">${ic('back', 14)}Back to Business Center</button></div>
     <div class="ttam-b"><div class="panel"><div class="panel-h"><h3>Create campaign · Short drama distribution</h3><span class="faint" style="font-size:12px">Step 1 of 3</span></div>
     <div style="padding:16px" class="stack"><div><div class="k muted" style="font-size:12px;margin-bottom:4px">Distribution link</div><input class="input" style="width:100%" name="ttam-link" value="${l.url}" readonly aria-label="Distribution link"></div>
-    ${l.status === 'active' ? banner('ok', `Collection identified: <b>${k.title}</b> · ${colLabel(c)} (${c.id}). You can promote this collection.`) : banner('err', `This link is ${LINK_ST[l.status][1].toLowerCase()}. ${l.ads.filter(a => !/^Paused/.test(a.st)).length} ads need review: ${l.ads.filter(a => !/^Paused/.test(a.st)).map(a => a.name).join(', ') || 'none'}.`)}
+    ${l.status === 'active' ? banner('ok', `Account identified: <b>${k.title}</b> · ${esc(ttAcct(c).handle)} · ${colLabel(c)}. You can promote this account and region.`) : banner('err', `This link is ${LINK_ST[l.status][1].toLowerCase()}. ${l.ads.filter(a => !/^Paused/.test(a.st)).length} ads need review: ${l.ads.filter(a => !/^Paused/.test(a.st)).map(a => a.name).join(', ') || 'none'}.`)}
     <div class="muted">Ad creatives come from TTAM\u2019s Creative Library. Budget, targeting and performance analysis (CTR, CPC, CPA, ROI) stay in TTAM.</div></div></div></div>`;
   el.classList.add('show');
 }
@@ -2146,7 +2164,7 @@ function backFromTtam(){
 
 /* Export drawer */
 const EX = {scope:'all', fmt:'csv', fields:null};
-const LINK_FIELDS = [['drama','Drama'],['publisher','Publisher account'],['contract','Contract ID'],['collection','Collection ID'],['market','Market'],['lang','Language'],['link','Distribution link'],['status','Status'],['reason','Status reason'],['iaa','IAA revenue'],['est','Estimated distribution revenue'],['created','Link created']];
+const LINK_FIELDS = [['drama','Drama'],['publisher','Publisher account'],['contract','Drama ID'],['collection','Account ID'],['market','Market'],['lang','Language'],['link','Distribution link'],['status','Status'],['reason','Status reason'],['iaa','IAA revenue'],['est','Estimated distribution revenue'],['created','Link created']];
 function openExport(){
   EX.scope = 'all'; EX.fmt = 'csv';
   EX.fields = new Set(LINK_FIELDS.map(f => f[0]));
@@ -2168,7 +2186,7 @@ function exportDrawer(){
     footer:`<span class="grow">File: distribution-links-2026-11-03.${EX.fmt}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
 }
 function exScope(){ return EX.scope === 'filtered' ? lvFiltered() : D().links; }
-function exVal(l, f){ const c = colOf(l.col), k = ctrOf(c.ctr); return {drama:k.title, publisher:pubOf(c), contract:k.id, collection:c.id, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, iaa:usd(l.iaa), est:usd(l.est), created:l.created}[f]; }
+function exVal(l, f){ const c = colOf(l.col), k = ctrOf(c.ctr), a = ttAcct(c); return {drama:k.title, publisher:pubOf(c), contract:a.handle, collection:a.uid, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, iaa:usd(l.iaa), est:usd(l.est), created:l.created}[f]; }
 function runExport(){
   const list = exScope();
   if (!list.length){ toast('No links in this scope. Choose another scope.', 'warn'); return; }
@@ -2238,7 +2256,7 @@ function stmDrawer(id){
   const logs = stmTimeline(s);
   const bodyRows = cols.map(r => {
     const k = ctrOf(r.ctrId);
-    return `<tr><td><div class="cell-title">${k.title}</div><div class="cell-sub mono">${k.id}</div></td><td><div class="cell-title">${r.col.market}${r.col.lang ? ' · ' + r.col.lang : ''}</div><div class="cell-sub mono">${r.col.id}</div></td><td class="num">${money(r.gmv)}</td><td class="num">${r.share}%</td><td class="num">${money(r.dist)}</td></tr>`;
+    return `<tr><td><div class="cell-title">${k.title}</div></td><td><div class="tt-acct">${ttAvatar(r.col)}<div class="meta"><div class="cell-title ell">${esc(ttAcct(r.col).handle)}</div><div class="cell-sub">${r.col.market}${r.col.lang ? ' · ' + r.col.lang : ''}</div></div></div></td><td class="num">${money(r.gmv)}</td><td class="num">${r.share}%</td><td class="num">${money(r.dist)}</td></tr>`;
   }).join('');
   let foot = `<button class="btn" data-act="stm-download" data-id="${id}">${ic('download', 14)}Download statement</button>`;
   if (s.status === 'pending') foot = `<span class="grow">Downloading doesn\u2019t confirm this statement.</span>` + foot + `<button class="btn btn-primary" data-act="stm-confirm" data-id="${id}">Confirm settlement</button>`;
@@ -2260,7 +2278,7 @@ function stmDrawer(id){
           </div>
           ${fxNote}
         </div>
-        <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4></div><div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Contract</th><th>Collection</th><th class="num" style="width:120px">GMV</th><th class="num" style="width:110px">Revenue share</th><th class="num" style="width:150px">Distribution revenue</th></tr></thead><tbody>${bodyRows}
+        <div class="sec"><div class="sec-h"><h4>Breakdown by drama</h4></div><div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Drama</th><th>Account and region</th><th class="num" style="width:120px">GMV</th><th class="num" style="width:110px">Revenue share</th><th class="num" style="width:150px">Distribution revenue</th></tr></thead><tbody>${bodyRows}
         ${s.adj ? `<tr><td>Adjustments</td><td colspan="3" class="cell-sub">${s.adjNote}</td><td class="num">${money(s.adj)}</td></tr>` : ''}
         </tbody></table></div></div></div>
         <div class="sec"><div class="sec-h"><h4>Payout and activity log</h4></div>${logs.length ? '<ul class="timeline">' + logs.map(l => `<li class="${l.k}"><div class="tl-t">${l.t}</div><div class="tl-e">${l.e}</div><div class="tl-d">${l.d}</div></li>`).join('') + '</ul>' : '<div class="faint">No activity yet.</div>'}</div>
@@ -2308,7 +2326,7 @@ const ACT = {
     if (e) e.stopPropagation();
     const c = ctrOf(el.dataset.id); if (!c) return;
     const st = mkStats(c);
-    if (!st.canClaim){ toast('No collections available to claim on this drama.', 'warn'); return; }
+    if (!st.canClaim){ toast('No accounts available to distribute on this drama.', 'warn'); return; }
     openDrama(c.id, st.pre);
   },
   'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
@@ -2357,7 +2375,7 @@ const ACT = {
     toast('Downloading all ' + c.episodes + ' episodes of ' + c.title);
     download(name, mockDramaFile(c), 'application/json');
   },
-  'claim-open': () => { if (!DS.sel.size){ toast('Select at least one available collection to claim.', 'warn'); return; } openClaimFlow([PL.ctr], Array.from(DS.sel).map(id => mkKey(colOf(id)))); },
+  'claim-open': () => { if (!DS.sel.size){ toast('Select at least one available account to distribute.', 'warn'); return; } openClaimFlow([PL.ctr], Array.from(DS.sel).map(id => mkKey(colOf(id)))); },
   'bulk-claim': () => { if (!UI.pick.size){ toast('Select at least one drama.', 'warn'); return; } openClaimFlow(CONTRACTS.map(c => c.id).filter(id => UI.pick.has(id)), []); },
   'pick-clear': () => { UI.pick.clear(); render(); },
   'pick-all': () => { mkFiltered().forEach(c => UI.pick.add(c.id)); render(); },
@@ -2375,14 +2393,14 @@ const ACT = {
   'cf-submit': el => {
     if (!CF.keys.size){ toast('Pick at least one market.', 'warn'); return; }
     const items = [].concat(...claimPlan().map(p => p.items.filter(i => i.act === 'claim' || i.act === 'link')));
-    if (!items.length){ toast('Nothing to claim. The selected dramas have no open, unclaimed versions for these markets.', 'warn'); return; }
+    if (!items.length){ toast('Nothing to distribute. The selected dramas have no open accounts for these markets.', 'warn'); return; }
     busy(el, 900, () => { CF.results = runClaim(items); UI.pick.clear(); DS.sel = new Set(); refreshModal(); refreshDrawer(); render(); });
   },
   'cf-recheck': el => busy(el, 700, () => { CF.results.forEach(x => { if (x.r === 'unknown'){ colOf(x.col).claim = 'claimed'; if (!linkOf(x.col)) createLink(x.col); x.r = 'ready'; x.why = ''; } }); refreshModal(); refreshDrawer(); render(); toast('Claims confirmed and links generated.'); }),
   'cf-retry': el => busy(el, 800, () => { CF.results.forEach(x => { if (x.r === 'failed'){ colOf(x.col).claim = 'claimed'; if (!linkOf(x.col)) createLink(x.col); x.r = 'ready'; x.why = 'Claimed on retry with the updated terms.'; } }); refreshModal(); refreshDrawer(); render(); toast('Retry succeeded. Same key, no duplicates.'); }),
   'cf-copy': () => { const ls = flowLinks(); if (!ls.length){ toast('No links are ready to copy yet.', 'warn'); return; } copyText(ls.map(l => l.url).join('\n'), 'Copied ' + plural(ls.length, 'link')); },
   'cf-export': () => { const R = CF.results.filter(x => (x.r === 'ready' || x.r === 'existed') && linkOf(x.col)); if (!R.length){ toast('No links are ready to export yet.', 'warn'); return; }
-    download('distribution-links.csv', csv([['Drama','Contract ID','Collection ID','Market','Language','Business Center ID','Distribution link','Result']].concat(R.map(x => { const c = colOf(x.col); return [ctrOf(c.ctr).title, c.ctr, c.id, c.market, c.lang, BCS.main.id, linkOf(c.id).url, FLOW_R[x.r][1]]; }))));
+    download('distribution-links.csv', csv([['Drama','TikTok account','Account ID','Market','Language','Business Center ID','Distribution link','Result']].concat(R.map(x => { const c = colOf(x.col); const a = ttAcct(c); return [ctrOf(c.ctr).title, a.handle, a.uid, c.market, c.lang, BCS.main.id, linkOf(c.id).url, FLOW_R[x.r][1]]; }))));
     toast('Exported ' + plural(R.length, 'link') + '.'); },
   'last-claim': () => { const lc = D().lastClaim; CF.ctrs = lc.ctrs.slice(); CF.keys = new Set(); CF.results = lc.items; openModal(claimFlowModal); },
   'recheck-claim': el => busy(el, 700, () => { const id = el.dataset.col; colOf(id).claim = 'claimed'; if (!linkOf(id)) createLink(id); toast('Claim confirmed and link ready: A House by the Tide · Mexico · Spanish.'); render(); }),
@@ -2442,8 +2460,8 @@ const ACT = {
     download('settlement-statements.csv', csv([['Statement','Period','Business Center','BC ID','Version','Gross (USD)','Adjustments (USD)','Final amount (USD)','Status']].concat(list.map(s => [s.id, s.period, BCS[s.bc].name, BCS[s.bc].id, s.version, s.gross.toFixed(2), s.adj.toFixed(2), stmFinal(s).toFixed(2), STM_ST[s.status][1]]))));
     toast('Exported ' + plural(list.length, 'statement') + '. Exporting doesn\u2019t confirm any statement.'); },
   'st-partial-retry': el => busy(el, 800, () => { D().stmPartial = false; render(); toast('Studio B statements loaded.'); }),
-  'stm-download': el => { const s = stmOf(el.dataset.id); const rows = [['Statement','Period','Business Center','Contract','Collection','GMV (USD)','Revenue share','Distribution revenue (USD)']];
-    stmColRows(s).forEach(r => rows.push([s.id, s.period, BCS[s.bc].name, ctrOf(r.ctrId).title, r.col.id, r.gmv.toFixed(2), r.share + '%', r.dist.toFixed(2)]));
+  'stm-download': el => { const s = stmOf(el.dataset.id); const rows = [['Statement','Period','Business Center','Drama','Account','GMV (USD)','Revenue share','Distribution revenue (USD)']];
+    stmColRows(s).forEach(r => rows.push([s.id, s.period, BCS[s.bc].name, ctrOf(r.ctrId).title, ttAcct(r.col).handle, r.gmv.toFixed(2), r.share + '%', r.dist.toFixed(2)]));
     if (s.adj) rows.push([s.id, s.period, BCS[s.bc].name, 'Adjustments', s.adjNote, '', '', s.adj.toFixed(2)]);
     rows.push([s.id, s.period, BCS[s.bc].name, 'Final amount', '', '', '', stmFinal(s).toFixed(2)]);
     download(s.id + '-v' + s.version + '.csv', csv(rows)); toast('Statement downloaded.' + (s.status === 'pending' ? ' It still needs your confirmation.' : ''), s.status === 'pending' ? 'warn' : ''); },
