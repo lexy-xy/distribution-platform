@@ -842,18 +842,33 @@ const stmFinal = s => s.gross + s.adj;
 const colLabel = c => c.market + ' · ' + c.lang;
 const HOOK_EP = 2;
 const AV_BG = ['#FE2C55','#161823','#007A76','#2463D1','#7B5CFF','#0E9F6E','#B76E00','#25C2B8'];
+const TT_ACCOUNTS = Object.create(null);
+function ttAcctKey(c){
+  return String((c && (c.acct || c.code)) || 'XX').toUpperCase();
+}
 function ttAcct(c){
-  const holder = String((c && c.pub) || (ctrOf(c.ctr) || {}).holder || 'Studio').split(/[\s/-]/)[0].toLowerCase().replace(/[^a-z0-9]/g, '');
-  const handle = '@' + holder + '.' + String(c.code || 'xx').toLowerCase();
-  let h = 0; const s = String(c.id || '');
-  for (let i = 0; i < s.length; i++) h = (h * 33 + s.charCodeAt(i)) >>> 0;
-  const uid = String(7100000000000000000 + (h % 89999999999999999));
-  const initials = ((holder.slice(0, 1) + String(c.code || 'X').slice(0, 1)) || 'TT').toUpperCase();
-  return {handle, uid, initials, bg: AV_BG[h % AV_BG.length]};
+  const code = ttAcctKey(c);
+  if (TT_ACCOUNTS[code]) return TT_ACCOUNTS[code];
+  let h = 2166136261;
+  const s = 'tt-acct:' + code;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 16777619) >>> 0;
+  const slug = code.toLowerCase();
+  TT_ACCOUNTS[code] = {
+    code,
+    handle: '@shike.' + slug,
+    uid: String(7100000000000000000 + (h % 89999999999999999)),
+    initials: ('S' + code.slice(0, 1)).toUpperCase(),
+    bg: AV_BG[h % AV_BG.length]
+  };
+  return TT_ACCOUNTS[code];
 }
 function ttAvatar(c){
   const a = ttAcct(c);
   return `<span class="tt-av" style="background:${a.bg}" aria-hidden="true">${esc(a.initials)}</span>`;
+}
+function ttAcctCell(c){
+  const a = ttAcct(c);
+  return `<div class="tt-acct">${ttAvatar(c)}<div class="meta"><div class="cell-title ell" title="${esc(a.handle)}">${esc(a.handle)}</div><div class="cell-sub ell" title="${esc(a.uid)}"><span class="mono">${esc(a.uid)}</span> · ${esc(colLabel(c))}</div></div></div>`;
 }
 function stmWhen(s, hm, dayOff){
   if (!dayOff) return s.generated + ' ' + hm + ' UTC';
@@ -1640,8 +1655,8 @@ function inCreatedRange(l){
 function lvFiltered(){
   const f = UI.lv; const q = f.q.trim().toLowerCase();
   return D().links.filter(l => {
-    const c = colOf(l.col), k = ctrOf(c.ctr);
-    if (q && ![k.title, k.id, c.id, l.url, l.code, pubOf(c)].join(' ').toLowerCase().includes(q)) return false;
+    const c = colOf(l.col), k = ctrOf(c.ctr), a = ttAcct(c);
+    if (q && ![k.title, k.id, c.id, l.url, l.code, a.handle, a.uid].join(' ').toLowerCase().includes(q)) return false;
     if (f.status !== 'all' && l.status !== f.status) return false;
     if (f.market !== 'all' && c.market !== f.market) return false;
     if (!inCreatedRange(l)) return false;
@@ -1691,7 +1706,7 @@ function linkViewRow(l){
   const c = colOf(l.col), k = ctrOf(c.ctr);
   return `<tr data-row="${l.col}">
       <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}${l.isNew ? ' <span class="tag teal">New</span>' : ''}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
-      <td><div class="cell-title ell" title="${esc(pubOf(c))}">${esc(pubOf(c))}</div><div class="cell-sub ell">${esc(colLabel(c))}</div></td>
+      <td>${ttAcctCell(c)}</td>
       <td>${distUrlCell(l)}</td>
       <td>${linkStCell(l)}</td>
       <td class="num usd"><button type="button" class="num-link" data-act="link-details" data-col="${l.col}" data-tab="data" title="Open data details">${usd(l.iaa)}</button></td>
@@ -1705,7 +1720,7 @@ function dvNoLinkRow(c, k){
     : '<span class="faint">No link</span>';
   return `<tr>
       <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
-      <td><div class="cell-title ell" title="${esc(pubOf(c))}">${esc(pubOf(c))}</div><div class="cell-sub ell">${esc(colLabel(c))}</div></td>
+      <td>${ttAcctCell(c)}</td>
       <td><span class="faint">No link</span></td>
       <td><span class="faint">No link</span></td>
       <td class="num faint">—</td>
@@ -2222,7 +2237,7 @@ function exportDrawer(){
     footer:`<span class="grow">File: distribution-links-2026-11-03.${EX.fmt}</span><button class="btn" data-act="close-drawer">Cancel</button><button class="btn btn-primary" data-act="ex-run">${ic('download', 14)}Export</button>`};
 }
 function exScope(){ return EX.scope === 'filtered' ? lvFiltered() : D().links; }
-function exVal(l, f){ const c = colOf(l.col), k = ctrOf(c.ctr), a = ttAcct(c); return {drama:k.title, publisher:pubOf(c), contract:a.handle, collection:a.uid, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, iaa:usd(l.iaa), est:usd(l.est), created:l.created}[f]; }
+function exVal(l, f){ const c = colOf(l.col), k = ctrOf(c.ctr), a = ttAcct(c); return {drama:k.title, publisher:a.handle, contract:k.id, collection:a.uid, market:c.market, lang:c.lang, link:l.url, status:LINK_ST[l.status][1], reason:l.reason, iaa:usd(l.iaa), est:usd(l.est), created:l.created}[f]; }
 function runExport(){
   const list = exScope();
   if (!list.length){ toast('No links in this scope. Choose another scope.', 'warn'); return; }
