@@ -1101,10 +1101,10 @@ function renderSidebar(){
     row('agent', 'Business agent') +
     '<div class="nav-label">Platforms</div>' + row('ads', 'Ads Manager') + row('suite', 'Business Suite') +
     '<div class="nav-label">Creatives</div>' + row('one', 'TikTok One') + row('library', 'Creative Library') +
-    `<button class="nav-row ${NAV_OPEN.dc ? 'open' : ''} ${inDc ? 'parent-on' : ''}" data-act="nav-toggle" aria-expanded="${NAV_OPEN.dc}">${ic('share', 20)}<span>Distribution Center</span>${ic('chev-down', 16, 'chev')}</button>` +
-    (NAV_OPEN.dc ? sub('marketplace', 'Drama Marketplace', p === 'marketplace') + sub('links', 'Distribution Management', p === 'links' || p === 'dramas') + sub('settlement', 'Settlement', p === 'settlement') : '') +
     '<div class="nav-label">Connection</div>' + row('leads', 'Leads Center') + row('events', 'Events Manager') +
     '<div class="nav-label">Planning</div>' + row('apps', 'Apps & Agents') +
+    `<button class="nav-row ${NAV_OPEN.dc ? 'open' : ''} ${inDc ? 'parent-on' : ''}" data-act="nav-toggle" aria-expanded="${NAV_OPEN.dc}">${ic('share', 20)}<span>Distribution Center</span>${ic('chev-down', 16, 'chev')}</button>` +
+    (NAV_OPEN.dc ? sub('marketplace', 'Drama Marketplace', p === 'marketplace') + sub('links', 'Distribution Management', p === 'links' || p === 'dramas') + sub('settlement', 'Settlement', p === 'settlement') : '') +
     '<div class="nav-label">Settings</div>' + row('billing', 'Billing') + row('building', 'Business Settings') +
     '<div class="nav-sep"></div>' + row('tools', 'All tools');
 }
