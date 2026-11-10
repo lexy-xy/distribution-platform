@@ -378,16 +378,22 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* Player */
-.det{display:grid;grid-template-columns:280px minmax(0,1fr);grid-template-areas:"info info" "cols cols" "player eps";gap:16px 24px;align-items:start}
-.det-l{grid-area:player;position:sticky;top:0;min-width:0}
+.det{display:grid;grid-template-columns:minmax(0,1fr);grid-template-areas:"info" "cols" "play";gap:16px;align-items:start}
+.det-play{grid-area:play;min-width:0}
+.det-play.sec{margin-top:0}
+.det-play-body{display:grid;grid-template-columns:280px minmax(0,1fr);gap:16px 24px;align-items:start}
+.det-l{min-width:0;position:sticky;top:0}
 .det-info{grid-area:info;min-width:0;display:flex;flex-direction:column;gap:16px}
-.det-eps{grid-area:eps;min-width:0}
-.det-eps.sec{margin-top:0}
+.det-eps{min-width:0}
 .det-cols{grid-area:cols;min-width:0}
 .det-cols.sec{margin-top:0}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
-.drawer.drama.fs .det{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"info info" "cols cols" "player eps";gap:22px 32px}
-.drawer.drama.fs .det-l,.drawer.drama.fs .det-eps{margin-top:8px;margin-bottom:8px}
+.ep-toolbar{display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:24px;margin-bottom:8px}
+.ep-toolbar .ep-anchors{margin:0}
+.drawer.drama.fs .det{grid-template-columns:minmax(0,1fr);grid-template-areas:"info" "cols" "play";gap:22px}
+.drawer.drama.fs .det-play-body{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px 32px}
+.drawer.drama.fs .det-play-h{margin-bottom:10px}
+.drawer.drama.fs .det-l,.drawer.drama.fs .det-eps{margin-top:0;margin-bottom:8px}
 .drawer.drama.fs .det-cols{margin-top:4px}
 .drawer.drama.fs .det-info{display:grid;grid-template-columns:48px minmax(0,1fr);grid-template-areas:"cover head" "cover facts" "cover tags" "cover syn";column-gap:14px;row-gap:6px;align-items:start;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--th)}
 .det-facts{display:contents}
@@ -1475,33 +1481,41 @@ function dramaBody(ctrId){
     <div class="sec det-cols"><div class="sec-h"><h4>Accounts and regions</h4><span class="faint" style="font-size:12px">${availCount} available to distribute</span></div>
       <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:44px"></th><th>TikTok account name (ID)</th><th style="width:140px">Market</th><th style="width:110px">Language</th><th class="col-extra">Suggested markets</th><th class="col-extra" style="width:150px">Distribution end date</th><th style="width:96px" class="num">Rev. share</th><th style="width:180px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
     </div>
-    <div class="det-l">
-      <div class="player-stage">
-      <div class="player ${PL.playing ? 'playing' : ''}" id="player">
-        ${poster(ctrId)}<img class="pl-frame" id="pl-frame" src="${frameSrc(ctrId, (PL.ep - 1) % MEDIA[ctrId][1] + 1)}" alt=""><div class="pl-dim"></div>
-        <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span>
-          <span class="pl-actions"><span class="tag warn" id="pl-lock" style="${PL.ep >= pw ? '' : 'display:none'}">${ic('lock', 10)}Paid episode</span>
-            <button class="pl-dl" data-act="dl-ep" aria-label="Download this episode" title="Download this episode">${ic('download', 14)}</button></span></div>
-        <button class="pl-center" data-act="pl-toggle" aria-label="Play or pause">${ic(PL.playing ? 'pause' : 'play', 22)}</button>
-        <div class="pl-ctrl">
-          <div class="pl-bar" data-act="pl-seek" aria-label="Seek"><div class="trk"><div class="fill" id="pl-fill" style="width:${PL.t / epDur(PL.ep) * 100}%"></div></div></div>
-          <div class="pl-row">
-            <button class="pl-btn" data-act="pl-prev" aria-label="Previous episode">${ic('prev', 14)}</button>
-            <button class="pl-btn" data-act="pl-toggle" aria-label="Play or pause" id="pl-tbtn">${ic(PL.playing ? 'pause' : 'play', 14)}</button>
-            <button class="pl-btn" data-act="pl-next" aria-label="Next episode">${ic('next', 14)}</button>
-            <span class="pl-time" id="pl-time">${fmtT(PL.t)} / ${fmtT(epDur(PL.ep))}</span>
-            <span class="pl-speed">${[1, 1.5, 2].map(s => `<button class="${PL.speed === s ? 'on' : ''}" data-act="pl-speed" data-v="${s}">${s}x</button>`).join('')}</span>
+    <div class="sec det-play">
+      <div class="sec-h det-play-h"><h4>Episodes preview</h4></div>
+      <div class="det-play-body">
+        <div class="det-l">
+          <div class="player-stage">
+          <div class="player ${PL.playing ? 'playing' : ''}" id="player">
+            ${poster(ctrId)}<img class="pl-frame" id="pl-frame" src="${frameSrc(ctrId, (PL.ep - 1) % MEDIA[ctrId][1] + 1)}" alt=""><div class="pl-dim"></div>
+            <div class="pl-top"><span class="tag dark" id="pl-ep">Ep ${PL.ep} / ${N}</span>
+              <span class="pl-actions"><span class="tag warn" id="pl-lock" style="${PL.ep >= pw ? '' : 'display:none'}">${ic('lock', 10)}Paid episode</span>
+                <button class="pl-dl" data-act="dl-ep" aria-label="Download this episode" title="Download this episode">${ic('download', 14)}</button></span></div>
+            <button class="pl-center" data-act="pl-toggle" aria-label="Play or pause">${ic(PL.playing ? 'pause' : 'play', 22)}</button>
+            <div class="pl-ctrl">
+              <div class="pl-bar" data-act="pl-seek" aria-label="Seek"><div class="trk"><div class="fill" id="pl-fill" style="width:${PL.t / epDur(PL.ep) * 100}%"></div></div></div>
+              <div class="pl-row">
+                <button class="pl-btn" data-act="pl-prev" aria-label="Previous episode">${ic('prev', 14)}</button>
+                <button class="pl-btn" data-act="pl-toggle" aria-label="Play or pause" id="pl-tbtn">${ic(PL.playing ? 'pause' : 'play', 14)}</button>
+                <button class="pl-btn" data-act="pl-next" aria-label="Next episode">${ic('next', 14)}</button>
+                <span class="pl-time" id="pl-time">${fmtT(PL.t)} / ${fmtT(epDur(PL.ep))}</span>
+                <span class="pl-speed">${[1, 1.5, 2].map(s => `<button class="${PL.speed === s ? 'on' : ''}" data-act="pl-speed" data-v="${s}">${s}x</button>`).join('')}</span>
+              </div>
+            </div>
           </div>
+          </div>
+          <div class="series"><div class="trk"><div class="free" style="width:${(pw - 1) / N * 100}%"></div><div class="mark" style="left:${(pw - 1) / N * 100}%" title="Paywall"></div><div class="cur" id="pl-cur" style="left:${(PL.ep - 0.5) / N * 100}%"></div></div>
+            <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
+        </div>
+        <div class="det-eps">
+          <div class="ep-toolbar">
+            <div class="filters ep-anchors"><button type="button" class="btn btn-xs ${PL.ep === HOOK_EP ? 'on' : ''}" data-act="pl-ep" data-ep="${HOOK_EP}" aria-pressed="${PL.ep === HOOK_EP}">Hook·Ep${HOOK_EP}</button><button type="button" class="btn btn-xs ${PL.ep === pw ? 'on' : ''}" data-act="pl-ep" data-ep="${pw}" aria-pressed="${PL.ep === pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
+            <button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button>
+          </div>
+          <div class="ep-grid" id="ep-grid">${eps}</div>
+          <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
         </div>
       </div>
-      </div>
-      <div class="series"><div class="trk"><div class="free" style="width:${(pw - 1) / N * 100}%"></div><div class="mark" style="left:${(pw - 1) / N * 100}%" title="Paywall"></div><div class="cur" id="pl-cur" style="left:${(PL.ep - 0.5) / N * 100}%"></div></div>
-        <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
-    </div>
-    <div class="sec det-eps"><div class="sec-h"><h4>Episodes preview</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
-      <div class="filters ep-anchors" style="margin-bottom:8px"><button type="button" class="btn btn-xs ${PL.ep === HOOK_EP ? 'on' : ''}" data-act="pl-ep" data-ep="${HOOK_EP}" aria-pressed="${PL.ep === HOOK_EP}">Hook·Ep${HOOK_EP}</button><button type="button" class="btn btn-xs ${PL.ep === pw ? 'on' : ''}" data-act="pl-ep" data-ep="${pw}" aria-pressed="${PL.ep === pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
-      <div class="ep-grid" id="ep-grid">${eps}</div>
-      <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
     </div>
   </div>`;
   return {body, availCount};
@@ -1517,11 +1531,12 @@ function dramaDrawer(ctrId){
   const nav = dramaNeighbors(ctrId);
   const prevTip = nav.prev ? 'Previous: ' + ctrOf(nav.prev).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'First drama in the current Marketplace list';
   const nextTip = nav.next ? 'Next: ' + ctrOf(nav.next).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
+  const fromDm = S.page === 'links' || S.page === 'dramas';
   const linked = colsOf(ctrId).map(x => x.id).find(id => linkOf(id));
-  const vtabs = [
+  const vtabs = fromDm ? [
     {label:ic('film', 18), on:true, act:'ld-tab', data:' data-tab="drama" aria-label="Drama details" title="Drama details"'},
     {label:ic('chart', 18), on:false, act: linked ? 'link-details' : 'toast', data: linked ? ` data-col="${linked}" data-tab="data" aria-label="Data details" title="Data details"` : ' data-msg="Start distribution on an account to see data details." data-type="info" aria-label="Data details" title="Data details"'}
-  ];
+  ] : [];
   return {kind:'drama', title:c.title, vtabs, vtabsLabel:'Drama details',
     body,
     footer:`<button class="btn" data-act="drama-prev" ${nav.prev ? 'data-id="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="drama-next" ${nav.next ? 'data-id="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button>${dramaClaimFooter(availCount)}`};
