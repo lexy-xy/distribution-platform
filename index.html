@@ -369,12 +369,13 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
 .drawer.drama.fs .det{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 32px}
 .drawer.drama.fs .det-l,.drawer.drama.fs .det-eps{margin-top:24px;margin-bottom:24px}
-.drawer.drama.fs .det-info{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.1fr);grid-template-areas:"hero hero" "facts syn";gap:16px;align-items:stretch}
-.drawer.drama.fs .det-hero{grid-area:hero}
+.drawer.drama.fs .det-info{display:grid;grid-template-columns:48px minmax(0,1fr);grid-template-areas:"cover head" "cover syn" "cover facts";column-gap:14px;row-gap:6px;align-items:start;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--th)}
 .det-facts{display:contents}
-.drawer.drama.fs .det-facts{display:block;grid-area:facts;border:1px solid var(--border);border-radius:4px;padding:14px 16px;background:#fff}
-.drawer.drama.fs .det-facts .kv{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px 20px}
-.drawer.drama.fs .det-syn{grid-area:syn;font-size:14px;line-height:1.7;max-width:none;border:1px solid var(--border);border-radius:4px;padding:14px 16px;background:#fff}
+.drawer.drama.fs .det-facts{display:block;grid-area:facts;border:0;padding:0;background:transparent}
+.drawer.drama.fs .det-facts .kv{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 16px}
+.drawer.drama.fs .det-facts .k{font-size:11px;line-height:16px}
+.drawer.drama.fs .det-facts .v{font-size:12px;line-height:16px}
+.drawer.drama.fs .det-syn{grid-area:syn;font-size:13px;line-height:1.5;max-width:none;border:0;padding:0;background:transparent;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
 .drawer.drama.fs .det-l{position:static;width:auto}
 .player-stage{display:contents}
 .drawer.drama.fs .player-stage{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;height:auto;background:#111417;border-radius:4px;overflow:hidden}
@@ -386,15 +387,19 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .drawer.drama.fs .ep-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:6px}
 .drawer.drama.fs .ep{height:28px}
 .det-hero{display:none}
-.drawer.drama.fs .det-hero{display:flex;align-items:center;gap:16px;padding:12px 16px;border:1px solid var(--border);border-radius:8px;background:var(--th)}
+.drawer.drama.fs .det-hero{display:contents}
+.drawer.drama.fs .det-hero-cover{grid-area:cover;width:48px;align-self:start;margin-top:2px}
+.drawer.drama.fs .det-hero-copy{grid-area:head;min-width:0}
+.drawer.drama.fs .det-hero-meta{display:none}
 .det-hero-cover{position:relative;width:54px;flex:none;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#1d2329}
 .det-hero-cover .poster,.det-hero-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .det-hero-copy{flex:1;min-width:0}
-.det-hero-title{font-size:16px;font-weight:600;line-height:22px}
+.det-hero-title-row{display:flex;align-items:center;gap:8px;min-width:0}
+.det-hero-title{font-size:16px;font-weight:600;line-height:22px;min-width:0;flex:1}
 .det-hero-meta{margin-top:4px;font-size:12px;color:var(--text2);line-height:18px}
-.det-hero-chip{display:inline-flex;align-items:center;gap:4px;height:22px;margin-top:8px;padding:0 8px;border-radius:11px;background:var(--ok-bg);color:var(--ok);font-size:12px;font-weight:500}
+.det-hero-chip{display:inline-flex;align-items:center;gap:4px;height:22px;margin-top:0;padding:0 8px;border-radius:11px;background:var(--ok-bg);color:var(--ok);font-size:12px;font-weight:500;flex:none}
 .det-hero-chip.claimed{background:var(--info-bg);color:var(--info)}
-.det-hero .btn{flex:none}
+.ep-anchors .btn.on{border-color:var(--primary);background:#E8F8F7;color:var(--primary-t);font-weight:600}
 .player{position:relative;width:100%;aspect-ratio:9/16;background:#000;border-radius:4px;overflow:hidden;color:#fff;user-select:none}
 .player svg.poster{position:absolute;inset:0;width:100%;height:100%}
 .player .pl-frame{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -830,6 +835,7 @@ const linkOf = colId => D().links.find(l => l.col === colId);
 const stmOf = id => D().statements.find(s => s.id === id);
 const stmFinal = s => s.gross + s.adj;
 const colLabel = c => c.market + ' · ' + c.lang;
+const HOOK_EP = 2;
 const AV_BG = ['#FE2C55','#161823','#007A76','#2463D1','#7B5CFF','#0E9F6E','#B76E00','#25C2B8'];
 function ttAcct(c){
   const holder = String((c && c.pub) || (ctrOf(c.ctr) || {}).holder || 'Studio').split(/[\s/-]/)[0].toLowerCase().replace(/[^a-z0-9]/g, '');
@@ -1373,11 +1379,12 @@ function dramaBody(ctrId){
       <div class="det-hero">
         <div class="det-hero-cover">${poster(ctrId)}<img src="${frameSrc(ctrId, 1)}" alt="" decoding="async"></div>
         <div class="det-hero-copy">
-          <div class="det-hero-title ell" title="${esc(c.title)}">${esc(c.title)}</div>
+          <div class="det-hero-title-row">
+            <div class="det-hero-title ell" title="${esc(c.title)}">${esc(c.title)}</div>
+            ${heroChip}
+          </div>
           <div class="det-hero-meta ell" title="${esc(heroMetaPlain)}">${heroMeta}</div>
-          ${heroChip}
         </div>
-        <button type="button" class="btn btn-primary" data-act="drama-cols">Start distribution</button>
       </div>
       <div class="det-facts">
       <div class="kv">
@@ -1416,8 +1423,8 @@ function dramaBody(ctrId){
       <div class="series"><div class="trk"><div class="free" style="width:${(pw - 1) / N * 100}%"></div><div class="mark" style="left:${(pw - 1) / N * 100}%" title="Paywall"></div><div class="cur" id="pl-cur" style="left:${(PL.ep - 0.5) / N * 100}%"></div></div>
         <div class="lbls"><span>Ep 1</span><span style="color:var(--warn)">Paywall · Ep ${pw}</span><span>Ep ${N}</span></div></div>
     </div>
-    <div class="sec det-eps"><div class="sec-h"><h4>Episodes</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
-      <div class="filters" style="margin-bottom:8px"><button class="btn btn-xs" data-act="pl-ep" data-ep="1">Ep 1 (hook)</button><button class="btn btn-xs" data-act="pl-ep" data-ep="${pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
+    <div class="sec det-eps"><div class="sec-h"><h4>Episodes preview</h4><button class="btn btn-xs" data-act="dl-series">${ic('download', 12)}Download all episodes</button></div>
+      <div class="filters ep-anchors" style="margin-bottom:8px"><button type="button" class="btn btn-xs ${PL.ep === HOOK_EP ? 'on' : ''}" data-act="pl-ep" data-ep="${HOOK_EP}" aria-pressed="${PL.ep === HOOK_EP}">Hook·Ep${HOOK_EP}</button><button type="button" class="btn btn-xs ${PL.ep === pw ? 'on' : ''}" data-act="pl-ep" data-ep="${pw}" aria-pressed="${PL.ep === pw}">${ic('lock', 11)}Paywall · Ep ${pw}</button></div>
       <div class="ep-grid" id="ep-grid">${eps}</div>
       <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
     </div>
@@ -1471,6 +1478,11 @@ function updatePlayer(){
   $('#player').classList.toggle('playing', PL.playing);
   $$('#player [data-act="pl-toggle"] use').forEach(u => u.setAttribute('href', '#i-' + (PL.playing ? 'pause' : 'play')));
   $$('#ep-grid .ep').forEach(b => b.classList.toggle('cur', +b.dataset.ep === PL.ep));
+  $$('#drawer-root .ep-anchors [data-act="pl-ep"]').forEach(b => {
+    const on = +b.dataset.ep === PL.ep;
+    b.classList.toggle('on', on);
+    b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
 }
 function setEp(ep){
   const c = ctrOf(PL.ctr); PL.ep = Math.min(Math.max(1, ep), c.episodes); PL.t = 0; updatePlayer();
@@ -2330,14 +2342,6 @@ const ACT = {
     openDrama(c.id, st.pre);
   },
   'open-drama': (el, e) => { if (e) e.stopPropagation(); openDrama(el.dataset.id, el.dataset.pre ? [el.dataset.pre] : null); },
-  'drama-cols': () => {
-    const b = $('#drawer-root .dr-b');
-    const t = $('#drawer-root .det-cols');
-    if (b && t){
-      const top = t.getBoundingClientRect().top - b.getBoundingClientRect().top + b.scrollTop - 8;
-      b.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-    }
-  },
   'drama-size': () => {
     DR.wide = !DR.wide;
     const dr = $('#drawer-root .drawer');
