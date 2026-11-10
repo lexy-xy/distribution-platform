@@ -103,22 +103,18 @@ button,input,select{font:inherit;color:inherit}
 .panel-h h3{margin:0;font-size:14px;font-weight:600}
 .panel-f{padding:8px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;color:var(--text2);font-size:12px;gap:12px}
 .tbl-wrap{overflow-x:auto}
-.tbl-wrap:has(.th-menu){overflow:visible}
 .tbl{width:100%;border-collapse:collapse;table-layout:fixed}
 .tbl thead{position:relative;z-index:3}
 .tbl th{height:36px;background:var(--th);font-weight:500;color:var(--text2);font-size:12px;text-align:left;padding:0 12px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tbl th.th-act{overflow:visible;padding:0;position:relative}
-.th-inner{display:flex;align-items:center;gap:2px;min-height:36px;padding:0 6px 0 12px;min-width:0}
+.tbl th.th-act{padding:0;cursor:pointer;color:var(--text2)}
+.th-inner{display:flex;align-items:center;gap:4px;min-height:36px;padding:0 6px 0 12px;min-width:0}
 .th-act.num .th-inner{justify-content:flex-end}
-.th-lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-.th-dir{flex:none;margin-right:4px;color:var(--text);font-weight:600}
-.th-caret{flex:none;width:20px;height:20px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--text2);opacity:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
-.th-act:hover .th-caret,.th-act.on .th-caret,.th-caret:focus-visible{opacity:1}
-.th-caret:hover,.th-caret.on{background:#E3E5E8;color:var(--text)}
-.th-act:hover,.th-act.on{background:#EEF0F2}
-.th-act.on{z-index:6;color:var(--text)}
-.th-menu{left:6px;right:auto;z-index:40;min-width:176px}
-.th-act.num .th-menu{right:6px;left:auto}
+.th-lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.th-act.num .th-lab{flex:none}
+.th-dir{flex:none;margin-right:2px;color:var(--text);font-weight:600}
+.th-caret{flex:none;width:20px;height:20px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--text);display:inline-flex;align-items:center;justify-content:center;pointer-events:none}
+.th-act:hover,.th-act.on{background:#EEF0F2;color:var(--text)}
+.th-act:hover .th-caret,.th-act.on .th-caret{background:#E3E5E8}
 .tbl td{padding:6px 10px;border-bottom:1px solid var(--row);vertical-align:middle;overflow:hidden}
 .tbl tbody tr:hover td{background:#FAFBFC}
 .tbl tr:last-child td{border-bottom:0}
@@ -145,8 +141,10 @@ button,input,select{font:inherit;color:inherit}
 .btn-more:hover,.btn-more.on{background:var(--hover);color:var(--text)}
 .more-wrap{position:relative;display:inline-flex}
 .menu{position:absolute;right:0;top:calc(100% + 4px);min-width:188px;background:#fff;border:1px solid var(--border2);border-radius:4px;box-shadow:0 8px 24px rgba(22,24,35,.14);z-index:30;padding:4px 0}
+.menu.th-menu{position:fixed;right:auto;top:0;left:0;width:max-content;min-width:184px;z-index:400}
 .menu button{display:flex;align-items:center;gap:8px;width:100%;border:0;background:none;padding:8px 12px;text-align:left;cursor:pointer;font-size:13px;color:var(--text)}
 .menu button:hover{background:var(--hover)}
+.menu button[disabled]{cursor:default}
 .pager{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:10px 16px;border-top:1px solid var(--border);flex-wrap:wrap}
 .pager .pg-pages{display:flex;align-items:center;gap:4px}
 .pg-btn{min-width:28px;height:28px;padding:0 8px;border:1px solid var(--border2);border-radius:4px;background:#fff;cursor:pointer;font-size:12px;color:var(--text);display:inline-flex;align-items:center;justify-content:center}
@@ -1140,6 +1138,7 @@ function render(){
   const fn = {marketplace:pageMarketplace, links:pageLinks, dramas:pageDramas, settlement:pageSettlement}[S.page];
   $('#page').innerHTML = fn();
   renderDemo();
+  pinThMenu();
   if (fName){ const el = $('#page [name="' + fName + '"]'); if (el){ el.focus(); if (caret != null && el.setSelectionRange) el.setSelectionRange(caret, caret); } }
 }
 function globalNotice(){
@@ -1283,7 +1282,7 @@ function pageMarketplace(){
       ${sel('mk.source', f.source, [['all','All sources'],['Local original','Local original'],['Localized','Localized']], 'Source', 116)}
       ${sel('mk.genre', f.genre, [['all','All genres']].concat(genres.map(g => [g, g])), 'Genre', 108)}
       ${sel('mk.avail', f.avail, [['all','Any availability'],['available','Has available accounts'],['claimed','Distributed by me']], 'Availability', 136)}
-      ${sel('mk.sort', f.sort, [['pop','Sort: Popularity'],['new','Sort: Newest'],['eps','Sort: Fewest episodes']], 'Sort', 140)}
+      ${f.view === 'list' ? '' : sel('mk.sort', f.sort, [['pop','Sort: Popularity'],['new','Sort: Newest'],['eps','Sort: Fewest episodes']], 'Sort', 140)}
     </div><div class="right">${mkViewSeg()}</div></div>`;
   }
   const listView = f.view === 'list';
@@ -1752,7 +1751,7 @@ function sortBy(list, spec, get){
     return String(va ?? '').localeCompare(String(vb ?? ''), 'en', {numeric:true, sensitivity:'base'}) * dir;
   });
 }
-function closeSortMenus(){ ['lv','bd','st','mk'].forEach(v => { UI[v].sortMenu = null; }); }
+function closeSortMenus(){ ['lv','bd','st','mk'].forEach(v => { UI[v].sortMenu = null; }); $$('body > .th-menu').forEach(m => m.remove()); }
 function thAct(view, key, label, extra, style){
   const spec = UI[view].colSort;
   const open = UI[view].sortMenu === key;
@@ -1760,14 +1759,35 @@ function thAct(view, key, label, extra, style){
   const dir = (spec && spec.key === key) ? spec.dir : '';
   const mark = dir === 'asc' ? '↑' : dir === 'desc' ? '↓' : '';
   const cls = ['th-act', extra || '', on ? 'on' : ''].filter(Boolean).join(' ');
-  const other = dir === 'asc' ? 'desc' : 'asc';
-  const menu = open ? `<div class="menu th-menu" role="menu">${
-    dir ? `<button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="" role="menuitem">${ic('close', 14)}Clear sort</button>
-      <button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="${other}" role="menuitem">${ic(other === 'asc' ? 'sort-up' : 'sort-down', 14)}${other === 'asc' ? 'Sort ascending' : 'Sort descending'}</button>`
-      : `<button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="asc" role="menuitem">${ic('sort-up', 14)}Sort ascending</button>
-      <button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="desc" role="menuitem">${ic('sort-down', 14)}Sort descending</button>`
-  }</div>` : '';
-  return `<th class="${cls}"${style ? ` style="${esc(style)}"` : ''}><div class="th-inner"><span class="th-lab">${mark ? `<span class="th-dir">${mark}</span>` : ''}${esc(label)}</span><button type="button" class="th-caret ${open ? 'on' : ''}" data-act="th-menu" data-view="${view}" data-col="${key}" aria-label="Sort ${esc(label)}" aria-haspopup="menu" aria-expanded="${open ? 'true' : 'false'}">${ic('chev-down', 12)}</button></div>${menu}</th>`;
+  return `<th class="${cls}" data-act="th-menu" data-view="${view}" data-col="${key}"${style ? ` style="${esc(style)}"` : ''} aria-haspopup="menu" aria-expanded="${open ? 'true' : 'false'}"><div class="th-inner"><span class="th-lab">${mark ? `<span class="th-dir">${mark}</span>` : ''}${esc(label)}</span><span class="th-caret" aria-hidden="true">${ic('chev-down', 12)}</span></div></th>`;
+}
+function pinThMenu(){
+  $$('body > .th-menu').forEach(m => m.remove());
+  let view = null, key = null;
+  ['lv','bd','st','mk'].forEach(v => { if (UI[v].sortMenu){ view = v; key = UI[v].sortMenu; } });
+  if (!view) return;
+  const th = document.querySelector(`th.th-act[data-view="${view}"][data-col="${key}"]`);
+  if (!th) return;
+  const caret = th.querySelector('.th-caret') || th;
+  const r = caret.getBoundingClientRect();
+  const spec = UI[view].colSort;
+  const dir = (spec && spec.key === key) ? spec.dir : '';
+  const menu = document.createElement('div');
+  menu.className = 'menu th-menu';
+  menu.setAttribute('role', 'menu');
+  menu.innerHTML =
+    `<button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="asc" role="menuitem">${ic('sort-up', 14)}Sort ascending</button>` +
+    `<button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="desc" role="menuitem">${ic('sort-down', 14)}Sort descending</button>` +
+    `<button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="" role="menuitem"${dir ? '' : ' disabled style="opacity:.45"'}>${ic('close', 14)}Clear sort</button>`;
+  document.body.appendChild(menu);
+  const mw = menu.offsetWidth;
+  let left = Math.round(r.left);
+  if (left + mw > window.innerWidth - 8) left = Math.max(8, Math.round(r.right - mw));
+  menu.style.position = 'fixed';
+  menu.style.right = 'auto';
+  menu.style.width = 'max-content';
+  menu.style.top = Math.round(r.bottom + 4) + 'px';
+  menu.style.left = left + 'px';
 }
 function linkStCell(l){ return stChip(LINK_ST, l.status) + (l.reason ? `<div class="st-reason">${l.reason}</div>` : ''); }
 function lvMenu(l){
@@ -2734,7 +2754,7 @@ document.addEventListener('click', e => {
     if (!el){ render(); return; }
   }
   const sortOpen = ['lv','bd','st','mk'].some(v => UI[v].sortMenu);
-  if (sortOpen && !e.target.closest('.th-act')){
+  if (sortOpen && !e.target.closest('.th-act') && !e.target.closest('.th-menu')){
     closeSortMenus();
     if (!el){ render(); return; }
     render();
@@ -2749,7 +2769,7 @@ document.addEventListener('click', e => {
   }
   if (!el || el.disabled) return;
   const inner = e.target.closest('button, a, input, select, label');
-  if (inner && inner !== el && el.contains(inner)) return;
+  if (inner && inner !== el && el.contains(inner) && !el.classList.contains('th-act')) return;
   const fn = ACT[el.dataset.act];
   if (fn){ e.preventDefault(); fn(el, e); }
 });
