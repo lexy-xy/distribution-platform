@@ -1377,7 +1377,8 @@ function dramaBody(ctrId){
     ? `<span class="det-hero-chip">${ic('check-circle', 12)}Available</span>`
     : `<span class="det-hero-chip claimed">${ic('check-circle', 12)}Claimed</span>`;
   const langs = Array.from(new Set(cs.map(x => x.lang))).join(', ');
-  const factsLine = [c.holder, c.source, N + ' · paywall from Ep ' + pw, c.launchL, c.plays, langs].map(esc).join(' · ');
+  const watched = c.id === 'CTR-550361' ? '24.7K watched' : c.plays + ' watched';
+  const factsLine = [c.holder, c.source, N + ' Eps', c.launchL + ' released', watched, langs].map(esc).join(' · ');
   const heroTags = [c.format].concat(c.genres).map(t => `<span class="tag">${esc(t)}</span>`).join('');
   const body = `
   <div class="det">
