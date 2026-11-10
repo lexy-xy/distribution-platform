@@ -369,13 +369,17 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
 .drawer.drama.fs .det{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 32px}
 .drawer.drama.fs .det-l,.drawer.drama.fs .det-eps{margin-top:24px;margin-bottom:24px}
-.drawer.drama.fs .det-info{display:grid;grid-template-columns:48px minmax(0,1fr);grid-template-areas:"cover head" "cover syn" "cover facts";column-gap:14px;row-gap:6px;align-items:start;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--th)}
+.drawer.drama.fs .det-info{display:grid;grid-template-columns:48px minmax(0,1fr);grid-template-areas:"cover head" "cover facts" "cover syn" "cover tags";column-gap:14px;row-gap:6px;align-items:start;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--th)}
 .det-facts{display:contents}
 .drawer.drama.fs .det-facts{display:block;grid-area:facts;border:0;padding:0;background:transparent}
-.drawer.drama.fs .det-facts .kv{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px 16px}
-.drawer.drama.fs .det-facts .k{font-size:11px;line-height:16px}
-.drawer.drama.fs .det-facts .v{font-size:12px;line-height:16px}
+.drawer.drama.fs .det-facts .kv{display:none}
+.drawer.drama.fs .det-facts-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 16px;font-size:12px;line-height:18px;color:var(--text)}
+.drawer.drama.fs .det-facts-line .k{color:var(--text2);font-weight:500;margin-right:4px}
+.det-facts-line{display:none}
 .drawer.drama.fs .det-syn{grid-area:syn;font-size:13px;line-height:1.5;max-width:none;border:0;padding:0;background:transparent;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;overflow:hidden}
+.det-hero-tags{display:none}
+.drawer.drama.fs .det-hero-tags{grid-area:tags;display:flex;flex-wrap:wrap;gap:6px}
+.drawer.drama.fs .det-hero-tags .tag{background:var(--primary);color:#fff;height:22px;padding:0 8px;border-radius:4px}
 .drawer.drama.fs .det-l{position:static;width:auto}
 .player-stage{display:contents}
 .drawer.drama.fs .player-stage{display:flex;align-items:center;justify-content:center;width:100%;aspect-ratio:16/9;height:auto;background:#111417;border-radius:4px;overflow:hidden}
@@ -394,8 +398,8 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .det-hero-cover{position:relative;width:54px;flex:none;aspect-ratio:9/16;border-radius:4px;overflow:hidden;background:#1d2329}
 .det-hero-cover .poster,.det-hero-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .det-hero-copy{flex:1;min-width:0}
-.det-hero-title-row{display:flex;align-items:center;gap:8px;min-width:0}
-.det-hero-title{font-size:16px;font-weight:600;line-height:22px;min-width:0;flex:1}
+.det-hero-title-row{display:flex;align-items:center;gap:8px;min-width:0;justify-content:flex-start}
+.det-hero-title{font-size:16px;font-weight:600;line-height:22px;min-width:0;flex:0 1 auto;max-width:calc(100% - 96px)}
 .det-hero-meta{margin-top:4px;font-size:12px;color:var(--text2);line-height:18px}
 .det-hero-chip{display:inline-flex;align-items:center;gap:4px;height:22px;margin-top:0;padding:0 8px;border-radius:11px;background:var(--ok-bg);color:var(--ok);font-size:12px;font-weight:500;flex:none}
 .det-hero-chip.claimed{background:var(--info-bg);color:var(--info)}
@@ -1373,6 +1377,10 @@ function dramaBody(ctrId){
   const heroChip = availCount
     ? `<span class="det-hero-chip">${ic('check-circle', 12)}Available</span>`
     : `<span class="det-hero-chip claimed">${ic('check-circle', 12)}Claimed</span>`;
+  const langs = Array.from(new Set(cs.map(x => x.lang))).join(', ');
+  const factsLine = [['Rights holder', c.holder],['Source', c.source],['Episodes', N + ' · paywall from Ep ' + pw],['Launched', c.launchL],['Plays (30 days)', c.plays],['Languages', langs]]
+    .map(([k, v]) => `<span class="det-fact"><span class="k">${esc(k)}</span>${esc(v)}</span>`).join('');
+  const heroTags = [c.format].concat(c.genres).map(t => `<span class="tag">${esc(t)}</span>`).join('');
   const body = `
   <div class="det">
     <div class="det-info">
@@ -1394,11 +1402,13 @@ function dramaBody(ctrId){
         <div><div class="k">Episodes</div><div class="v">${N} · paywall from Ep ${pw}</div></div>
         <div><div class="k">Launched</div><div class="v">${c.launchL}</div></div>
         <div><div class="k">Plays (30 days)</div><div class="v">${c.plays}</div></div>
-        <div><div class="k">Languages</div><div class="v">${Array.from(new Set(cs.map(x => x.lang))).join(', ')}</div></div>
+        <div><div class="k">Languages</div><div class="v">${langs}</div></div>
         <div><div class="k">Genres</div><div class="v">${c.genres.join(', ')}</div></div>
       </div>
+      <div class="det-facts-line">${factsLine}</div>
       </div>
       <p class="det-syn">${c.synopsis}</p>
+      <div class="det-hero-tags">${heroTags}</div>
     </div>
     <div class="det-l">
       <div class="player-stage">
