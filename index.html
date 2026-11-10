@@ -260,9 +260,16 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .drawer.show{transform:none}
 .drawer.drama{flex-direction:row;align-items:stretch;transition:transform .36s cubic-bezier(.4,0,.2,1),width .36s cubic-bezier(.4,0,.2,1)}
 .drawer.drama.fs{width:100%}
-.dr-rail{width:48px;flex:none;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;border-right:1px solid var(--border);background:#FAFBFC}
+.dr-rail{width:64px;flex:none;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;border-right:1px solid var(--border);background:#FAFBFC}
 .dr-rail .btn-icon{width:32px;height:32px}
 .dr-rail-bot{margin-top:auto}
+.dr-vtabs{display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%;padding:12px 6px 0;flex:1;min-height:0}
+.dr-vtab{width:100%;min-height:52px;padding:8px 4px;border:0;background:transparent;border-radius:4px;color:var(--text2);font-size:12px;font-weight:500;line-height:16px;cursor:pointer;text-align:center}
+.dr-vtab:hover{background:var(--hover);color:var(--text)}
+.dr-vtab.on{background:var(--nav-on);color:var(--primary-t);font-weight:600}
+.th-sort{border:0;background:none;padding:0;font:inherit;font-weight:500;color:inherit;display:inline-flex;align-items:center;gap:4px;cursor:pointer;max-width:100%}
+.th-sort:hover{color:var(--text)}
+.th-sort.on{color:var(--primary-t);font-weight:600}
 .dr-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .drawer.drama.fs .dr-h{padding:14px 40px 14px 32px}
 .drawer.drama.fs .dr-h h2{font-size:18px;line-height:26px}
@@ -698,9 +705,9 @@ const UI = freshUI();
 function freshUI(){
   return {
     mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop', view:'card', page:1, size:10},
-    lv:{q:'', status:'all', market:'all', range:'30', from:'2026-10-07', to:DEMO_TODAY, page:1, size:10, menu:null},
+    lv:{q:'', status:'all', market:'all', range:'30', from:'2026-10-07', to:DEMO_TODAY, page:1, size:10, menu:null, sort:''},
     pick:new Set(),
-    bd:{q:'', open:new Set(['CTR-902184'])},
+    bd:{q:'', open:new Set(['CTR-902184']), sort:''},
     st:{period:'all', bc:'all', status:'all', page:1, size:10},
     dismissed:new Set()
   };
@@ -995,8 +1002,11 @@ function skelRows(n, cols){
 }
 /* Drawer / modal */
 let drawerFn = null, modalFn = null, drawerClose = null;
+function drawerChrome(r){
+  return r.kind === 'drama' || r.kind === 'link' || r.kind === 'statement';
+}
 function drawerClass(r){
-  return 'drawer' + (r.kind === 'drama' ? (' drama' + (DR.wide ? ' fs' : '')) : '');
+  return 'drawer' + (drawerChrome(r) ? (' drama' + (DR.wide ? ' fs' : '')) : '');
 }
 function openDrawer(fn, onClose){
   drawerFn = fn; drawerClose = onClose || null;
@@ -1005,16 +1015,19 @@ function openDrawer(fn, onClose){
   requestAnimationFrame(() => requestAnimationFrame(() => { $$('#drawer-root .mask, #drawer-root .drawer').forEach(e => e.classList.add('show')); }));
 }
 function drawerInner(r){
-  if (r.kind === 'drama'){
+  if (drawerChrome(r)){
     const wide = DR.wide;
     const sizeLbl = wide ? 'Collapse to narrow layout' : 'Expand to full screen';
+    const vtabs = (r.vtabs && r.vtabs.length)
+      ? `<div class="dr-vtabs" role="tablist" aria-label="${esc(r.vtabsLabel || 'Details')}">${r.vtabs.map(t => `<button type="button" class="dr-vtab ${t.on ? 'on' : ''}" role="tab" aria-selected="${t.on ? 'true' : 'false'}" data-act="${esc(t.act)}"${t.data || ''}>${t.label}</button>`).join('')}</div>`
+      : '';
     return `<div class="dr-rail">
       <button type="button" class="btn btn-icon" data-act="close-drawer" aria-label="Close">${ic('close', 18)}</button>
+      ${vtabs}
       <button type="button" class="btn btn-icon dr-rail-bot" data-act="drama-size" aria-label="${esc(sizeLbl)}" title="${esc(sizeLbl)}" aria-pressed="${wide ? 'true' : 'false'}">${ic(wide ? 'collapse' : 'expand', 16)}</button>
     </div>
     <div class="dr-main">
       <div class="dr-h"><div class="t"><h2>${r.title}</h2>${r.sub ? '<div class="s">' + r.sub + '</div>' : ''}</div></div>
-      ${r.tabs ? r.tabs : ''}
       <div class="dr-b">${r.body}</div>
       ${r.footer ? '<div class="dr-f">' + r.footer + '</div>' : ''}
     </div>`;
@@ -1478,7 +1491,12 @@ function dramaDrawer(ctrId){
   const nav = dramaNeighbors(ctrId);
   const prevTip = nav.prev ? 'Previous: ' + ctrOf(nav.prev).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'First drama in the current Marketplace list';
   const nextTip = nav.next ? 'Next: ' + ctrOf(nav.next).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
-  return {kind:'drama', title:c.title,
+  const linked = colsOf(ctrId).map(x => x.id).find(id => linkOf(id));
+  const vtabs = [
+    {label:'Drama', on:true, act:'ld-tab', data:' data-tab="drama" aria-label="Drama details"'},
+    {label:'Data', on:false, act: linked ? 'link-details' : 'toast', data: linked ? ` data-col="${linked}" data-tab="data" aria-label="Data details"` : ' data-msg="Start distribution on an account to see data details." data-type="info" aria-label="Data details"'}
+  ];
+  return {kind:'drama', title:c.title, vtabs, vtabsLabel:'Drama details',
     body,
     footer:`<button class="btn" data-act="drama-prev" ${nav.prev ? 'data-id="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="drama-next" ${nav.next ? 'data-id="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button>${dramaClaimFooter(availCount)}`};
 }
@@ -1652,16 +1670,40 @@ function inCreatedRange(l){
   startDate.setUTCDate(startDate.getUTCDate() - (days - 1));
   return t >= startDate.getTime() && t <= end;
 }
+function linkDramaTitle(l){
+  const c = colOf(l.col); const k = c && ctrOf(c.ctr);
+  return (k && k.title) || '';
+}
 function lvFiltered(){
   const f = UI.lv; const q = f.q.trim().toLowerCase();
-  return D().links.filter(l => {
+  const list = D().links.filter(l => {
     const c = colOf(l.col), k = ctrOf(c.ctr), a = ttAcct(c);
     if (q && ![k.title, k.id, c.id, l.url, l.code, a.handle, a.uid].join(' ').toLowerCase().includes(q)) return false;
     if (f.status !== 'all' && l.status !== f.status) return false;
     if (f.market !== 'all' && c.market !== f.market) return false;
     if (!inCreatedRange(l)) return false;
     return true;
-  }).sort((a, b) => createdAt(b) - createdAt(a) || a.col.localeCompare(b.col));
+  });
+  if (f.sort === 'name') return list.sort((a, b) => linkDramaTitle(a).localeCompare(linkDramaTitle(b), 'en') || createdAt(b) - createdAt(a) || a.col.localeCompare(b.col));
+  if (f.sort === 'created') return list.sort((a, b) => createdAt(b) - createdAt(a) || linkDramaTitle(a).localeCompare(linkDramaTitle(b), 'en') || a.col.localeCompare(b.col));
+  return list.sort((a, b) => createdAt(b) - createdAt(a) || a.col.localeCompare(b.col));
+}
+function latestLinkCreated(k){
+  let max = 0;
+  colsOf(k.id).forEach(c => { const l = linkOf(c.id); if (l){ const t = createdAt(l).getTime(); if (t > max) max = t; } });
+  return max;
+}
+function dmSortSel(view){
+  const cur = view === 'links' ? UI.lv.sort : UI.bd.sort;
+  const created = view === 'links' ? 'Link created (newest)' : 'Latest link created';
+  const name = view === 'links' ? 'lv.sort' : 'bd.sort';
+  return `<label class="faint" style="display:inline-flex;align-items:center;gap:6px">Sort ${sel(name, cur, [['','Default order'],['name','Drama name'],['created', created]], 'Sort', 196)}</label>`;
+}
+function thSort(view, key, label){
+  const cur = view === 'lv' ? UI.lv.sort : UI.bd.sort;
+  const act = view === 'lv' ? 'lv-sort' : 'bd-sort';
+  const on = cur === key;
+  return `<button type="button" class="th-sort ${on ? 'on' : ''}" data-act="${act}" data-v="${key}" aria-pressed="${on ? 'true' : 'false'}">${label}${on ? ic('chev-down', 12) : ''}</button>`;
 }
 function linkStCell(l){ return stChip(LINK_ST, l.status) + (l.reason ? `<div class="st-reason">${l.reason}</div>` : ''); }
 function lvMenu(l){
@@ -1690,21 +1732,23 @@ function pagerHtml(total){
     <span class="faint">${from}–${to} of ${plural(total, 'link')}</span>
   </div>`;
 }
-function linkViewHead(){
+function linkViewHead(sortable){
+  const drama = sortable ? thSort('lv', 'name', 'Drama') : 'Drama';
+  const created = sortable ? thSort('lv', 'created', 'Link created') : 'Link created';
   return `<thead><tr>
-      <th style="width:24%">Drama</th>
+      <th style="width:24%">${drama}</th>
       <th style="width:16%">Publisher account</th>
       <th style="width:14%">Distribution link</th>
       <th style="width:11%">Status</th>
       <th class="num" style="width:10%" title="IAA revenue">IAA revenue</th>
       <th class="num" style="width:12%" title="Estimated distribution revenue">Estimated distribution revenue</th>
-      <th style="width:10%">Link created</th>
+      <th style="width:10%">${created}</th>
       <th style="width:100px">Actions</th>
     </tr></thead>`;
 }
 function linkViewRow(l){
   const c = colOf(l.col), k = ctrOf(c.ctr);
-  return `<tr data-row="${l.col}">
+  return `<tr class="clickable" data-act="link-details" data-col="${l.col}" data-row="${l.col}">
       <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}${l.isNew ? ' <span class="tag teal">New</span>' : ''}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
       <td>${ttAcctCell(c)}</td>
       <td>${distUrlCell(l)}</td>
@@ -1715,10 +1759,12 @@ function linkViewRow(l){
       <td class="act"><div class="act-row"><button type="button" class="btn-link" data-act="link-details" data-col="${l.col}">Details</button><span class="more-wrap"><button type="button" class="btn-more ${UI.lv.menu === l.col ? 'on' : ''}" data-act="lv-more" data-col="${l.col}" aria-label="More actions" aria-haspopup="menu" aria-expanded="${UI.lv.menu === l.col ? 'true' : 'false'}">${ic('more', 16)}</button>${lvMenu(l)}</span></div></td></tr>`;
 }
 function dvNoLinkRow(c, k){
-  const act = c.claim === 'available'
+  const can = c.claim === 'available';
+  const act = can
     ? `<div class="act-row"><button type="button" class="btn-link" data-act="open-drama" data-id="${k.id}" data-pre="${c.id}">Claim</button></div>`
     : '<span class="faint">No link</span>';
-  return `<tr>
+  const rowAct = can ? ` class="clickable" data-act="open-drama" data-id="${k.id}" data-pre="${c.id}"` : '';
+  return `<tr${rowAct}>
       <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}</div><div class="cell-sub" style="white-space:normal">${k.episodes} eps · ${k.launch} · ${c.share}% share</div></div></div></td>
       <td>${ttAcctCell(c)}</td>
       <td><span class="faint">No link</span></td>
@@ -1740,11 +1786,12 @@ function pageLinks(){
       ${sel('lv.status', f.status, [['all','All statuses'],['active','Distributing'],['invalid','Invalid'],['unknown','Status unknown']], 'Status', 136)}
       ${sel('lv.market', f.market, [['all','All markets']].concat(markets.map(m => [m, m])), 'Market', 128)}
       ${sel('lv.range', f.range, [['7','Last 7 days'],['30','Last 30 days'],['custom','Custom range']], 'Time range', 140)}
+      ${dmSortSel('links')}
       ${custom ? `<span class="range-custom"><input class="input" type="date" name="lv-from" data-chg="lv-from" value="${esc(f.from)}" aria-label="From date"><span class="faint">–</span><input class="input" type="date" name="lv-to" data-chg="lv-to" value="${esc(f.to)}" aria-label="To date"></span>` : ''}
     </div><div class="right">
       <button class="btn btn-primary" data-act="export-links">${ic('download', 14)}Export</button>
     </div></div>`;
-  const head = linkViewHead();
+  const head = linkViewHead(true);
   if (st === 'loading') return out + `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${skelRows(5, 8)}</tbody></table></div></div></div>`;
   if (st === 'empty') return out + '<div class="panel">' + emptyBlock('link', 'No distribution links yet', 'Start distribution in Drama Marketplace. Each account you distribute gets a distribution link for your Business Center automatically.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const all = lvFiltered();
@@ -1760,11 +1807,12 @@ function pageDramas(){
   const st = S.state; const f = UI.bd;
   let out = dmHeader('dramas') + '<div class="stack">' + dmBanners();
   if (st === 'error') return out + errorBlock('dramas and links') + '</div>';
-  out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label></div>
+  out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label>
+      ${dmSortSel('dramas')}</div>
     <div class="right"><button class="btn" data-act="bd-expand">Expand all</button><button class="btn" data-act="bd-collapse">Collapse all</button><button class="btn btn-primary" data-act="export-links">${ic('download', 14)}Export</button></div></div>`;
   const head = `<thead><tr>
       <th style="width:44px"></th>
-      <th>Drama</th>
+      <th>${thSort('bd', 'name', 'Drama')}</th>
       <th style="width:100px">Claimed</th>
       <th style="width:150px">Links</th>
       <th>Markets</th>
@@ -1775,7 +1823,9 @@ function pageDramas(){
   if (st === 'loading') return out + `<div class="panel"><table class="tbl">${head}<tbody>${skelRows(4, 8)}</tbody></table></div></div>`;
   if (st === 'empty') return out + '<div class="panel">' + emptyBlock('film', 'No claimed dramas yet', 'Dramas appear here once you start distribution on at least one account in Drama Marketplace.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const q = f.q.trim().toLowerCase();
-  const list = ALL_CONTRACTS.filter(k => colsOf(k.id).some(c => c.claim !== 'available') && (!q || [k.title, k.id].concat(colsOf(k.id).map(c => c.id)).join(' ').toLowerCase().includes(q)));
+  let list = ALL_CONTRACTS.filter(k => colsOf(k.id).some(c => c.claim !== 'available') && (!q || [k.title, k.id].concat(colsOf(k.id).map(c => c.id)).join(' ').toLowerCase().includes(q)));
+  if (f.sort === 'name') list = list.slice().sort((a, b) => a.title.localeCompare(b.title, 'en'));
+  else if (f.sort === 'created') list = list.slice().sort((a, b) => latestLinkCreated(b) - latestLinkCreated(a) || a.title.localeCompare(b.title, 'en'));
   const rows = list.map(k => {
     const cs = colsOf(k.id); const open = f.open.has(k.id);
     const claimed = cs.filter(c => c.claim === 'claimed').length;
@@ -1783,7 +1833,7 @@ function pageDramas(){
     const inv = ls.filter(l => l.status === 'invalid').length, unk = ls.filter(l => l.status === 'unknown').length;
     const iaa = ls.reduce((s, l) => s + (Number(l.iaa) || 0), 0);
     const est = ls.reduce((s, l) => s + (Number(l.est) || 0), 0);
-    let r = `<tr class="clickable" data-act="bd-toggle" data-id="${k.id}"><td><button class="btn btn-icon" data-act="bd-toggle" data-id="${k.id}" aria-label="Expand" aria-expanded="${open}">${ic(open ? 'chev-down' : 'chev-right', 16)}</button></td>
+    let r = `<tr class="clickable" data-act="open-drama" data-id="${k.id}"><td><button class="btn btn-icon" data-act="bd-toggle" data-id="${k.id}" aria-label="Expand" aria-expanded="${open}">${ic(open ? 'chev-down' : 'chev-right', 16)}</button></td>
       <td><div class="drama-cell"><div class="thumb">${poster(k.id)}</div><div class="meta"><div class="cell-title ell" title="${esc(k.title)}">${k.title}</div></div></div></td>
       <td>${claimed} of ${cs.length}</td>
       <td>${ls.length} link${ls.length === 1 ? '' : 's'}${inv ? ' · <span class="st err">' + inv + ' invalid</span>' : ''}${unk ? ' · <span class="st warn">' + unk + ' unknown</span>' : ''}</td>
@@ -2131,16 +2181,17 @@ function linkNeighbors(colId){
   const at = order.indexOf(colId);
   return {at, prev: at > 0 ? order[at - 1] : null, next: at >= 0 ? order[at + 1] : null};
 }
-function linkTabs(){
-  return `<div class="tabs dr-tabs" role="tablist" aria-label="Link details">
-    <button type="button" class="tab ${LD.tab === 'drama' ? 'on' : ''}" role="tab" aria-selected="${LD.tab === 'drama'}" data-act="ld-tab" data-tab="drama">Drama details</button>
-    <button type="button" class="tab ${LD.tab === 'data' ? 'on' : ''}" role="tab" aria-selected="${LD.tab === 'data'}" data-act="ld-tab" data-tab="data">Data details</button>
-  </div>`;
+function linkVtabs(){
+  return [
+    {label:'Drama', on: LD.tab === 'drama', act:'ld-tab', data:' data-tab="drama" aria-label="Drama details"'},
+    {label:'Data', on: LD.tab === 'data', act:'ld-tab', data:' data-tab="data" aria-label="Data details"'}
+  ];
 }
 function openLinkDrawer(colId, tab){
   const c = colOf(colId);
   LD.col = colId; LD.tab = tab || 'drama'; LD.page = 1;
   stopPlayer();
+  DR.wide = true;
   if (c){ PL.ctr = c.ctr; PL.ep = 1; PL.t = 0; PL.speed = 2; }
   DS.sel = new Set();
   openDrawer(() => linkDrawer(colId), stopPlayer);
@@ -2157,15 +2208,17 @@ function linkDrawer(colId){
   const l = linkOf(colId); const c = colOf(colId); const k = c ? ctrOf(c.ctr) : null;
   const title = k ? k.title + ' · ' + c.market : 'Link details';
   const sub = c ? `<span>${esc(ttAcct(c).handle)}</span><span class="faint">·</span><span>${esc(colLabel(c))}</span>${l ? stChip(LINK_ST, l.status) : ''}` : '';
-  const tabs = linkTabs();
+  const vtabs = linkVtabs();
+  const vtabsLabel = 'Link details';
+  const base = {kind:'link', title, sub, vtabs, vtabsLabel};
   if (LD.tab === 'data'){
-    return {title, sub, tabs, body: ldDataBody(colId)};
+    return Object.assign(base, {body: ldDataBody(colId)});
   }
   const st = S.state;
-  if (st === 'loading') return {title, sub, tabs, body: `<div class="det"><div class="det-l"><div class="sk" style="aspect-ratio:9/16;width:100%"></div></div><div class="det-r"><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:14px;width:80%;margin-top:10px"></div><div class="sk" style="height:72px;width:100%;margin-top:16px"></div></div></div>`};
-  if (st === 'error') return {title, sub, tabs, body: errorBlock('drama details')};
+  if (st === 'loading') return Object.assign(base, {body: `<div class="det"><div class="det-l"><div class="sk" style="aspect-ratio:9/16;width:100%"></div></div><div class="det-r"><div class="sk" style="height:14px;width:60%"></div><div class="sk" style="height:14px;width:80%;margin-top:10px"></div><div class="sk" style="height:72px;width:100%;margin-top:16px"></div></div></div>`});
+  if (st === 'error') return Object.assign(base, {body: errorBlock('drama details')});
   if (st === 'empty' || !k){
-    return {title, sub, tabs, body: '<div class="panel">' + emptyBlock('film', 'No drama details yet', 'Start distribution in Drama Marketplace to see the drama and its data here.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>'};
+    return Object.assign(base, {body: '<div class="panel">' + emptyBlock('film', 'No drama details yet', 'Start distribution in Drama Marketplace to see the drama and its data here.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div>'});
   }
   const {body, availCount} = dramaBody(c.ctr);
   const nav = linkNeighbors(colId);
@@ -2173,8 +2226,8 @@ function linkDrawer(colId){
   const nextTitle = nav.next ? ctrOf(colOf(nav.next).ctr).title : '';
   const prevTip = nav.prev ? 'Previous: ' + prevTitle : 'First link in the current list';
   const nextTip = nav.next ? 'Next: ' + nextTitle : 'Last link in the current list';
-  return {title, sub, tabs, body,
-    footer:`<button class="btn" data-act="link-nav" ${nav.prev ? 'data-col="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="link-nav" ${nav.next ? 'data-col="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button>${dramaClaimFooter(availCount)}`};
+  return Object.assign(base, {body,
+    footer:`<button class="btn" data-act="link-nav" ${nav.prev ? 'data-col="' + nav.prev + '"' : 'disabled'} title="${esc(prevTip)}">${ic('chev-left', 14)}Previous</button><button class="btn" data-act="link-nav" ${nav.next ? 'data-col="' + nav.next + '"' : 'disabled'} title="${esc(nextTip)}">Next${ic('chev-right', 14)}</button>${dramaClaimFooter(availCount)}`});
 }
 
 /* TTAM handoff */
@@ -2317,7 +2370,7 @@ function stmDrawer(id){
   const notes = s.revised ? banner('warn', '<b>Amount revised: v1 to v2.</b> An adjustment of ' + money(s.adj) + ' was added on Nov 2 (' + s.adjNote + '). Please review and confirm again; your earlier review doesn\u2019t apply to the new version.') : '';
   const failBan = s.status === 'failed' ? banner('err', '<b>Payout failed · ' + s.failReason + '.</b> The bank rejected the transfer because the account holder name doesn\u2019t match the beneficiary on file. Update the beneficiary name in Billing, then request a payout retry.') : '';
   const fxNote = (s.status === 'pending' && !UI.dismissed.has('stm-fx-' + id)) ? `<div class="stm-note"><span class="stm-note-ic" aria-hidden="true">i</span><div>Non-USD revenue is converted to USD using the platform reference rates at month end; this statement uses EUR/USD 1.0832 and GBP/USD 1.2764.</div><button type="button" class="btn btn-icon" data-act="stm-fx-dismiss" data-id="${id}" aria-label="Dismiss FX rate note">${ic('close', 14)}</button></div>` : '';
-  return {title:'Settlement statement ' + s.id, sub:`<span>${s.period}</span>${stChip(STM_ST, s.status)}`,
+  return {kind:'statement', title:'Settlement statement ' + s.id, sub:`<span>${s.period}</span>${stChip(STM_ST, s.status)}`,
     body:`${notes || failBan ? (notes + failBan) + '<div style="height:12px"></div>' : ''}
       <div class="stm-stack">
         <div class="stm-row1">
@@ -2453,6 +2506,8 @@ const ACT = {
   'lv-more': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.col; UI.lv.menu = UI.lv.menu === id ? null : id; render(); },
   'lv-deactivate': () => { UI.lv.menu = null; toast('Deactivate link is not in this prototype.', 'info'); render(); },
   'lv-page': el => { const p = +el.dataset.p; if (!p || p < 1) return; UI.lv.page = p; UI.lv.menu = null; render(); },
+  'lv-sort': el => { UI.lv.sort = el.dataset.v || ''; UI.lv.page = 1; UI.lv.menu = null; render(); },
+  'bd-sort': el => { UI.bd.sort = el.dataset.v || ''; render(); },
   'export-links': () => openExport(),
   'ex-fmt': el => { EX.fmt = el.dataset.v; refreshDrawer(); },
   'ex-run': () => runExport(),
@@ -2496,7 +2551,7 @@ const ACT = {
   'bd-expand': () => { ALL_CONTRACTS.forEach(k => UI.bd.open.add(k.id)); render(); },
   'bd-collapse': () => { UI.bd.open.clear(); render(); },
   'bd-clear': () => { UI.bd.q = ''; render(); },
-  'open-stm': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; if (S.page !== 'settlement') go('settlement', () => openDrawer(() => stmDrawer(id))); else openDrawer(() => stmDrawer(id)); },
+  'open-stm': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.id; DR.wide = true; if (S.page !== 'settlement') go('settlement', () => openDrawer(() => stmDrawer(id))); else openDrawer(() => stmDrawer(id)); },
   'st-page': el => { const p = +el.dataset.p; if (!p || p < 1) return; UI.st.page = p; render(); },
   'st-clear': () => { UI.st = freshUI().st; render(); },
   'st-export': () => { const list = stmFiltered(); if (!list.length){ toast('No statements match your filters.', 'warn'); return; }
