@@ -103,8 +103,22 @@ button,input,select{font:inherit;color:inherit}
 .panel-h h3{margin:0;font-size:14px;font-weight:600}
 .panel-f{padding:8px 16px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;color:var(--text2);font-size:12px;gap:12px}
 .tbl-wrap{overflow-x:auto}
+.tbl-wrap:has(.th-menu){overflow:visible}
 .tbl{width:100%;border-collapse:collapse;table-layout:fixed}
+.tbl thead{position:relative;z-index:3}
 .tbl th{height:36px;background:var(--th);font-weight:500;color:var(--text2);font-size:12px;text-align:left;padding:0 12px;border-bottom:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tbl th.th-act{overflow:visible;padding:0;position:relative}
+.th-inner{display:flex;align-items:center;gap:2px;min-height:36px;padding:0 6px 0 12px;min-width:0}
+.th-act.num .th-inner{justify-content:flex-end}
+.th-lab{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.th-dir{flex:none;margin-right:4px;color:var(--text);font-weight:600}
+.th-caret{flex:none;width:20px;height:20px;padding:0;border:0;border-radius:4px;background:transparent;color:var(--text2);opacity:0;display:inline-flex;align-items:center;justify-content:center;cursor:pointer}
+.th-act:hover .th-caret,.th-act.on .th-caret,.th-caret:focus-visible{opacity:1}
+.th-caret:hover,.th-caret.on{background:#E3E5E8;color:var(--text)}
+.th-act:hover,.th-act.on{background:#EEF0F2}
+.th-act.on{z-index:6;color:var(--text)}
+.th-menu{left:6px;right:auto;z-index:40;min-width:176px}
+.th-act.num .th-menu{right:6px;left:auto}
 .tbl td{padding:6px 10px;border-bottom:1px solid var(--row);vertical-align:middle;overflow:hidden}
 .tbl tbody tr:hover td{background:#FAFBFC}
 .tbl tr:last-child td{border-bottom:0}
@@ -260,16 +274,14 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .drawer.show{transform:none}
 .drawer.drama{flex-direction:row;align-items:stretch;transition:transform .36s cubic-bezier(.4,0,.2,1),width .36s cubic-bezier(.4,0,.2,1)}
 .drawer.drama.fs{width:100%}
-.dr-rail{width:64px;flex:none;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;border-right:1px solid var(--border);background:#FAFBFC}
+.dr-rail{width:48px;flex:none;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;border-right:1px solid var(--border);background:#FAFBFC}
 .dr-rail .btn-icon{width:32px;height:32px}
 .dr-rail-bot{margin-top:auto}
-.dr-vtabs{display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%;padding:12px 6px 0;flex:1;min-height:0}
-.dr-vtab{width:100%;min-height:52px;padding:8px 4px;border:0;background:transparent;border-radius:4px;color:var(--text2);font-size:12px;font-weight:500;line-height:16px;cursor:pointer;text-align:center}
+.dr-vtabs{display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;padding:12px 0 0;flex:1;min-height:0}
+.dr-vtab{width:32px;height:32px;min-height:32px;padding:0;border:0;background:transparent;border-radius:4px;color:var(--text2);cursor:pointer;display:inline-flex;align-items:center;justify-content:center}
 .dr-vtab:hover{background:var(--hover);color:var(--text)}
-.dr-vtab.on{background:var(--nav-on);color:var(--primary-t);font-weight:600}
-.th-sort{border:0;background:none;padding:0;font:inherit;font-weight:500;color:inherit;display:inline-flex;align-items:center;gap:4px;cursor:pointer;max-width:100%}
-.th-sort:hover{color:var(--text)}
-.th-sort.on{color:var(--primary-t);font-weight:600}
+.dr-vtab.on{background:var(--nav-on);color:var(--primary-t)}
+.dr-vtab .ic{width:18px;height:18px}
 .dr-main{flex:1;min-width:0;min-height:0;display:flex;flex-direction:column}
 .drawer.drama.fs .dr-h{padding:14px 40px 14px 32px}
 .drawer.drama.fs .dr-h h2{font-size:18px;line-height:26px}
@@ -366,7 +378,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .amount-xl{font-size:28px;font-weight:600;line-height:36px;font-variant-numeric:tabular-nums}
 
 /* Player */
-.det{display:grid;grid-template-columns:280px minmax(0,1fr);grid-template-areas:"player info" "player eps" "cols cols";gap:16px 24px;align-items:start}
+.det{display:grid;grid-template-columns:280px minmax(0,1fr);grid-template-areas:"info info" "cols cols" "player eps";gap:16px 24px;align-items:start}
 .det-l{grid-area:player;position:sticky;top:0;min-width:0}
 .det-info{grid-area:info;min-width:0;display:flex;flex-direction:column;gap:16px}
 .det-eps{grid-area:eps;min-width:0}
@@ -374,8 +386,9 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .det-cols{grid-area:cols;min-width:0}
 .det-cols.sec{margin-top:0}
 .det-syn{margin:0;font-size:13px;line-height:1.65;color:var(--text)}
-.drawer.drama.fs .det{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"info info" "player eps" "cols cols";gap:22px 32px}
-.drawer.drama.fs .det-l,.drawer.drama.fs .det-eps{margin-top:24px;margin-bottom:24px}
+.drawer.drama.fs .det{grid-template-columns:minmax(0,1fr) minmax(0,1fr);grid-template-areas:"info info" "cols cols" "player eps";gap:22px 32px}
+.drawer.drama.fs .det-l,.drawer.drama.fs .det-eps{margin-top:8px;margin-bottom:8px}
+.drawer.drama.fs .det-cols{margin-top:4px}
 .drawer.drama.fs .det-info{display:grid;grid-template-columns:48px minmax(0,1fr);grid-template-areas:"cover head" "cover facts" "cover tags" "cover syn";column-gap:14px;row-gap:6px;align-items:start;padding:10px 14px;border:1px solid var(--border);border-radius:8px;background:var(--th)}
 .det-facts{display:contents}
 .drawer.drama.fs .det-facts{display:block;grid-area:facts;border:0;padding:0;background:transparent}
@@ -550,6 +563,9 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
     <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
     <symbol id="i-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.5 5.1 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.5-6.9A2 2 0 0 0 16.8 4H7.2a2 2 0 0 0-1.7 1.1z"/></symbol>
     <symbol id="i-film" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M7 3v18M17 3v18M3 7.5h4M3 12h18M3 16.5h4M17 7.5h4M17 16.5h4"/></symbol>
+    <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19V5M4 19h16"/><path d="M8 17v-5M12 17V7M16 17v-8"/></symbol>
+    <symbol id="i-sort-up" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5"/><path d="m7 10 5-5 5 5"/></symbol>
+    <symbol id="i-sort-down" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="m7 14 5 5 5-5"/></symbol>
     <symbol id="i-more" viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/></symbol>
     <symbol id="i-collapse" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M9.5 4v16"/><path d="m16.5 9-3 3 3 3"/></symbol>
     <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="4" width="17" height="16" rx="2"/><path d="M9.5 4v16"/><path d="m13.5 9 3 3-3 3"/></symbol>
@@ -704,11 +720,11 @@ const S = {state:'normal', page:null, data:null, after:null};
 const UI = freshUI();
 function freshUI(){
   return {
-    mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop', view:'card', page:1, size:10},
-    lv:{q:'', status:'all', market:'all', range:'30', from:'2026-10-07', to:DEMO_TODAY, page:1, size:10, menu:null, sort:''},
+    mk:{q:'', lang:'all', format:'all', source:'all', genre:'all', avail:'all', sort:'pop', view:'card', page:1, size:10, colSort:null, sortMenu:null},
+    lv:{q:'', status:'all', market:'all', range:'30', from:'2026-10-07', to:DEMO_TODAY, page:1, size:10, menu:null, colSort:null, sortMenu:null},
     pick:new Set(),
-    bd:{q:'', open:new Set(['CTR-902184']), sort:''},
-    st:{period:'all', bc:'all', status:'all', page:1, size:10},
+    bd:{q:'', open:new Set(['CTR-902184']), colSort:null, sortMenu:null},
+    st:{period:'all', bc:'all', status:'all', page:1, size:10, colSort:null, sortMenu:null},
     dismissed:new Set()
   };
 }
@@ -1187,11 +1203,11 @@ function mkList(list){
   const allOn = rows.length && rows.every(c => UI.pick.has(c.id));
   const head = `<thead><tr>
     <th style="width:40px"><input type="checkbox" class="cb" name="mk-page" data-act="pick-page" ${allOn ? 'checked' : ''} aria-label="Select all on this page"></th>
-    <th style="width:22%">Drama</th>
+    ${thAct('mk', 'name', 'Drama')}
     <th style="width:18%">Tags</th>
-    <th class="num" style="width:80px">Markets</th>
-    <th class="num" style="width:110px">Revenue share</th>
-    <th style="width:100px">Published</th>
+    ${thAct('mk', 'markets', 'Markets', 'num')}
+    ${thAct('mk', 'share', 'Revenue share', 'num')}
+    ${thAct('mk', 'published', 'Published')}
     <th style="width:12%">Market signal</th>
     <th style="width:110px">Status</th>
     <th class="act" style="width:168px">Action</th>
@@ -1211,7 +1227,7 @@ function mkList(list){
       <td class="act"><div class="act-row"><button type="button" class="btn-link" data-act="open-drama" data-id="${c.id}">View details</button><button type="button" class="btn-link" data-act="mk-claim" data-id="${c.id}" ${st.canClaim ? '' : 'disabled'}>Claim</button></div></td>
     </tr>`;
   }).join('');
-  return `<div class="panel"><div class="tbl-wrap"><table class="tbl">${head}<tbody>${body}</tbody></table></div>${mkPagerHtml(list.length)}</div>`;
+  return `<div class="panel"><div class="tbl-wrap" style="overflow:visible"><table class="tbl">${head}<tbody>${body}</tbody></table></div>${mkPagerHtml(list.length)}</div>`;
 }
 function mkFiltered(){
   const f = UI.mk; const q = f.q.trim().toLowerCase();
@@ -1226,7 +1242,17 @@ function mkFiltered(){
     if (f.avail === 'claimed' && !cs.some(x => x.claim === 'claimed')) return false;
     return true;
   });
-  list.sort((a, b) => f.sort === 'new' ? b.launch.localeCompare(a.launch) : f.sort === 'eps' ? a.episodes - b.episodes : a.rank - b.rank);
+  if (f.colSort && f.colSort.key){
+    list = sortBy(list, f.colSort, (c, key) => {
+      if (key === 'name') return c.title;
+      if (key === 'published') return c.launch;
+      if (key === 'markets') return colsOf(c.id).length;
+      if (key === 'share'){ const sh = colsOf(c.id).map(x => x.share); return sh.length ? Math.min.apply(null, sh) : 0; }
+      return '';
+    });
+  } else {
+    list.sort((a, b) => f.sort === 'new' ? b.launch.localeCompare(a.launch) : f.sort === 'eps' ? a.episodes - b.episodes : a.rank - b.rank);
+  }
   return list;
 }
 function sel(name, val, opts, label, w){
@@ -1446,6 +1472,9 @@ function dramaBody(ctrId){
       <p class="det-syn">${c.synopsis}</p>
       <div class="det-hero-tags">${heroTags}</div>
     </div>
+    <div class="sec det-cols"><div class="sec-h"><h4>Accounts and regions</h4><span class="faint" style="font-size:12px">${availCount} available to distribute</span></div>
+      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:44px"></th><th>TikTok account name (ID)</th><th style="width:140px">Market</th><th style="width:110px">Language</th><th class="col-extra">Suggested markets</th><th class="col-extra" style="width:150px">Distribution end date</th><th style="width:96px" class="num">Rev. share</th><th style="width:180px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
+    </div>
     <div class="det-l">
       <div class="player-stage">
       <div class="player ${PL.playing ? 'playing' : ''}" id="player">
@@ -1474,9 +1503,6 @@ function dramaBody(ctrId){
       <div class="ep-grid" id="ep-grid">${eps}</div>
       <div class="legend"><span><i style="background:#F0FAF9"></i>Ep 1–10 hook</span><span><i style="background:var(--warn-bg);border-color:#E7B567"></i>Paywall</span><span><i style="background:var(--primary);border-color:var(--primary)"></i>Now playing</span></div>
     </div>
-    <div class="sec det-cols"><div class="sec-h"><h4>Accounts and regions</h4><span class="faint" style="font-size:12px">${availCount} available to distribute</span></div>
-      <div class="panel"><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:40px"></th><th style="width:44px"></th><th>TikTok account name (ID)</th><th style="width:140px">Market</th><th style="width:110px">Language</th><th class="col-extra">Suggested markets</th><th class="col-extra" style="width:150px">Distribution end date</th><th style="width:96px" class="num">Rev. share</th><th style="width:180px">Status</th></tr></thead><tbody>${rows}</tbody></table></div></div>
-    </div>
   </div>`;
   return {body, availCount};
 }
@@ -1493,8 +1519,8 @@ function dramaDrawer(ctrId){
   const nextTip = nav.next ? 'Next: ' + ctrOf(nav.next).title : nav.at < 0 ? 'Not in the current Marketplace list' : 'Last drama in the current Marketplace list';
   const linked = colsOf(ctrId).map(x => x.id).find(id => linkOf(id));
   const vtabs = [
-    {label:'Drama', on:true, act:'ld-tab', data:' data-tab="drama" aria-label="Drama details"'},
-    {label:'Data', on:false, act: linked ? 'link-details' : 'toast', data: linked ? ` data-col="${linked}" data-tab="data" aria-label="Data details"` : ' data-msg="Start distribution on an account to see data details." data-type="info" aria-label="Data details"'}
+    {label:ic('film', 18), on:true, act:'ld-tab', data:' data-tab="drama" aria-label="Drama details" title="Drama details"'},
+    {label:ic('chart', 18), on:false, act: linked ? 'link-details' : 'toast', data: linked ? ` data-col="${linked}" data-tab="data" aria-label="Data details" title="Data details"` : ' data-msg="Start distribution on an account to see data details." data-type="info" aria-label="Data details" title="Data details"'}
   ];
   return {kind:'drama', title:c.title, vtabs, vtabsLabel:'Drama details',
     body,
@@ -1674,6 +1700,16 @@ function linkDramaTitle(l){
   const c = colOf(l.col); const k = c && ctrOf(c.ctr);
   return (k && k.title) || '';
 }
+function lvVal(l, key){
+  const c = colOf(l.col), k = c && ctrOf(c.ctr);
+  if (key === 'name') return (k && k.title) || '';
+  if (key === 'handle') return ttAcct(c).handle;
+  if (key === 'status') return (LINK_ST[l.status] || ['', l.status])[1];
+  if (key === 'iaa') return Number(l.iaa) || 0;
+  if (key === 'est') return Number(l.est) || 0;
+  if (key === 'created') return createdAt(l).getTime();
+  return '';
+}
 function lvFiltered(){
   const f = UI.lv; const q = f.q.trim().toLowerCase();
   const list = D().links.filter(l => {
@@ -1684,8 +1720,7 @@ function lvFiltered(){
     if (!inCreatedRange(l)) return false;
     return true;
   });
-  if (f.sort === 'name') return list.sort((a, b) => linkDramaTitle(a).localeCompare(linkDramaTitle(b), 'en') || createdAt(b) - createdAt(a) || a.col.localeCompare(b.col));
-  if (f.sort === 'created') return list.sort((a, b) => createdAt(b) - createdAt(a) || linkDramaTitle(a).localeCompare(linkDramaTitle(b), 'en') || a.col.localeCompare(b.col));
+  if (f.colSort && f.colSort.key) return sortBy(list, f.colSort, lvVal);
   return list.sort((a, b) => createdAt(b) - createdAt(a) || a.col.localeCompare(b.col));
 }
 function latestLinkCreated(k){
@@ -1693,17 +1728,30 @@ function latestLinkCreated(k){
   colsOf(k.id).forEach(c => { const l = linkOf(c.id); if (l){ const t = createdAt(l).getTime(); if (t > max) max = t; } });
   return max;
 }
-function dmSortSel(view){
-  const cur = view === 'links' ? UI.lv.sort : UI.bd.sort;
-  const created = view === 'links' ? 'Link created (newest)' : 'Latest link created';
-  const name = view === 'links' ? 'lv.sort' : 'bd.sort';
-  return `<label class="faint" style="display:inline-flex;align-items:center;gap:6px">Sort ${sel(name, cur, [['','Default order'],['name','Drama name'],['created', created]], 'Sort', 196)}</label>`;
+function sortBy(list, spec, get){
+  const dir = spec.dir === 'desc' ? -1 : 1;
+  return list.slice().sort((a, b) => {
+    const va = get(a, spec.key), vb = get(b, spec.key);
+    if (typeof va === 'number' && typeof vb === 'number') return (va - vb) * dir;
+    return String(va ?? '').localeCompare(String(vb ?? ''), 'en', {numeric:true, sensitivity:'base'}) * dir;
+  });
 }
-function thSort(view, key, label){
-  const cur = view === 'lv' ? UI.lv.sort : UI.bd.sort;
-  const act = view === 'lv' ? 'lv-sort' : 'bd-sort';
-  const on = cur === key;
-  return `<button type="button" class="th-sort ${on ? 'on' : ''}" data-act="${act}" data-v="${key}" aria-pressed="${on ? 'true' : 'false'}">${label}${on ? ic('chev-down', 12) : ''}</button>`;
+function closeSortMenus(){ ['lv','bd','st','mk'].forEach(v => { UI[v].sortMenu = null; }); }
+function thAct(view, key, label, extra, style){
+  const spec = UI[view].colSort;
+  const open = UI[view].sortMenu === key;
+  const on = !!(spec && spec.key === key) || open;
+  const dir = (spec && spec.key === key) ? spec.dir : '';
+  const mark = dir === 'asc' ? '↑' : dir === 'desc' ? '↓' : '';
+  const cls = ['th-act', extra || '', on ? 'on' : ''].filter(Boolean).join(' ');
+  const other = dir === 'asc' ? 'desc' : 'asc';
+  const menu = open ? `<div class="menu th-menu" role="menu">${
+    dir ? `<button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="" role="menuitem">${ic('close', 14)}Clear sort</button>
+      <button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="${other}" role="menuitem">${ic(other === 'asc' ? 'sort-up' : 'sort-down', 14)}${other === 'asc' ? 'Sort ascending' : 'Sort descending'}</button>`
+      : `<button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="asc" role="menuitem">${ic('sort-up', 14)}Sort ascending</button>
+      <button type="button" data-act="th-sort" data-view="${view}" data-col="${key}" data-dir="desc" role="menuitem">${ic('sort-down', 14)}Sort descending</button>`
+  }</div>` : '';
+  return `<th class="${cls}"${style ? ` style="${esc(style)}"` : ''}><div class="th-inner"><span class="th-lab">${mark ? `<span class="th-dir">${mark}</span>` : ''}${esc(label)}</span><button type="button" class="th-caret ${open ? 'on' : ''}" data-act="th-menu" data-view="${view}" data-col="${key}" aria-label="Sort ${esc(label)}" aria-haspopup="menu" aria-expanded="${open ? 'true' : 'false'}">${ic('chev-down', 12)}</button></div>${menu}</th>`;
 }
 function linkStCell(l){ return stChip(LINK_ST, l.status) + (l.reason ? `<div class="st-reason">${l.reason}</div>` : ''); }
 function lvMenu(l){
@@ -1733,16 +1781,14 @@ function pagerHtml(total){
   </div>`;
 }
 function linkViewHead(sortable){
-  const drama = sortable ? thSort('lv', 'name', 'Drama') : 'Drama';
-  const created = sortable ? thSort('lv', 'created', 'Link created') : 'Link created';
   return `<thead><tr>
-      <th style="width:24%">${drama}</th>
-      <th style="width:16%">Publisher account</th>
+      ${sortable ? thAct('lv', 'name', 'Drama', '', 'width:24%') : '<th style="width:24%">Drama</th>'}
+      ${sortable ? thAct('lv', 'handle', 'Publisher account', '', 'width:16%') : '<th style="width:16%">Publisher account</th>'}
       <th style="width:14%">Distribution link</th>
-      <th style="width:11%">Status</th>
-      <th class="num" style="width:10%" title="IAA revenue">IAA revenue</th>
-      <th class="num" style="width:12%" title="Estimated distribution revenue">Estimated distribution revenue</th>
-      <th style="width:10%">${created}</th>
+      ${sortable ? thAct('lv', 'status', 'Status', '', 'width:11%') : '<th style="width:11%">Status</th>'}
+      ${sortable ? thAct('lv', 'iaa', 'IAA revenue', 'num', 'width:10%') : '<th class="num" style="width:10%" title="IAA revenue">IAA revenue</th>'}
+      ${sortable ? thAct('lv', 'est', 'Estimated distribution revenue', 'num', 'width:12%') : '<th class="num" style="width:12%" title="Estimated distribution revenue">Estimated distribution revenue</th>'}
+      ${sortable ? thAct('lv', 'created', 'Link created', '', 'width:10%') : '<th style="width:10%">Link created</th>'}
       <th style="width:100px">Actions</th>
     </tr></thead>`;
 }
@@ -1786,7 +1832,6 @@ function pageLinks(){
       ${sel('lv.status', f.status, [['all','All statuses'],['active','Distributing'],['invalid','Invalid'],['unknown','Status unknown']], 'Status', 136)}
       ${sel('lv.market', f.market, [['all','All markets']].concat(markets.map(m => [m, m])), 'Market', 128)}
       ${sel('lv.range', f.range, [['7','Last 7 days'],['30','Last 30 days'],['custom','Custom range']], 'Time range', 140)}
-      ${dmSortSel('links')}
       ${custom ? `<span class="range-custom"><input class="input" type="date" name="lv-from" data-chg="lv-from" value="${esc(f.from)}" aria-label="From date"><span class="faint">–</span><input class="input" type="date" name="lv-to" data-chg="lv-to" value="${esc(f.to)}" aria-label="To date"></span>` : ''}
     </div><div class="right">
       <button class="btn btn-primary" data-act="export-links">${ic('download', 14)}Export</button>
@@ -1807,25 +1852,33 @@ function pageDramas(){
   const st = S.state; const f = UI.bd;
   let out = dmHeader('dramas') + '<div class="stack">' + dmBanners();
   if (st === 'error') return out + errorBlock('dramas and links') + '</div>';
-  out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label>
-      ${dmSortSel('dramas')}</div>
+  out += `<div class="toolbar"><div class="left"><label class="search">${ic('search', 14)}<input class="input" name="bd-q" data-inp="bd-q" value="${esc(f.q)}" placeholder="Search title or ID" aria-label="Search dramas"></label></div>
     <div class="right"><button class="btn" data-act="bd-expand">Expand all</button><button class="btn" data-act="bd-collapse">Collapse all</button><button class="btn btn-primary" data-act="export-links">${ic('download', 14)}Export</button></div></div>`;
   const head = `<thead><tr>
       <th style="width:44px"></th>
-      <th>${thSort('bd', 'name', 'Drama')}</th>
-      <th style="width:100px">Claimed</th>
-      <th style="width:150px">Links</th>
+      ${thAct('bd', 'name', 'Drama')}
+      ${thAct('bd', 'claimed', 'Claimed')}
+      ${thAct('bd', 'links', 'Links')}
       <th>Markets</th>
-      <th class="num" style="width:10%" title="IAA revenue">IAA revenue</th>
-      <th class="num" style="width:12%" title="Estimated distribution revenue">Estimated distribution revenue</th>
+      ${thAct('bd', 'iaa', 'IAA revenue', 'num')}
+      ${thAct('bd', 'est', 'Estimated distribution revenue', 'num')}
       <th style="width:100px">Actions</th>
     </tr></thead>`;
   if (st === 'loading') return out + `<div class="panel"><table class="tbl">${head}<tbody>${skelRows(4, 8)}</tbody></table></div></div>`;
   if (st === 'empty') return out + '<div class="panel">' + emptyBlock('film', 'No claimed dramas yet', 'Dramas appear here once you start distribution on at least one account in Drama Marketplace.', '<button class="btn btn-primary" data-act="go" data-to="marketplace">Browse Drama Marketplace</button>') + '</div></div>';
   const q = f.q.trim().toLowerCase();
   let list = ALL_CONTRACTS.filter(k => colsOf(k.id).some(c => c.claim !== 'available') && (!q || [k.title, k.id].concat(colsOf(k.id).map(c => c.id)).join(' ').toLowerCase().includes(q)));
-  if (f.sort === 'name') list = list.slice().sort((a, b) => a.title.localeCompare(b.title, 'en'));
-  else if (f.sort === 'created') list = list.slice().sort((a, b) => latestLinkCreated(b) - latestLinkCreated(a) || a.title.localeCompare(b.title, 'en'));
+  const bdVal = (k, key) => {
+    const cs = colsOf(k.id); const ls = cs.map(c => linkOf(c.id)).filter(Boolean);
+    if (key === 'name') return k.title;
+    if (key === 'claimed') return cs.filter(c => c.claim === 'claimed').length;
+    if (key === 'links') return ls.length;
+    if (key === 'iaa') return ls.reduce((s, l) => s + (Number(l.iaa) || 0), 0);
+    if (key === 'est') return ls.reduce((s, l) => s + (Number(l.est) || 0), 0);
+    if (key === 'created') return latestLinkCreated(k);
+    return '';
+  };
+  if (f.colSort && f.colSort.key) list = sortBy(list, f.colSort, bdVal);
   const rows = list.map(k => {
     const cs = colsOf(k.id); const open = f.open.has(k.id);
     const claimed = cs.filter(c => c.claim === 'claimed').length;
@@ -2183,8 +2236,8 @@ function linkNeighbors(colId){
 }
 function linkVtabs(){
   return [
-    {label:'Drama', on: LD.tab === 'drama', act:'ld-tab', data:' data-tab="drama" aria-label="Drama details"'},
-    {label:'Data', on: LD.tab === 'data', act:'ld-tab', data:' data-tab="data" aria-label="Data details"'}
+    {label:ic('film', 18), on: LD.tab === 'drama', act:'ld-tab', data:' data-tab="drama" aria-label="Drama details" title="Drama details"'},
+    {label:ic('chart', 18), on: LD.tab === 'data', act:'ld-tab', data:' data-tab="data" aria-label="Data details" title="Data details"'}
   ];
 }
 function openLinkDrawer(colId, tab){
@@ -2308,7 +2361,17 @@ function stHeader(){
 }
 function stmFiltered(){
   const f = UI.st;
-  return D().statements.filter(s => (f.period === 'all' || s.period === f.period) && (f.bc === 'all' || s.bc === f.bc) && (f.status === 'all' || s.status === f.status) && !(D().stmPartial && s.bc === 'sub'));
+  const list = D().statements.filter(s => (f.period === 'all' || s.period === f.period) && (f.bc === 'all' || s.bc === f.bc) && (f.status === 'all' || s.status === f.status) && !(D().stmPartial && s.bc === 'sub'));
+  if (f.colSort && f.colSort.key) return sortBy(list, f.colSort, (s, key) => {
+    if (key === 'id') return s.id;
+    if (key === 'period') return s.period;
+    if (key === 'bc') return BCS[s.bc].name;
+    if (key === 'dramas') return s.split.length;
+    if (key === 'amount') return stmFinal(s);
+    if (key === 'status') return (STM_ST[s.status] || ['', s.status])[1];
+    return '';
+  });
+  return list;
 }
 function stPagerHtml(total){
   const size = UI.st.size || 10;
@@ -2351,7 +2414,7 @@ function pageSettlement(){
   const rows = list.map(s => { const b = BCS[s.bc];
     const act = s.status === 'pending' ? `<button type="button" class="btn-link" data-act="open-stm" data-id="${s.id}">Confirm</button>` : s.status === 'failed' ? `<button type="button" class="btn-link" data-act="open-stm" data-id="${s.id}">Fix payout</button>` : s.status === 'confirming' ? `<button type="button" class="btn-link" data-act="stm-check" data-id="${s.id}">Check status</button>` : `<button type="button" class="btn-link" data-act="open-stm" data-id="${s.id}">View</button>`;
     return `<tr class="clickable" data-act="open-stm" data-id="${s.id}"><td><div class="cell-title mono" style="font-size:13px">${s.id}</div><div class="cell-sub">${s.generated}</div></td><td>${s.period}</td><td><div class="ell">${b.name}</div><div class="cell-sub">${b.role}</div></td><td class="num">${s.split.length}</td><td class="num"><b>${money(stmFinal(s))}</b>${s.adj ? '<div class="cell-sub">' + money(s.adj) + ' adj.</div>' : ''}</td><td>v${s.version}${s.revised ? ' <span class="tag warn">Revised</span>' : ''}</td><td>${stChip(STM_ST, s.status)}${s.failReason ? '<div class="st-reason">' + s.failReason + '</div>' : ''}</td><td class="act">${act}</td></tr>`; }).join('');
-  out += `<div class="panel"><div class="panel-h"><h3>Statements</h3><span class="faint" style="font-size:12px">${plural(all.length, 'statement')}</span></div><div class="tbl-wrap"><table class="tbl"><thead><tr><th style="width:150px">Statement</th><th style="width:90px">Period</th><th>Business Center</th><th class="num" style="width:70px">Dramas</th><th class="num" style="width:130px">Final amount</th><th style="width:100px">Version</th><th style="width:190px">Status</th><th class="act" style="width:110px">Action</th></tr></thead><tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No statements match your filters', '', '<button class="btn" data-act="st-clear">Clear filters</button>')}</td></tr>`}</tbody></table></div>${stPagerHtml(all.length)}</div>`;
+  out += `<div class="panel"><div class="panel-h"><h3>Statements</h3><span class="faint" style="font-size:12px">${plural(all.length, 'statement')}</span></div><div class="tbl-wrap" style="overflow:visible"><table class="tbl"><thead><tr>${thAct('st', 'id', 'Statement')}${thAct('st', 'period', 'Period')}${thAct('st', 'bc', 'Business Center')}${thAct('st', 'dramas', 'Dramas', 'num')}${thAct('st', 'amount', 'Final amount', 'num')}<th style="width:100px">Version</th>${thAct('st', 'status', 'Status')}<th class="act" style="width:110px">Action</th></tr></thead><tbody>${rows || `<tr><td colspan="8">${emptyBlock('search', 'No statements match your filters', '', '<button class="btn" data-act="st-clear">Clear filters</button>')}</td></tr>`}</tbody></table></div>${stPagerHtml(all.length)}</div>`;
   return out + '</div>';
 }
 function stmDrawer(id){
@@ -2506,8 +2569,25 @@ const ACT = {
   'lv-more': (el, e) => { if (e) e.stopPropagation(); const id = el.dataset.col; UI.lv.menu = UI.lv.menu === id ? null : id; render(); },
   'lv-deactivate': () => { UI.lv.menu = null; toast('Deactivate link is not in this prototype.', 'info'); render(); },
   'lv-page': el => { const p = +el.dataset.p; if (!p || p < 1) return; UI.lv.page = p; UI.lv.menu = null; render(); },
-  'lv-sort': el => { UI.lv.sort = el.dataset.v || ''; UI.lv.page = 1; UI.lv.menu = null; render(); },
-  'bd-sort': el => { UI.bd.sort = el.dataset.v || ''; render(); },
+  'th-menu': (el, e) => {
+    if (e) e.stopPropagation();
+    const view = el.dataset.view, key = el.dataset.col;
+    const open = UI[view] && UI[view].sortMenu === key;
+    closeSortMenus();
+    UI.lv.menu = null;
+    if (UI[view]) UI[view].sortMenu = open ? null : key;
+    render();
+  },
+  'th-sort': (el, e) => {
+    if (e) e.stopPropagation();
+    const view = el.dataset.view, key = el.dataset.col, dir = el.dataset.dir;
+    if (!UI[view]) return;
+    UI[view].colSort = dir ? {key, dir} : null;
+    UI[view].sortMenu = null;
+    if (view === 'lv' || view === 'mk' || view === 'st') UI[view].page = 1;
+    if (view === 'lv') UI.lv.menu = null;
+    render();
+  },
   'export-links': () => openExport(),
   'ex-fmt': el => { EX.fmt = el.dataset.v; refreshDrawer(); },
   'ex-run': () => runExport(),
@@ -2637,6 +2717,12 @@ document.addEventListener('click', e => {
     UI.lv.menu = null;
     if (!el){ render(); return; }
   }
+  const sortOpen = ['lv','bd','st','mk'].some(v => UI[v].sortMenu);
+  if (sortOpen && !e.target.closest('.th-act')){
+    closeSortMenus();
+    if (!el){ render(); return; }
+    render();
+  }
   if (LD.visOpen && !e.target.closest('.vp-wrap')){
     LD.visOpen = false;
     if (drawerFn) refreshDrawer();
@@ -2659,6 +2745,7 @@ document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if ($('#ttam').classList.contains('show')) backFromTtam();
   else if (modalFn) closeModal();
+  else if (['lv','bd','st','mk'].some(v => UI[v].sortMenu)){ closeSortMenus(); render(); }
   else if (LD.metOpen){ LD.metOpen = false; refreshDrawer(); }
   else if (LD.visOpen){ LD.visOpen = false; refreshDrawer(); }
   else if (drawerFn){ closeDrawer(); }
