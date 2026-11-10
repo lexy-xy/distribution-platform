@@ -433,6 +433,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
 .series .lbls{display:flex;justify-content:space-between;font-size:11px;color:var(--text2);margin-top:6px}
 .ep-grid{display:grid;grid-template-columns:repeat(15,minmax(0,1fr));gap:4px}
 .ep{height:26px;border:1px solid var(--border);background:#fff;border-radius:3px;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:2px;padding:0;font-variant-numeric:tabular-nums}
+.ep .ic{width:10px;height:10px}
 .ep:hover{border-color:var(--primary)}
 .ep.hook{background:#F0FAF9}
 .ep.paid{color:var(--text2)}
@@ -526,6 +527,7 @@ button.kpi.on{box-shadow:inset 0 -2px 0 var(--primary)}
     <symbol id="i-prev" viewBox="0 0 24 24" fill="currentColor"><path d="M18 5.5v13a1 1 0 0 1-1.6.8L8 13v6H6V5h2v6l8.4-6.3a1 1 0 0 1 1.6.8z"/></symbol>
     <symbol id="i-next" viewBox="0 0 24 24" fill="currentColor"><path d="M6 5.5v13a1 1 0 0 0 1.6.8L16 13v6h2V5h-2v6L7.6 4.7A1 1 0 0 0 6 5.5z"/></symbol>
     <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></symbol>
+    <symbol id="i-eq" viewBox="0 0 24 24" fill="currentColor"><rect x="3.5" y="11" width="4" height="9" rx="1"/><rect x="10" y="4" width="4" height="16" rx="1"/><rect x="16.5" y="8" width="4" height="12" rx="1"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.5"/><path d="M12 16v-5"/><path d="M12 8h.01"/></symbol>
     <symbol id="i-alert" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4"/><path d="M12 17h.01"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></symbol>
@@ -1346,14 +1348,21 @@ const SUGGESTED = {
 function suggestedMarkets(col){
   return (SUGGESTED[col.code] || []).join(', ') || '—';
 }
+function epLead(e, pw, cur){
+  if (e === cur) return ic('eq', 10);
+  if (e >= pw) return ic('lock', 10);
+  return '';
+}
+function epBtn(e, pw){
+  const cur = PL.ep;
+  const cls = ['ep', e <= 10 ? 'hook' : '', e >= pw ? 'paid' : '', e === pw ? 'pw' : '', e === cur ? 'cur' : ''].join(' ');
+  return `<button class="${cls}" data-act="pl-ep" data-ep="${e}" aria-label="Episode ${e}">${epLead(e, pw, cur)}${e}</button>`;
+}
 function dramaBody(ctrId){
   const c = ctrOf(ctrId); const cs = colsOf(ctrId);
   const primary = cs.find(x => x.code === 'US') || cs[0];
   const pw = c.paywall, N = c.episodes;
-  const eps = Array.from({length:N}, (_, i) => i + 1).map(e => {
-    const cls = ['ep', e <= 10 ? 'hook' : '', e > pw ? 'paid' : '', e === pw ? 'pw' : '', e === PL.ep ? 'cur' : ''].join(' ');
-    return `<button class="${cls}" data-act="pl-ep" data-ep="${e}" aria-label="Episode ${e}">${e === pw ? ic('lock', 10) : ''}${e}</button>`;
-  }).join('');
+  const eps = Array.from({length:N}, (_, i) => i + 1).map(e => epBtn(e, pw)).join('');
   const availCount = cs.filter(x => x.claim === 'available' && x.dist === 'open').length;
   const rows = cs.map(x => {
     const can = x.claim === 'available' && x.dist === 'open';
@@ -1486,7 +1495,13 @@ function updatePlayer(){
   $('#pl-cur').style.left = ((PL.ep - 0.5) / c.episodes * 100) + '%';
   $('#player').classList.toggle('playing', PL.playing);
   $$('#player [data-act="pl-toggle"] use').forEach(u => u.setAttribute('href', '#i-' + (PL.playing ? 'pause' : 'play')));
-  $$('#ep-grid .ep').forEach(b => b.classList.toggle('cur', +b.dataset.ep === PL.ep));
+  const pw = c.paywall;
+  $$('#ep-grid .ep').forEach(b => {
+    const e = +b.dataset.ep;
+    const on = e === PL.ep;
+    b.classList.toggle('cur', on);
+    b.innerHTML = epLead(e, pw, PL.ep) + e;
+  });
   $$('#drawer-root .ep-anchors [data-act="pl-ep"]').forEach(b => {
     const on = +b.dataset.ep === PL.ep;
     b.classList.toggle('on', on);
